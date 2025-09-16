@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEET Sections - Soham</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fce7f3, #f8fafc);
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      background: #b91c1c;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: #fecaca;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #b91c1c;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #7f1d1d;
+    }
+
+    .section-options {
+      padding: 70px 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 35px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .section-card {
+      background: white;
+      padding: 35px 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .section-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    }
+
+    .section-card h3 {
+      color: #b91c1c;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+    }
+
+    .section-card p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .section-card a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #dc2626;
+      color: white;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+      margin: 5px;
+    }
+
+    .section-card a:hover {
+      background: #7f1d1d;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .section-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .section-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #b91c1c;
+      color: white;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NEET Test</h1>
+    <a href="exam.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="section-options">
+    <div class="section-card">
+      <h3>Physics</h3>
+      <p>Strengthen your NEET Physics problem-solving skills.</p>
+      <a href="neet-physics.html">Start Physics Test</a>
+    </div>
+    <div class="section-card">
+      <h3>Chemistry</h3>
+      <p>Practice Organic, Inorganic & Physical Chemistry MCQs.</p>
+      <a href="neet-chemistry.html">Start Chemistry Test</a>
+    </div>
+    <div class="section-card">
+      <h3>Biology</h3>
+      <p>Master Botany and Zoology concepts for NEET Biology.</p>
+      <a href="neet-biology.html">Start Biology Test</a>
+    </div>
+    <div class="section-card">
+      <h3>Full Length Test</h3>
+      <p>Take a real NEET exam simulation with all 3 subjects.</p>
+      <a href="neet-full.html">Start Full Test</a>
+    </div>
+    <div class="section-card">
+      <h3>Previous Years Papers</h3>
+      <p>Solve NEET PYQs to understand exam patterns.</p>
+      <a href="neet-pyq.html">View Papers</a>
+    </div>
+    <div class="section-card">
+      <h3>View Syllabus</h3>
+      <p>Check the full syllabus for NEET exam preparation.</p>
+      <a href="neet syllabus.pdf" target="_blank">📄 View Syllabus</a>
+      <a href="neet syllabus.pdf" download>⬇️ Download PDF</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>

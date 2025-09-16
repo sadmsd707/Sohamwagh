@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Choose Stream - Soham</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #ecfdf5, #f8fafc);
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      background: #065f46;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: #a7f3d0;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #065f46;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #064e3b;
+    }
+
+    .stream-options {
+      padding: 70px 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .stream-card {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .stream-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    }
+
+    .stream-card h3 {
+      color: #065f46;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+    }
+
+    .stream-card p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .stream-card a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #047857;
+      color: white;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .stream-card a:hover {
+      background: #064e3b;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .stream-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #065f46;
+      color: white;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Choose Your Stream</h1>
+    <a href="mhtcet.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="mhtcet.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="stream-options">
+    <div class="stream-card">
+      <h3>Maths (PCM)</h3>
+      <p>Practice Maths questions for the PCM stream.</p>
+      <a href="mhtcet-maths.html">Start Maths</a>
+    </div>
+    <div class="stream-card">
+      <h3>Biology (PCB)</h3>
+      <p>Practice Biology questions for the PCB stream.</p>
+      <a href="mhtcet-biology.html">Start Biology</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>

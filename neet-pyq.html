@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEET PYQ - Soham</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fce7f3, #f8fafc);
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      background: #b91c1c;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: #fecaca;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #b91c1c;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #7f1d1d;
+    }
+
+    .pyq-section {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+    }
+
+    .pyq-title {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #b91c1c;
+      margin-bottom: 30px;
+    }
+
+    .pyq-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+
+    .pyq-row:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .pyq-name {
+      font-size: 1.05rem;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .pyq-row a {
+      background: #dc2626;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .pyq-row a:hover {
+      background: #7f1d1d;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .pyq-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #b91c1c;
+      color: white;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NEET PYQ</h1>
+    <a href="neet.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="neet.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="pyq-section">
+    <h2 class="pyq-title">Previous Year Papers</h2>
+
+    <!-- PYQ Rows -->
+    <div class="pyq-row"><span class="pyq-name">NEET 2024</span><a href="neet-pyq-2024.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2023</span><a href="neet-pyq-2023.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2022</span><a href="neet-pyq-2022.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2021</span><a href="neet-pyq-2021.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2020</span><a href="neet-pyq-2020.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2019</span><a href="neet-pyq-2019.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2018</span><a href="neet-pyq-2018.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2017</span><a href="neet-pyq-2017.html">View</a></div>
+    <div class="pyq-row"><span class="pyq-name">NEET 2016</span><a href="neet-pyq-2016.html">View</a></div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>

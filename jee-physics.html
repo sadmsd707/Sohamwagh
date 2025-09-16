@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Chapter - Soham</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover { color: #93c5fd; }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #1e3a8a;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #1e40af;
+    }
+
+    .chapter-section {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+    }
+
+    .chapter-title {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #1e3a8a;
+      margin-bottom: 30px;
+    }
+
+    .chapter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+
+    .chapter-row:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .chapter-name {
+      font-size: 1.05rem;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    .chapter-row a {
+      background: #2563eb;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .chapter-row a:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .chapter-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #1e3a8a;
+      color: white;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Select Chapter</h1>
+    <a href="jee.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="chapter-section">
+    <h2 class="chapter-title">Physics Chapters</h2>
+
+    <!-- Chapter Rows -->
+    <div class="chapter-row"><span class="chapter-name">1. Units & Measurements</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">2. Vector Algebra</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">3. Motion in Straight Line</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">4. Motion in Plane</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">5. Circular Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">6. Laws of Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">7. Work, Power & Energy</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">8. Centre of Mass and Collision</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">9. Rotation Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">10. Properties of Matter</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">11. Heat & Thermodynamics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">12. Simple Harmonic Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">13. Waves</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">14. Gravitation</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">15. Electrostatics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">16. Current Electricity</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">17. Capacitor</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">18. Magnetic Effect of Current</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">19. Magnetic Properties of Matter</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">20. Electromagnetic Induction</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">21. Alternating Current</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">22. Electromagnetic Waves</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">23. Geometrical Optics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">24. Wave Optics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">25. Atoms and Nuclei</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">26. Dual Nature of Radiation</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">27. Semiconductor</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">28. Communication System</span><a href="#">Start</a></div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>

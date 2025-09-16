@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Chapter - Physics</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fce7f3, #f8fafc);
+      color: #333;
+      margin: 0;
+    }
+
+    header {
+      background: #b91c1c;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: #fecaca;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #b91c1c;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #7f1d1d;
+    }
+
+    .chapter-section {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+    }
+
+    .chapter-title {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #b91c1c;
+      margin-bottom: 30px;
+    }
+
+    .chapter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+
+    .chapter-row:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .chapter-name {
+      font-size: 1.05rem;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .chapter-row a {
+      background: #dc2626;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .chapter-row a:hover {
+      background: #7f1d1d;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .chapter-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #b91c1c;
+      color: white;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Select Chapter</h1>
+    <a href="neet.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="neet.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="chapter-section">
+    <h2 class="chapter-title">Physics Chapters</h2>
+
+    <!-- Chapter Rows -->
+    <div class="chapter-row"><span class="chapter-name">1. Units & Measurements</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">2. Motion in a Straight Line</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">3. Laws of Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">4. Work, Energy & Power</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">5. Rotational Motion</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">6. Gravitation</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">7. Thermodynamics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">8. Oscillations</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">9. Waves</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">10. Electrostatics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">11. Current Electricity</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">12. Magnetic Effects of Current</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">13. Electromagnetic Induction</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">14. Alternating Current</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">15. Ray Optics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">16. Wave Optics</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">17. Dual Nature of Radiation</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">18. Atoms & Nuclei</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">19. Semiconductor Devices</span><a href="#">Start</a></div>
+    <div class="chapter-row"><span class="chapter-name">20. Communication Systems</span><a href="#">Start</a></div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>

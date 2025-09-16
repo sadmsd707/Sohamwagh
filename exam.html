@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Exam - Soham</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+      color: #333;
+    }
+
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* Back button */
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -35px;
+      background: #1e3a8a;   /* matches header/footer */
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #1e40af;   /* hover effect */
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #93c5fd;
+    }
+
+    .exam-options {
+      padding: 70px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 35px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .exam-card {
+      background: white;
+      padding: 35px 25px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid #e5e7eb;
+    }
+
+    .exam-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    .exam-card h3 {
+      color: #1e3a8a;
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+    }
+
+    .exam-card p {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .exam-card a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #2563eb;
+      color: white;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .exam-card a:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      text-align: center;
+      background: #1e3a8a;
+      color: white;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham</h1>
+    <a href="index.html" class="back-btn">⬅ Back</a>
+    <nav>
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="exams.html">Practice</a></li>
+        <li><a href="#">Scores</a></li>
+        <li><a href="index.html">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="exam-options">
+    <div class="exam-card">
+      <h3>JEE</h3>
+      <p>Physics, Chemistry, Mathematics, and Biology MCQs for JEE Main & Advanced.</p>
+      <a href="jee.html">Start JEE Test</a>
+    </div>
+    <div class="exam-card">
+      <h3>NEET</h3>
+      <p>Physics, Chemistry, and Biology practice questions tailored for NEET aspirants.</p>
+      <a href="neet.html">Start NEET Test</a>
+    </div>
+    <div class="exam-card">
+      <h3>MHT-CET</h3>
+      <p>Practice Physics, Chemistry, Mathematics, and Biology for MHT-CET PCM/PCB streams.</p>
+      <a href="mhtcet.html">Start MHT-CET Test</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+</body>
+</html>
