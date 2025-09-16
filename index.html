@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Soham - Entrance Exam Practice</title>
   <style>
-    /* Reset and base styling */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
     body {
       background: #f5f7fa;
       color: #333;
       line-height: 1.6;
     }
 
-    /* Header */
     header {
       background: #2563eb;
       color: white;
@@ -27,39 +26,55 @@
       justify-content: space-between;
       align-items: center;
     }
+
     header h1 {
       font-size: 1.8rem;
     }
+
     nav ul {
       list-style: none;
       display: flex;
       gap: 20px;
     }
+
     nav ul li a {
       text-decoration: none;
       color: white;
       font-weight: 500;
-      transition: color 0.3s;
     }
+
     nav ul li a:hover {
       color: #dbeafe;
     }
 
-    /* Hero Section */
+    .logout-btn {
+      background: #dbeafe;
+      color: #1e3a8a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-left: 20px;
+    }
+
     .hero {
       text-align: center;
       padding: 60px 20px;
       background: linear-gradient(to right, #2563eb, #1e3a8a);
       color: white;
     }
+
     .hero h2 {
       font-size: 2.5rem;
       margin-bottom: 20px;
     }
+
     .hero p {
       font-size: 1.2rem;
       margin-bottom: 30px;
     }
+
     .hero button {
       background: white;
       color: #2563eb;
@@ -68,13 +83,12 @@
       font-size: 1rem;
       border-radius: 25px;
       cursor: pointer;
-      transition: background 0.3s;
     }
+
     .hero button:hover {
       background: #dbeafe;
     }
 
-    /* Categories */
     .categories {
       padding: 50px 20px;
       display: grid;
@@ -83,23 +97,20 @@
       max-width: 1200px;
       margin: auto;
     }
+
     .card {
       background: white;
       padding: 25px;
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       text-align: center;
-      transition: transform 0.3s;
     }
-    .card:hover {
-      transform: translateY(-8px);
-    }
+
     .card h3 {
       color: #2563eb;
       margin-bottom: 10px;
     }
 
-    /* Footer */
     footer {
       background: #1e3a8a;
       color: white;
@@ -108,9 +119,18 @@
       margin-top: 50px;
     }
   </style>
+  <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      window.location.href = "login.html";
+    }
+  </script>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1>Soham</h1>
     <nav>
@@ -121,16 +141,15 @@
         <li><a href="index.html">Login</a></li>
       </ul>
     </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </header>
 
-  <!-- Hero -->
   <section class="hero">
     <h2>Prepare Smarter for Your Entrance Exams</h2>
     <p>Practice MCQs, track your progress, and boost your performance.</p>
     <button onclick="window.location.href='exam.html'">Start Practicing</button>
   </section>
 
-  <!-- Categories -->
   <section class="categories">
     <div class="card">
       <h3>Physics</h3>
@@ -142,17 +161,4 @@
     </div>
     <div class="card">
       <h3>Mathematics</h3>
-      <p>Test your problem-solving skills with MCQs from algebra, geometry, calculus, and more.</p>
-    </div>
-    <div class="card">
-      <h3>Biology</h3>
-      <p>Revise questions from botany, zoology, genetics, and human physiology for medical exams.</p>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Soham. All rights reserved.</p>
-  </footer>
-</body>
-</html>
+      <p>Test your problem-solving skills with MCQs from algebra, geometry, calculus,
