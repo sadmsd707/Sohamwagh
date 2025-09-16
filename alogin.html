@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Soham</title>
   <style>
-    /* Reset */
     * {
       margin: 0;
       padding: 0;
@@ -14,25 +13,21 @@
 
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #d1fae5, #ecfdf5); /* light green gradient */
+      background: linear-gradient(135deg, #d1fae5, #ecfdf5);
       color: #333;
     }
 
     header {
-      background: #065f46; /* dark green */
+      background: #065f46;
       color: white;
       padding: 15px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      text-align: center;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      position: relative;
     }
 
     header h1 {
       font-size: 1.8rem;
       font-weight: bold;
-      letter-spacing: 1px;
     }
 
     .login-container {
@@ -43,7 +38,6 @@
       border-radius: 18px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
       text-align: center;
-      border: 1px solid #e5e7eb;
     }
 
     .login-container h2 {
@@ -60,7 +54,6 @@
       border: 1px solid #d1d5db;
       font-size: 1rem;
       outline: none;
-      transition: border 0.3s;
     }
 
     .login-container input:focus {
@@ -70,7 +63,7 @@
     .login-btn {
       width: 100%;
       padding: 12px;
-      background: #10b981; /* teal button */
+      background: #10b981;
       color: white;
       border: none;
       border-radius: 25px;
@@ -78,12 +71,10 @@
       font-weight: 500;
       cursor: pointer;
       margin-top: 15px;
-      transition: background 0.3s, transform 0.2s;
     }
 
     .login-btn:hover {
       background: #047857;
-      transform: scale(1.05);
     }
 
     .error {
@@ -110,8 +101,8 @@
   <div class="login-container">
     <h2>Login to Continue</h2>
     <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="password" id="password" placeholder="Password" required>
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
       <button type="submit" class="login-btn">Login</button>
       <p id="errorMsg" class="error"></p>
     </form>
@@ -126,12 +117,13 @@
     const errorMsg = document.getElementById("errorMsg");
 
     form.addEventListener("submit", function(e) {
-      e.preventDefault(); // stop normal form submit
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
 
       if (username === "Soham" && password === "Omkar") {
-        window.location.href = "index.html"; // go to homepage
+        localStorage.setItem("isLoggedIn", "true");
+        window.location.href = "index.html";
       } else {
         errorMsg.textContent = "Invalid Username or Password!";
       }
