@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Result Summary</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+    .header {
+      background: #047857;
+      color: white;
+      padding: 15px;
+      border-radius: 8px 8px 0 0;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .score-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .score-box {
+      background: #fef3c7;
+      color: #b45309;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .chart-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    .pie-chart {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      position: relative;
+      background: #d1d5db;
+    }
+    .pie-chart::after {
+      content: '';
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      width: 50%;
+      height: 50%;
+      background: white;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    .chart-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .chart-labels .correct-label {
+      background: #10b981;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .chart-labels .wrong-label {
+      background: #ef4444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .stat-box {
+      background: #ecfdf5;
+      border-left: 4px solid #047857;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .stat-box.correct { border-left-color: #10b981; }
+    .stat-box.wrong { border-left-color: #ef4444; }
+    .stat-box.unattempted { border-left-color: #6b7280; }
+    .stat-box.time { border-left-color: #0ea5e9; }
+    .stat-box.accuracy { border-left-color: #f59e0b; }
+    .stat-box.attempted { border-left-color: #8b5cf6; }
+    .stat-box.negative { border-left-color: #dc2626; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .grid button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: default;
+      transition: transform 0.2s ease;
+    }
+    .correct {
+      background: #10b981;
+      color: white;
+    }
+    .wrong {
+      background: #ef4444;
+      color: white;
+      border: 2px solid #dc2626;
+      font-weight: 700;
+      transform: scale(1.05);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    .unattempted {
+      background: #d1d5db;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">MHT–CET 2025 Vector Algebra Quiz</div>
+    <div class="card">
+      <p><strong>Test taken on:</strong> <span id="testTimestamp"></span></p>
+      <div class="score-section">
+        <div class="score-box" id="scoreBox">0 / 0</div>
+        <div class="chart-wrapper">
+          <div class="pie-chart" id="pieChart"></div>
+          <div class="chart-labels">
+            <div class="correct-label" id="correctLabel">Correct: 0</div>
+            <div class="wrong-label" id="wrongLabel">Wrong: 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box unattempted" id="unattemptedBox">Unattempted<br>0</div>
+        <div class="stat-box time" id="timeBox">Time<br>00:00</div>
+        <div class="stat-box accuracy" id="accuracyBox">Accuracy<br>0%</div>
+        <div class="stat-box attempted" id="attemptedBox">Attempted<br>0 / 0</div>
+        <div class="stat-box negative" id="negativeBox">Negative Marks<br>0.0 / 0.0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Question Grid</h3>
+      <div class="grid" id="questionGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    // Timestamp
+    const now = new Date();
+    const options = {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    document.getElementById("testTimestamp").textContent = now.toLocaleString('en-IN', options);
+
+    // Load results from localStorage
+    const data = JSON.parse(localStorage.getItem("quizResults"));
+    if (!data) {
+      document.body.innerHTML = "<h2 style='text-align:center;color:red;'>⚠ No results found. Please attempt the quiz first.</h2>";
+    } else {
+      const total = data.total;
+      const correct = data.correct;
+      const wrong = data.details.filter(q => q.userAns !== "Not Answered" && !q.isCorrect).length;
+      const notAnswered = data.details.filter(q => q.userAns === "Not Answered").length;
+      const attempted = total - notAnswered;
+      const accuracy = data.accuracy;
+      const score = correct; // you can change formula if negative marking
+      const timeTaken = data.time;
+
+      // Update UI
+      document.getElementById("scoreBox").textContent = `${score} / ${total}`;
+      document.getElementById("correctLabel").textContent = `Correct: ${correct}`;
+      document.getElementById("wrongLabel").textContent = `Wrong: ${wrong}`;
+      document.getElementById("unattemptedBox").innerHTML = `Unattempted<br>${notAnswered}`;
+      document.getElementById("accuracyBox").innerHTML = `Accuracy<br>${accuracy}%`;
+      document.getElementById("attemptedBox").innerHTML = `Attempted<br>${attempted} / ${total}`;
+      document.getElementById("timeBox").innerHTML = `Time<br>${timeTaken}`;
+      document.getElementById("negativeBox").innerHTML = `Negative Marks<br>0.0 / ${total.toFixed(1)}`;
+
+      // Pie chart
+      const correctPercent = (correct / total) * 100;
+      const wrongPercent = (wrong / total) * 100;
+      document.getElementById("pieChart").style.background = `conic-gradient(
+        #10b981 0% ${correctPercent}%,
+        #ef4444 ${correctPercent}% ${correctPercent + wrongPercent}%,
+        #d1d5db ${correctPercent + wrongPercent}% 100%
+      )`;
+
+      // Question grid
+      const grid = document.getElementById("questionGrid");
+      data.details.forEach((res, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = i + 1;
+        if (res.userAns === "Not Answered") {
+          btn.classList.add("unattempted");
+        } else if (res.isCorrect) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+        grid.appendChild(btn);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #065f46;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #047857;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #ecfdf5;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #bbf7d0;
+      border-left: 4px solid #047857;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #047857;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #065f46;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div>MHT CET 2025 · Vector Algebra Quiz</div>
+      <div>⏱️ Time Left: <span id="timer">48:30</span></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "If |a| = 126, b = 7, and a × b = 35, find a · b",
+        options: ["4", "5", "6", "7"],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "Vector A of magnitude 5√3 units, vector B of magnitude 10 units are inclined at 30°. What is the magnitude of A × B?",
+        options: ["5√3 units", "10 units", "25√3 units", "75 units"],
+        correct: "C"
+      },
+      {
+        number: "Question 03",
+        text: "If P = bî + 6ĵ + k and Q = î − aj + 4k are perpendicular, and 3b − a = 5, find a and b.",
+        options: ["a = 2, b = 10", "a = 1, b = 2", "a = 2, b = 3", "a = 4, b = 3"],
+        correct: "C"
+      },
+      {
+        number: "Question 04",
+        text: "Given A = (2î − 3ĵ + k), B = (3ĵ + î − 2k), and C = (3î + 2ĵ + k), find (A + B) · C",
+        options: ["10", "12", "18", "20"],
+        correct: "C"
+      },
+      {
+        number: "Question 05",
+        text: "A unit vector in the direction of resultant of A = −2î + 3ĵ + k and B = î + 2ĵ − 4k is",
+        options: ["−3î + ĵ + 5k", "î + 2ĵ − 4k", "−2î + 3ĵ + k", "−î + 5ĵ − 3k"],
+        correct: "D"
+      },
+      {
+        number: "Question 06",
+        text: "Vectors A = 3î − 2ĵ + k, B = î − 3ĵ + 5k, C = 2î − ĵ + 4k form a",
+        options: ["Isosceles triangle", "Equilateral triangle", "No triangle", "Right angled triangle"],
+        correct: "D"
+      },
+      {
+        number: "Question 07",
+        text: "Find the unit vector along the direction of a = 4î − ĵ, b = −3î + 2ĵ, c = −k",
+        options: ["1/3", "1(î − ĵ + k)", "1/2(î − ĵ + k)", "1/√2(î + ĵ + k)"],
+        correct: "C"
+      },
+      {
+        number: "Question 08",
+        text: "If A = î + ĵ + 3k, B = −2î + ĵ + 4k, C = 2î − 2ĵ − 8k, find angle between P = A + B + C and Q = A × B",
+        options: ["0°", "45°", "90°", "60°"],
+        correct: "C"
+      },
+      {
+        number: "Question 09",
+        text: "If B is doubled and resultant becomes perpendicular to A, then magnitude of C is",
+        options: ["4B", "3B", "B", "2B"],
+        correct: "D"
+      },
+      {
+        number: "Question 10",
+        text: "Angle between resultant of A + B and A × B is",
+        options: ["π rad", "0°", "π/2 rad", "π/4 rad"],
+        correct: "C"
+      },
+      {
+        number: "Question 11",
+        text: "Angle subtended by A = 4î + 3ĵ + 12k with X-axis is",
+        options: ["cos⁻¹(3/13)", "sin⁻¹(3/13)", "sin⁻¹(4/13)", "cos⁻¹(4/13)"],
+        correct: "D"
+      },
+      {
+        number: "Question 12",
+        text: "Two vectors A and B, B is doubled and resultant becomes perpendicular to A. Magnitude of C is",
+        options: ["2B", "B", "3B", "4B"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "Vector P has components 1 and 3. Resultant of P and Q has components 5 and 6. Magnitude of Q is",
+        options: ["5", "4", "3", "2"],
+        correct: "A"
+      },
+      {
+        number: "Question 14",
+        text: "Two vectors of same magnitude have resultant equal to either vector. Angle between them is",
+        options: ["cos⁻¹(−0.5)", "cos⁻¹(−0.4)", "cos⁻¹(−0.3)", "cos⁻¹(−0.6)"],
+        correct: "A"
+      },
+      {
+        number: "Question 15",
+        text: "Vector P has components 2 and 4. Vector Q along −X axis has magnitude 6. Vector (Q − P) is",
+        options: ["4(2î − 3ĵ)", "−4(2î − ĵ)", "4(2î + ĵ)", "−4(2î + ĵ)"],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "Vectors (A + B) and (A − B) are perpendicular. Condition is",
+        options: ["|A| = |B|", "A · B = 0", "A · B = 1", "A × B = 0"],
+        correct: "B"
+      },
+      {
+        number: "Question 17",
+        text: "Component of Q in direction of Q (P and Q inclined at angle θ)",
+        options: ["P · Q", "P × Q / |P|", "P · Q / |P|", "p · q"],
+        correct: "D"
+      },
+      {
+        number: "Question 18",
+        text: "If √(A² + B²) is magnitude of resultant of (A + B) and (A − B), angle between vectors is",
+        options: [
+          "cos⁻¹(2(A² − B²)/A² + B²)",
+          "cos⁻¹((A² − B²)/A² + B²)",
+          "cos⁻¹(2(A² − B²)/A² + B²)",
+          "cos⁻¹((A² − B²)/A² + B²)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 19",
+        text: "Resultant R of P and Q is perpendicular to P and |P| = |R|. Angle between P and Q is",
+        options: ["5π/4", "7π/4", "π/4", "3π/4"],
+        correct: "C"
+      },
+      {
+        number: "Question 20",
+        text: "If A = 2î + 3ĵ and B = î − ĵ, find A · B",
+        options: ["−1", "1", "2", "3"],
+        correct: "D"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const startTime = new Date();
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "result.html";
+    }
+
+    renderQuestion(current);
+
+    // Timer
+    let minutes = 48, seconds = 30;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      if (seconds === 0) {
+        if (minutes === 0) return;
+        minutes--;
+        seconds = 59;
+      } else {
+        seconds--;
+      }
+      timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
