@@ -99,21 +99,37 @@
       margin-top: 20px;
     }
     .stat-box {
-      background: #ecfdf5;
-      border-left: 4px solid #047857;
       padding: 10px;
       border-radius: 6px;
       text-align: center;
       font-weight: 500;
       font-size: 14px;
     }
-    .stat-box.correct { border-left-color: #10b981; }
-    .stat-box.wrong { border-left-color: #ef4444; }
-    .stat-box.unattempted { border-left-color: #6b7280; }
-    .stat-box.time { border-left-color: #0ea5e9; }
-    .stat-box.accuracy { border-left-color: #f59e0b; }
-    .stat-box.attempted { border-left-color: #8b5cf6; }
-    .stat-box.negative { border-left-color: #dc2626; }
+    .stat-box.attempted { 
+      border-left: 4px solid #8b5cf6; 
+      background: #ede9fe; 
+      color: #4c1d95; 
+    }
+    .stat-box.unattempted { 
+      border-left: 4px solid #6366f1; 
+      background: #eef2ff; 
+      color: #3730a3; 
+    }
+    .stat-box.accuracy { 
+      border-left: 4px solid #f59e0b; 
+      background: #fef3c7; 
+      color: #92400e; 
+    }
+    .stat-box.time { 
+      border-left: 4px solid #0ea5e9; 
+      background: #e0f2fe; 
+      color: #075985; 
+    }
+    .stat-box.negative { 
+      border-left: 4px solid #dc2626; 
+      background: #fee2e2; 
+      color: #991b1b; 
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
@@ -165,10 +181,10 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-box unattempted" id="unattemptedBox">Unattempted<br>0</div>
-        <div class="stat-box time" id="timeBox">Time<br>00:00</div>
-        <div class="stat-box accuracy" id="accuracyBox">Accuracy<br>0%</div>
         <div class="stat-box attempted" id="attemptedBox">Attempted<br>0 / 0</div>
+        <div class="stat-box unattempted" id="unattemptedBox">Unattempted<br>0</div>
+        <div class="stat-box accuracy" id="accuracyBox">Accuracy<br>0%</div>
+        <div class="stat-box time" id="timeBox">Time<br>00:00</div>
         <div class="stat-box negative" id="negativeBox">Negative Marks<br>0.0 / 0.0</div>
       </div>
     </div>
@@ -204,16 +220,16 @@
       const notAnswered = data.details.filter(q => q.userAns === "Not Answered").length;
       const attempted = total - notAnswered;
       const accuracy = data.accuracy;
-      const score = correct; // you can change formula if negative marking
+      const score = correct; // change formula if negative marking
       const timeTaken = data.time;
 
       // Update UI
       document.getElementById("scoreBox").textContent = `${score} / ${total}`;
       document.getElementById("correctLabel").textContent = `Correct: ${correct}`;
       document.getElementById("wrongLabel").textContent = `Wrong: ${wrong}`;
+      document.getElementById("attemptedBox").innerHTML = `Attempted<br>${attempted} / ${total}`;
       document.getElementById("unattemptedBox").innerHTML = `Unattempted<br>${notAnswered}`;
       document.getElementById("accuracyBox").innerHTML = `Accuracy<br>${accuracy}%`;
-      document.getElementById("attemptedBox").innerHTML = `Attempted<br>${attempted} / ${total}`;
       document.getElementById("timeBox").innerHTML = `Time<br>${timeTaken}`;
       document.getElementById("negativeBox").innerHTML = `Negative Marks<br>0.0 / ${total.toFixed(1)}`;
 
