@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Physics Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #065f46;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #047857;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #ecfdf5;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #bbf7d0;
+      border-left: 4px solid #047857;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #047857;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #065f46;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #d1fae5;
+      border-radius: 3px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      background: #047857;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div>MHT CET 2025 · Kinetic Theory of Gases</div>
+      <div>⏱️ Time: <span id="timer">00:00</span></div>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "500 gram of a diatomic gas is enclosed at a pressure of 100000 N/m². The density of the gas is 5 kg/m³. The energy of one mole of the gas due to its thermal motion is [consider the gas molecule as a rigid rotator]",
+        options: [
+          "15000 J",
+          "25000 J",
+          "15000000 J",
+          "25000000 J"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "The temperature of an ideal gas is increased from 100 K to 400 K. If 'x' is the r.m.s. velocity of its molecules at 100 K, then at 400 K, the r.m.s. velocity becomes",
+        options: ["4x", "x/4", "2x", "3x"],
+        correct: "C"
+      },
+      {
+        number: "Question 03",
+        text: "The temperature at which oxygen molecules will have same r.m.s. speed as helium molecules at 57°C is (molecular masses of oxygen and helium are 32 and 4 respectively.)",
+        options: ["1320 K", "2240 K", "2640 K", "3230 K"],
+        correct: "B"
+      },
+      {
+        number: "Question 04",
+        text: "The initial average kinetic energy of the molecules was E, when a gas sample is at 27°C. When the gas is heated to 327°C, then the final average kinetic energy will be",
+        options: ["√(2E)", "2E", "300E", "327E"],
+        correct: "B"
+      },
+      {
+        number: "Question 05",
+        text: "The temperature of an ideal gas is increased from 100 K to 400 K. If 'x' is the root mean square velocity of its molecules at 100 K, r.m.s. velocity becomes",
+        options: ["x/4", "2x", "3x", "4x"],
+        correct: "B"
+      },
+      {
+        number: "Question 06",
+        text: "According to the kinetic theory of gases, when two molecules of a gas collide with each other then",
+        options: [
+          "both kinetic energy and momentum are conserved.",
+          "neither kinetic energy nor momentum is conserved.",
+          "momentum is conserved but kinetic energy is not conserved.",
+          "kinetic energy is conserved but momentum is not conserved."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 07",
+        text: "The volume of given mass of a gas is increased by 7% at constant temperature. The pressure should be decreased by",
+        options: ["7%", "14%", "6.54%", "14.52%"],
+        correct: "C"
+      },
+      {
+        number: "Question 08",
+        text: "Select the correct statement.",
+        options: [
+          "The product of pressure and volume of an ideal gas will be equal to translational kinetic energy of the molecules.",
+          "The temperature of gas is -73°C. When the gas is heated to 527°C, the r.m.s. speed of the molecules is doubled.",
+          "The temperature of gas is -100°C. When the gas is heated to +627°C, the r.m.s. speed of the molecules is four times.",
+          "The product of pressure and volume of an ideal gas will be equal to half the translational kinetic energy."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 09",
+        text: "Six molecules of a gas in container have speeds 2 m/s, 5 m/s, 3 m/s, 6 m/s, 3 m/s and 5 m/s. The r.m.s. speed is",
+        options: ["4 m/s", "1.7 m/s", "4.24 m/s", "5 m/s"],
+        correct: "C"
+      },
+      {
+        number: "Question 10",
+        text: "How much should the pressure be increased in order to reduce the volume of a given mass of gas by 5% at the constant temperature?",
+        options: ["5%", "10%", "5.26%", "4%"],
+        correct: "C"
+      },
+      {
+        number: "Question 11",
+        text: "The pressure 'P', volume 'V' and temperature 'T' of a gas in a jar 'A' and the gas in other jar 'B' is at pressure '2P', volume 'V/4' and temperature 'T/4'. Then the ratio of the number of molecules in jar A and jar B will be",
+        options: ["1:1", "1:2", "2:1", "4:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 12",
+        text: "When the pressure of the gas contained in a closed vessel is increased by 2.5%, the temperature of the gas increases by 4 K. The initial temperature of the gas is",
+        options: ["80 K", "150 K", "160 K", "320 K"],
+        correct: "C"
+      },
+      {
+        number: "Question 13",
+        text: "For a gas at a particular temperature on an average, the quantity which remains same for all molecules is",
+        options: ["velocity", "momentum", "kinetic energy", "angular momentum"],
+        correct: "C"
+      },
+      {
+        number: "Question 14",
+        text: "The mean kinetic energy of the molecules of an ideal gas at 399°C is 'E'. The temperature at which the mean kinetic energy of its molecules will be 'E/2', is",
+        options: ["336°C", "276°C", "123°C", "63°C"],
+        correct: "D"
+      },
+      {
+        number: "Question 15",
+        text: "The r.m.s. speed of gas molecules at 800 K will be",
+        options: [
+          "same as at 200 K",
+          "twice the value at 200 K",
+          "four times the value at 200 K",
+          "half the value at 200 K"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "The temperature of an ideal gas is increased from 100 K to 400 K. If 'x' is the R.M.S. velocity of its molecules at 100 K, it becomes",
+        options: ["x/4", "2x", "3x", "4x"],
+        correct: "B"
+      },
+      {
+        number: "Question 17",
+        text: "If a gas is compressed isothermally then the r.m.s. velocity of its molecules",
+        options: [
+          "increases.",
+          "decreases.",
+          "remains the same.",
+          "first increases and then decreases."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 18",
+        text: "The average force applied on the walls of a closed container depends as T^x where T is the temperature of an ideal gas. The value of x is",
+        options: ["1", "2", "3", "4"],
+        correct: "A"
+      },
+      {
+        number: "Question 19",
+        text: "Two gases A and B are at absolute temperatures 350 K and 420 K respectively. The ratio of average kinetic energy of the molecules of gas B to that of gas A is",
+        options: ["6:5", "√6:√5", "36:25", "5:6"],
+        correct: "A"
+      },
+      {
+        number: "Question 20",
+        text: "If r.m.s. velocity of hydrogen molecules is 4 times that of an oxygen molecule at 47°C, the temperature of hydrogen molecules is (Molecular weight of Hydrogen and Oxygen are 2 and 32 respectively)",
+        options: ["23°C", "47°C", "80°C", "114°C"],
+        correct: "B"
+      },
+      {
+        number: "Question 21",
+        text: "The molar specific heat of an ideal gas at constant pressure and constant volume is 'C_p' and 'C_v' respectively. If 'R' is a universal gas constant and the ratio of 'C_p' to 'C_v' is γ, then 'C_p' is equal to",
+        options: [
+          "[(γ - 1)/(γ + 1)] R",
+          "[(γ - 1)R]/γ",
+          "[Rγ]/(γ - 1)",
+          "[Rγ]/(γ + 1)"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 22",
+        text: "For ideal non-rigid diatomic gas, the value of R/C_V is nearly (γ = C_P/C_V = 9/7)",
+        options: ["0.4", "0.66", "0.28", "1.28"],
+        correct: "A"
+      },
+      {
+        number: "Question 23",
+        text: "A monoatomic ideal gas is heated at constant pressure. The percentage of total heat used in changing the internal energy is",
+        options: ["30%", "40%", "50%", "60%"],
+        correct: "D"
+      },
+      {
+        number: "Question 24",
+        text: "The ratio of the specific heats C_p/C_v = γ, in terms of degrees of freedom (n) is",
+        options: [
+          "(1 + 1/n)",
+          "(1 + n/3)",
+          "(1 + 2/n)",
+          "(1 + n/2)"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 25",
+        text: "Assuming the expression for the pressure exerted by the gas, it can be shown that pressure is",
+        options: [
+          "3/4 of kinetic energy per unit volume of a gas.",
+          "2/3 of kinetic energy per unit volume of a gas.",
+          "1/3 of kinetic energy per unit volume of a gas.",
+          "3/2 of kinetic energy per unit volume of a gas."
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 26",
+        text: "In an ideal gas at temperature T, the average force that a molecule applies on the walls of a closed container depends on T as T^x. The value of x is",
+        options: ["0.25", "2", "0.5", "1"],
+        correct: "D"
+      },
+      {
+        number: "Question 27",
+        text: "The absolute temperature of a gas is determined by",
+        options: [
+          "the average momentum of the molecule.",
+          "the velocity of sound in the gas.",
+          "the number of molecules in the gas.",
+          "the mean square velocity of the molecules."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 28",
+        text: "Four moles of hydrogen, two moles of helium and one mole of water vapour form an ideal gas mixture. [C_v for hydrogen = (5/2)R, C_v for helium = (3/2)R, C_v for water vapour = 3R] What is the molar specific heat at constant pressure of the mixture?",
+        options: ["(11/3)R", "(23/7)R", "(16/7)R", "(23/3)R"],
+        correct: "B"
+      },
+      {
+        number: "Question 29",
+        text: "What is the pressure of hydrogen in a cylinder of volume 10 litre if its total energy of translation is 7500 J?",
+        options: [
+          "500000 N/m²",
+          "1000000 N/m²",
+          "50000 N/m²",
+          "5000000 N/m²"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 30",
+        text: "'N' molecules of gas A, each having mass 'm' and '2N' molecules of gas B, each of mass '2m' are contained in the same vessel which is at constant temperature 'T'. The mean square velocity of B is V² and mean square of x-component of A is ω². The value of ω²/V² is",
+        options: ["3:2", "2:3", "1:2", "2:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 31",
+        text: "An insulated container contains a diatomic gas of molar mass 'm'. The container is moving with velocity 'V', if it is stopped suddenly, the change in temperature is (R = gas constant)",
+        options: [
+          "mV²/(3R)",
+          "mV²/(5R)",
+          "mV/(7R)",
+          "5mV/(3R)"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "For a gas, R/C_v = 0.4 where R is the universal gas constant and 'C_v' is molar specific heat at constant volume. The gas is made up of molecules which are",
+        options: ["rigid diatomic.", "monoatomic.", "non-rigid diatomic.", "polyatomic."],
+        correct: "B"
+      },
+      {
+        number: "Question 33",
+        text: "The average force applied on the wall of a closed container depends as T^X where T is the temperature of an ideal gas. The value of x is",
+        options: ["0.5", "1", "2", "1.5"],
+        correct: "B"
+      },
+      {
+        number: "Question 34",
+        text: "An ideal gas (γ = 1.5) is expanded adiabatically. To reduce root mean square velocity of molecules two times, the gas should be expanded",
+        options: ["20 times", "16 times", "12 times", "8 times"],
+        correct: "B"
+      },
+      {
+        number: "Question 35",
+        text: "The temperature of a gas is -80°C. To what temperature the gas should be heated so that the r.m.s. speed is increased by 2 times?",
+        options: ["499°C", "772°C", "1464°C", "1737°C"],
+        correct: "B"
+      },
+      {
+        number: "Question 36",
+        text: "If C_p and C_v are molar specific heats of an ideal gas at constant pressure and volume respectively and 'γ' is C_p/C_v then C_p = (R = universal gas constant)",
+        options: [
+          "γR/(γ - 1)",
+          "γR",
+          "(1 + γ)/(1 - γ)",
+          "R/(γ - 1)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 37",
+        text: "A perfect gas of volume 5 litre is compressed isothermally to volume of 1 litre. The r.m.s. speed of the molecules will",
+        options: [
+          "increase by 10 times",
+          "decrease by 10 times",
+          "increase by 5 times",
+          "remain unchanged"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 38",
+        text: "A real gas behaves as an ideal gas at",
+        options: [
+          "low pressure and low temperature.",
+          "low pressure and high temperature.",
+          "high pressure and low temperature.",
+          "high pressure and high temperature."
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 39",
+        text: "According to the law of equipartition of energy the molar specific heat of a diatomic gas at constant volume where the molecule has one additional vibrational mode is",
+        options: ["(9/2)R", "(5/2)R", "(3/2)R", "(7/2)R"],
+        correct: "D"
+      },
+      {
+        number: "Question 40",
+        text: "An insulated container contains a monoatomic gas of molar mass 'm'. The container is moving with velocity 'V'. If it is stopped suddenly, the change in temperature is (R = gas constant)",
+        options: [
+          "mV²/(5R)",
+          "mV²/(3R)",
+          "mV²/(7R)",
+          "mV²/(9R)"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "The r.m.s. velocity of gas molecules kept at temperature 27°C in a vessel is 61 m/s. Molecular weight of gas is nearly (R = 8.31 J/mol·K)",
+        options: ["2", "28", "4", "32"],
+        correct: "D"
+      },
+      {
+        number: "Question 42",
+        text: "The r.m.s. velocity of hydrogen at S.T.P. is 'u' m/s. If the gas is heated at constant pressure till its volume becomes three times, then the final temperature of the gas and the r.m.s. speed are respectively",
+        options: [
+          "819 K, √3 u m/s",
+          "1092 K, 3u m/s",
+          "819 K, u/√3 m/s",
+          "1092 K, u/3 m/s"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 43",
+        text: "A fixed mass of gas at constant pressure occupies a volume 'V'. The gas undergoes a rise in temperature so that the r.m.s. velocity of the molecules is doubled. The new volume will be",
+        options: ["V", "2V", "4V", "8V"],
+        correct: "C"
+      },
+      {
+        number: "Question 44",
+        text: "The average translational kinetic energy of nitrogen (molar mass 28) molecules at a particular temperature is 0.042 eV. The translational kinetic energy of oxygen molecules (molar mass 32) in eV at double the temperature is",
+        options: ["0.021", "0.048", "0.056", "0.084"],
+        correct: "D"
+      },
+      {
+        number: "Question 45",
+        text: "The temperature at which r.m.s. velocity of hydrogen molecules is 4.5 times that of an oxygen molecule at 47°C is (Molecular weight of hydrogen and oxygen molecules are 2 and 32 respectively)",
+        options: ["47°C", "132°C", "320°C", "405°C"],
+        correct: "C"
+      },
+      {
+        number: "Question 46",
+        text: "At S.T.P., the mean free path of gas molecule is 1500 d, where 'd' is diameter of molecule. What will be the mean free path at 373 K at constant volume?",
+        options: [
+          "1500 d",
+          "(373/273) × 1500 d",
+          "(273/373) × 1500 d",
+          "√(373/273) × 1500 d"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 47",
+        text: "The molecular mass of a gas having r.m.s. speed four times as that of another gas having molecular mass 32 is",
+        options: ["2", "4", "26", "32"],
+        correct: "A"
+      },
+      {
+        number: "Question 48",
+        text: "The temperature of a gas is measure of",
+        options: [
+          "the average kinetic energy of gas molecules.",
+          "the average potential energy of gas molecules.",
+          "the average distance between the molecules of a gas",
+          "the size of the molecules of a gas"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 49",
+        text: "The temperature of a gas is -68°C. To what temperature should it be heated, so that the r.m.s. velocity of the molecules be doubled?",
+        options: ["357°C", "457°C", "547°C", "820°C"],
+        correct: "D"
+      },
+      {
+        number: "Question 50",
+        text: "The internal energy of a monoatomic ideal gas molecule is",
+        options: [
+          "partly kinetic and partly potential.",
+          "totally kinetic.",
+          "totally potential",
+          "neither kinetic nor potential"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 51",
+        text: "A sample of oxygen gas and a sample of hydrogen gas both have the same mass, same volume and the same pressure. The ratio of their absolute temperature is",
+        options: ["1:4", "4:1", "1:16", "16:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 52",
+        text: "A gas at pressure P₀ is contained in a vessel. If the masses of all the molecules are halved and their velocities are doubled, the resulting pressure would be equal to",
+        options: ["4P₀", "2P₀", "P₀", "P₀/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 53",
+        text: "Which one of the following represents correctly the variation of volume (V) of an ideal gas with temperature (T) under constant pressure conditions?",
+        options: ["P", "Q", "R", "S"],
+        correct: "B"
+      },
+      {
+        number: "Question 54",
+        text: "For an ideal gas the density of the gas is ρ₀ when temperature and pressure of the gas are T₀ and P₀ respectively. When the temperature of the gas is 2T₀, its pressure will be 3P₀. The new density will be",
+        options: [
+          "(3/2)ρ₀",
+          "(4/3)ρ₀",
+          "(3/4)ρ₀",
+          "(2/3)ρ₀"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 55",
+        text: "For polyatomic gases, the ratio of molar specific heat at constant pressure to constant volume is (f = degrees of freedom)",
+        options: [
+          "(2+f)/(3+f)",
+          "(3+f)/(2+f)",
+          "(3+f)/(4+f)",
+          "(4+f)/(3+f)"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 56",
+        text: "Let γ₁ be the ratio of molar specific heat at constant pressure and molar specific heat at constant volume of a monoatomic gas and γ₂ be the similar ratio of diatomic gas. Considering the diatomic gas molecule as a rigid rotator, the ratio γ₂/γ₁ is",
+        options: ["37/21", "27/35", "21/25", "35/27"],
+        correct: "D"
+      },
+      {
+        number: "Question 57",
+        text: "The molar specific heat of an ideal gas at constant pressure and constant volume is C_p and C_v respectively. If R is universal gas constant and γ = C_p/C_v then C_v =",
+        options: [
+          "(1 - γ)/(1 + γ)",
+          "(1 + γ)/(1 - γ)",
+          "(γ - 1)/R",
+          "R/(γ - 1)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 58",
+        text: "A gas at normal temperature is suddenly compressed to one-fourth of its original volume. If C_p/C_v = γ = 1.5, then the increase in its temperature is",
+        options: ["273 K", "373 K", "473 K", "573 K"],
+        correct: "B"
+      },
+      {
+        number: "Question 59",
+        text: "For a gas, R/C_v = 0.4, where R is universal gas constant and C_v is molar specific heat at constant volume. The gas is made up of molecules which are",
+        options: ["rigid diatomic", "monoatomic", "non-rigid diatomic", "polyatomic"],
+        correct: "B"
+      },
+      {
+        number: "Question 60",
+        text: "If temperature of gas molecules is raised from 127°C to 527°C, the ratio of r.m.s. speed of the molecules is respectively",
+        options: ["1:2", "2:1", "1:√2", "2:√2"],
+        correct: "B"
+      },
+      {
+        number: "Question 61",
+        text: "According to Boyle's law, the product PV remains constant. The unit of PV is same as that of",
+        options: ["energy", "force", "impulse", "momentum"],
+        correct: "A"
+      },
+      {
+        number: "Question 62",
+        text: "A monoatomic gas at pressure 'P', having volume 'V' expands isothermally to a volume '2V' and then adiabatically to a volume '16V'. The final pressure of the gas is (Take γ = 5/3)",
+        options: ["P/64", "P/32", "16P", "32P"],
+        correct: "A"
+      },
+      {
+        number: "Question 63",
+        text: "If a gas is compressed isothermally then the r.m.s. velocity of the molecules",
+        options: [
+          "decreases.",
+          "increases.",
+          "remains the same.",
+          "first decreases and then increases."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 64",
+        text: "'n' number of liquid drops each of radius 'r' coalesce to form a single drop of radius 'R'. The energy released in the process is converted into the kinetic energy of the big drop so formed. The speed of the big drop is [T = surface tension of liquid, ρ = density of liquid.]",
+        options: [
+          "√[T/ρ (1/r - 1/R)]",
+          "√[2T/ρ (1/r - 1/R)]",
+          "√[4T/ρ (1/r - 1/R)]",
+          "√[6T/ρ (1/r - 1/R)]"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 65",
+        text: "We have a jar filled with gas characterized by parameters P, V, T and another jar B filled with gas having parameters 2P, V/4, 2T, where symbols have their usual meaning. The ratio of number of molecules in jar A to those in jar B is",
+        options: ["1:1", "1:2", "2:1", "4:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 66",
+        text: "In a vessel, the ideal gas is at a pressure P. If the mass of all the molecules is halved and their speed is doubled, then resultant pressure of the gas will be",
+        options: ["4P", "2P", "P", "P/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 67",
+        text: "The average force applied on the walls of a closed container depends on T^x where T is the temperature of an ideal gas. The value of 'x' is",
+        options: ["4", "3", "2", "1"],
+        correct: "D"
+      },
+      {
+        number: "Question 68",
+        text: "A piece of metal weighing 100 g is heated to 80°C and dropped into 1 kg of cold water in an insulated container at 15°C. If the final temperature of the water in the container is 15.69°C, the specific heat of the metal in J/g°C is:",
+        options: ["0.38", "0.24", "0.45", "0.13"],
+        correct: "A"
+      },
+      {
+        number: "Question 69",
+        text: "An ideal gas in a container of volume 500 c.c. is at a pressure of 2 × 10⁻⁵ N/m². The average kinetic energy of each molecule is 6 × 10⁻²¹ J. The number of gas molecules in the container is",
+        options: [
+          "5 × 10²⁵",
+          "25 × 10²³",
+          "5 × 10²³",
+          "2.5 × 10²²"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 70",
+        text: "The temperature of an ideal gas is increased from 27°C to 927°C. The r.m.s. speed of its molecules becomes",
+        options: ["twice.", "half.", "four times.", "one-fourth."],
+        correct: "A"
+      },
+      {
+        number: "Question 71",
+        text: "For a gas having 'X' degrees of freedom, 'γ' is (γ = ratio of specific heats = C_p/C_v)",
+        options: [
+          "(1 + X)/2",
+          "1 + X/2",
+          "1 + 2/X",
+          "1 + 1/X"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 72",
+        text: "A gas at N.T.P. is suddenly compressed to (1/4)th of its original volume. The final pressure in (Given γ = ratio of sp. heats = 3/2) atmosphere is (P = original pressure)",
+        options: ["P", "2P", "4P", "8P"],
+        correct: "D"
+      },
+      {
+        number: "Question 73",
+        text: "According to kinetic theory of gases, which one of the following statements is wrong?",
+        options: [
+          "All the molecules of a gas are identical.",
+          "Collisions between the molecules of a gas and that of the molecules with the walls of the container are perfectly elastic.",
+          "The molecules do not exert appreciable force on one another except during collision.",
+          "The pressure exerted by a gas is due to the collision between the molecules of the gas."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 74",
+        text: "The temperature of an ideal gas is increased from 140 K to 560 K. If the r.m.s. speed of gas molecules is v at 140 K, then at 560 K, r.m.s. speed becomes",
+        options: ["4v", "v/4", "v/2", "2v"],
+        correct: "D"
+      },
+      {
+        number: "Question 75",
+        text: "When the rms velocity of a gas is denoted by V, which of the following relation is true? (T = absolute temperature of the gas)",
+        options: [
+          "V²/T = constant",
+          "VT² = constant",
+          "V/T² = constant",
+          "V²T = constant"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 76",
+        text: "The translational kinetic energy of the molecules of a gas at absolute temperature T can be doubled by",
+        options: [
+          "decreasing T to T/2",
+          "increasing T to 4T",
+          "increasing T to √(2T)",
+          "increasing T to 2T"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 77",
+        text: "According to kinetic theory of gases, when two molecules of a gas collide with each other then",
+        options: [
+          "kinetic energy is conserved but momentum is not conserved.",
+          "momentum is conserved but kinetic energy is not conserved.",
+          "neither kinetic energy nor momentum is conserved.",
+          "both momentum and kinetic energy are conserved."
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 78",
+        text: "The average translational kinetic energy of N molecules in a gas is E₁. The kinetic energy of the electron (e) accelerated from rest through potential difference V volt is E₂. The temperature at which E₁ = E₂ possible is (R = gas constant, N = number of molecules)",
+        options: [
+          "3VNe/(2R)",
+          "VNe/(2R)",
+          "VNe/(3R)",
+          "2VNe/(3R)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 79",
+        text: "According to the kinetic theory of gases, which of the following statements is WRONG?",
+        options: [
+          "The pressure exerted by a gas is due to the collisions between the molecules of the gas",
+          "Collisions between the molecules of a gas and that of the molecules with the walls of the containers are perfectly elastic",
+          "All molecules of a gas are identical",
+          "The molecules do not exert appreciable force on one another except during collision"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "If one mole of an ideal gas γ = 5/3 is mixed with one mole of a diatomic gas γ = 7/5. The value of γ for the mixture is",
+        options: ["1.50", "1.53", "3.07", "1.40"],
+        correct: "B"
+      },
+      {
+        number: "Question 81",
+        text: "The molar specific heat at constant pressure of an ideal gas is (7/2)R. The gas is made up of molecules which are (R is the universal gas constant)",
+        options: ["Polyatomic", "triatomic", "monoatomic", "diatomic"],
+        correct: "D"
+      },
+      {
+        number: "Question 82",
+        text: "If 'E' is the kinetic energy per mole of an ideal gas and 'T' is the absolute temperature, then the universal gas constant is given as",
+        options: [
+          "2T/(3E)",
+          "2E/(3T)",
+          "3T/(2E)",
+          "3E/(2T)"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 83",
+        text: "According to the kinetic theory of gases, when two molecules of gas collide with each other then",
+        options: [
+          "Kinetic energy is conserved but momentum is not conserved.",
+          "neither kinetic energy nor momentum is conserved.",
+          "both kinetic energy and momentum are conserved.",
+          "momentum is conserved but kinetic energy is not conserved."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 84",
+        text: "The molar specific heat of an ideal gas at constant pressure and constant volume is C_p and C_v respectively. If R is the universal gas constant and the ratio of C_p to C_v is γ then. C_v =",
+        options: [
+          "(γ-1)/R",
+          "(1-γ)/(1+γ)",
+          "(1+γ)/(1-γ)",
+          "R/(γ-1)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 85",
+        text: "The r.m.s. speed of gas at temperature T is 2 times the r.m.s speed at 320 K. The value of the Temperature T is",
+        options: ["1280 K", "960 K", "640 K", "2560 K"],
+        correct: "A"
+      },
+      {
+        number: "Question 86",
+        text: "If the absolute temperature of a gas is increased 5 times, the r.m.s. velocity of the gas molecules will be",
+        options: ["5 times", "10 times", "25 times", "√5 times"],
+        correct: "D"
+      },
+      {
+        number: "Question 87",
+        text: "Two gases A and B are at absolute temperatures 360 K and 420 K respectively. The ratio of average kinetic energy of the molecules of gas B to that of gas A is",
+        options: ["6:7", "√7:√6", "7:6", "49:36"],
+        correct: "C"
+      },
+      {
+        number: "Question 88",
+        text: "Which one of the following is NOT a correct expression for an ideal gas? [C_p = Molar specific heat of a gas at constant pressure, C_v = Molar specific heat of a gas at constant volume, γ = Ratio of two specific heats of a gas, R = Universal gas constant]",
+        options: [
+          "C_v = C_p + R",
+          "R = C_v (γ - 1)",
+          "C_v/C_p = 1/γ",
+          "R = C_p (γ - 1)/γ"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 89",
+        text: "The molecular masses of helium and oxygen are 4 and 32 respectively. The ratio of r.m.s speed of helium at 327°C to r.m.s speed of oxygen at 27°C will be",
+        options: ["1:6", "8:1", "1:8", "4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 90",
+        text: "For an ideal gas, R = (2/3) C_v. This suggests that the gas consists of molecule, which are [R = universal gas constant]",
+        options: [
+          "polyatomic",
+          "diatomic",
+          "monoatomic",
+          "a mixture of diatomic and polyatomic molecules"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 91",
+        text: "The rms speed of a gas molecule is 'V' at pressure 'P'. If the pressure is increased by two time, then the rms speed of the gas molecule at the same temperature will be",
+        options: ["V", "√2 V", "V/3", "V/2"],
+        correct: "A"
+      },
+      {
+        number: "Question 92",
+        text: "Equal volumes of two gases, having their densities in the ratio of 1:16 exert equal pressures on the walls of two containers. The ratio of their rms speeds (c₁:c₂) is",
+        options: ["1:4", "4:1", "8:1", "1:8"],
+        correct: "B"
+      },
+      {
+        number: "Question 93",
+        text: "If m' represents the mass of each molecules of a gas and T', its absolute temperature, then the root mean square speed of the gas molecule is proportional to",
+        options: [
+          "m^(-1/2) T^(1/2)",
+          "mT",
+          "m^(1/2) T^(-1/2)",
+          "m^(1/2) T^(1/2)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 94",
+        text: "At what temperature does the average translational kinetic energy of a molecule in a gas becomes equal to kinetic energy of an electron accelerated from rest through potential difference of 'V' volt? (N = Avogadro number, R = gas constant, e = electronic charge)",
+        options: [
+          "2eVN/(3R)",
+          "eVN/R",
+          "eVN/(4R)",
+          "3eVN/(2R)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 95",
+        text: "An ideal gas of molar mass 'M₀' has r.m.s. velocity 'V' at temperature 'T'. Then",
+        options: [
+          "VT² = constant",
+          "V²/T = constant",
+          "V²T = constant",
+          "V is independent of T"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 96",
+        text: "For a gas molecule with 6 degrees of freedom, which one of the following relations between gas constant 'R' and molar specific heat 'C_v' is correct?",
+        options: [
+          "R = C_v/3",
+          "R = 5C_v/4",
+          "R = C_v/2",
+          "R = 3C_v/4"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 97",
+        text: "The translational kinetic energy of the molecules of a gas at absolute temperature (T) can be doubled",
+        options: [
+          "by increasing T to 4T",
+          "by increasing T to 2T",
+          "by decreasing T to T/2",
+          "by increasing T to √2 T"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 98",
+        text: "If 'E' is the kinetic energy per mole of an ideal gas and 'T' is the absolute temperature, then the universal gas constant is given as",
+        options: [
+          "2T/(3E)",
+          "2E/(3T)",
+          "3T/(2E)",
+          "3E/(2T)"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 99",
+        text: "Equal volumes of two gases are kept in different containers having densities in the ratio 1:16. They exert equal pressures on the wall of their respective containers. Then the ratio of their r.m.s. velocities is",
+        options: ["16:1", "1:8", "4:1", "1:12"],
+        correct: "C"
+      },
+      {
+        number: "Question 100",
+        text: "A perfect gas of volume 10 liter is compressed isothermally to a volume of 1 liter. The rms sped of the molecules will",
+        options: [
+          "decrease 5 time",
+          "remain unchanged",
+          "increase 5 times",
+          "increase 10 times"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 101",
+        text: "We have a sample of gas characterised by P, V and T and another sample of gas characterised by 2P, V/4, and 2T. What is the ratio of the number of molecules in the first and second samples?",
+        options: ["2:1", "4:1", "8:1", "16:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 102",
+        text: "Two ideal gases A and B having the same temperature T, same pressure P and same volume V, are mixed together. If the temperature of mixture is kept constant and the volume occupied by the mixture is reduced to V/2, then the pressure of the mixture will become",
+        options: ["P/2", "P", "4P", "2P"],
+        correct: "D"
+      },
+      {
+        number: "Question 103",
+        text: "The root mean square velocity of molecules of a gas is 200 m/s. What will be the root mean square velocity of the molecules, if the molecular weight is doubled and the absolute temperature is halved?",
+        options: ["50 m/s", "100 m/s", "200 m/s", "100/√2 m/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 104",
+        text: "For a gas R/c_v = 0.67. This gas is made up of molecules which are",
+        options: ["diatomic.", "polyatomic.", "monoatomic.", "mixture of diatomic and polyatomic."],
+        correct: "C"
+      },
+      {
+        number: "Question 105",
+        text: "For a gas, R/C_v = 0.4 where 'R' is universal gas constant and C_v is the molar specific heat at constant volume. The gas is made up of molecules which are",
+        options: ["polyatomic.", "rigid diatomic.", "non-rigid diatomic.", "monoatomic."],
+        correct: "D"
+      },
+      {
+        number: "Question 106",
+        text: "If a gas is compressed isothermally then the r.m.s. velocity of the molecules",
+        options: [
+          "remains the same.",
+          "increases.",
+          "decreases.",
+          "first decreases and then increases."
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 107",
+        text: "The ratio of specific heat at constant pressure to specific heat at constant volume (γ) for a gas is (1 + 2/f) where f is the number of degrees of freedom of a molecule of a gas. The ratio of 'γ_d' for rigid diatomic to 'γ_m' for monoatomic is",
+        options: ["14/23", "25/21", "21/25", "23/14"],
+        correct: "C"
+      },
+      {
+        number: "Question 108",
+        text: "The quantity PV/KT represents (K = Boltzmann constant)",
+        options: [
+          "number of moles of gas.",
+          "kinetic energy of gas",
+          "mass of the gas",
+          "number of molecules of gas in one mole"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 109",
+        text: "The ratio of the specific heats C_p/C_v = γ in terms of degrees of freedom 'n' is given by",
+        options: [
+          "(1 + n/2)",
+          "(1 + 1/n)",
+          "(1 + 10/3)",
+          "(1 + 2/n)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 110",
+        text: "Let the r.m.s. velocity of molecule of a given mass of gas be C₁ at temperature 27°C. When the temperature is increased to 327°C, the r.m.s. velocity is C₂. Then the ratio C₂/C₁ is",
+        options: ["√2", "2", "4", "2√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 111",
+        text: "One mole of a diatomic gas does a work Q/3, when the amount of heat supplied is 'Q'. In this process, the molar heat capacity of the gas is",
+        options: ["15R", "9R", "7R", "3R/4"],
+        correct: "B"
+      },
+      {
+        number: "Question 112",
+        text: "At what temperature is the R.M.S. velocity of Hydrogen molecule equal to that of an oxygen molecule at 47°C? (Molecular weight of hydrogen = 2, Molecular weight of oxygen = 32)",
+        options: ["80 K", "20 K", "40 K", "60 K"],
+        correct: "B"
+      },
+      {
+        number: "Question 113",
+        text: "If 'C_p' and C_v are molar specific heats of an ideal gas at constant pressure and volume respectively, if 'λ' is ratio of two specific heats and 'R' is universal gas constant then 'C_p' is equal to",
+        options: [
+          "Rγ/(γ-1)",
+          "γR",
+          "(1+γ)/(1-γ)",
+          "R/(γ-1)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 114",
+        text: "The equation of state for 2g of oxygen at a pressure 'P' and temperature 'T', when occupying a volume 'V' will be",
+        options: ["pV = 16RT", "pV = RT", "pV = (1/16)RT", "pV = 2RT"],
+        correct: "C"
+      },
+      {
+        number: "Question 115",
+        text: "The speed of oxygen molecule in a gas is u,If the temperature is doubled and the molecule dissociates into two atoms, the speed will be",
+        options: ["4u", "u", "2u", "u√2"],
+        correct: "C"
+      },
+      {
+        number: "Question 116",
+        text: "The molar specific heat of an ideal gas at constant pressure and constant volume is C_p and C_v respectively. If R is the universal gas constant and the ratio of C_p to C_v is γ then C_v =",
+        options: [
+          "(1-γ)/(1+γ)",
+          "(1+γ)/(1-γ)",
+          "(r-1)/R",
+          "R/(γ-1)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 117",
+        text: "For a rigid diatomic molecule, the universal gas constant R = nC_p, where, C_p is the molar specific heat at constant pressure and n is a number. Hence, n is equal to",
+        options: ["0.2257", "0.4", "0.2857", "0.3557"],
+        correct: "C"
+      },
+      {
+        number: "Question 118",
+        text: "For a gas R/C_v = 0.4, where R is the universal gas constant and C_v is the molar specific heat at constant volume. The gas is made up of molecules which are",
+        options: ["rigid diatomic", "monoatomic", "non- rigid diatomic", "polyatomic"],
+        correct: "B"
+      },
+      {
+        number: "Question 119",
+        text: "The pressure exerted by an ideal gas on the walls of a container is",
+        options: [
+          "1/3 of kinetic energy per unit volume of a gas",
+          "2/3 of kinetic energy per unit volume of a gas",
+          "3/4 of kinetic energy per unit volume of a gas",
+          "3/2 × kinetic energy per unit volume of a gas"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 120",
+        text: "KE per unit volume is E. The pressure exerted by the gas is given by",
+        options: ["E/3", "2E/3", "3E/2", "E/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 121",
+        text: "The velocity of 4 gas molecules are given by 1 km/s, 3 km/s, 5 km/s and 7 km/s. Calculate the difference between average and RMS velocity.",
+        options: ["0.338", "0.438", "0.583", "0.683"],
+        correct: "B"
+      },
+      {
+        number: "Question 122",
+        text: "At what temperature rms speed of air molecules is doubled of that at NTP?",
+        options: ["819°C", "719°C", "909°C", "None of these"],
+        correct: "A"
+      },
+      {
+        number: "Question 123",
+        text: "To what temperature should the hydrogen at 327°C be cooled at constant pressure, so that the root mean square velocity of its molecules becomes half of its previous value?",
+        options: ["-123°C", "123°C", "-100°C", "0°C"],
+        correct: "A"
+      },
+      {
+        number: "Question 124",
+        text: "What is an ideal gas?",
+        options: [
+          "One that consists of molecules",
+          "A gas satisfying the assumptions of kinetic theory",
+          "A gas having Maxwellian distribution of speed",
+          "A gas consisting of massless particles"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 125",
+        text: "If in a wire of Young's modulus Y, longitudinal strain X is produced then the potential energy stored in its unit volume will be",
+        options: ["0.5YX²", "0.5Y²X", "2YX²", "YX²"],
+        correct: "A"
+      },
+      {
+        number: "Question 126",
+        text: "An open U-tube contains mercury. When 11.2 cm of water is poured into one of the arms of the tube, how high does the mercury rise in the other arm from its initial unit?",
+        options: ["0.56 cm", "1.35 cm", "0.41 cm", "2.32 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 127",
+        text: "The error in the measurement of length and mass is 3% and 4% respectively. The error in the measurement of density will be",
+        options: ["6%", "13%", "9%", "15%"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const startTime = new Date();
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update progress bar
+      const progressPercent = ((index + 1) / questions.length) * 100;
+      document.getElementById("progress").style.width = `${progressPercent}%`;
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "result.html";
+    }
+
+    renderQuestion(current);
+
+    // Stopwatch Timer ⏱️
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
