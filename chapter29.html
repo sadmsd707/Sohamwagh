@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MHT-CET Physics Quiz</title>
+  <title>MHT-CET Quiz</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -19,13 +19,25 @@
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 20px 25px;
+      position: relative;
     }
     .header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
       font-size: 14px;
       color: #065f46;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
     .question-number {
       font-weight: bold;
@@ -73,33 +85,108 @@
     .btn.right {
       margin-left: auto;
     }
-    .progress-bar {
-      height: 6px;
-      background: #d1fae5;
-      border-radius: 3px;
-      margin: 15px 0;
-      overflow: hidden;
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
     }
-    .progress {
-      height: 100%;
-      background: #047857;
-      border-radius: 3px;
-      transition: width 0.3s ease;
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #047857;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #10b981;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #047857;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
   <div class="quiz-container">
     <div class="header">
-      <div>MHT CET 2025 · Kinetic Theory of Gases</div>
-      <div>⏱️ Time: <span id="timer">00:00</span></div>
+      <div class="header-left">
+        <div>MHT CET 2025 · Units & Measurements</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
     </div>
     
-    <div class="progress-bar">
-      <div class="progress" id="progress"></div>
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
     </div>
 
     <div id="quiz-content"></div>
+    
     <div class="nav-buttons">
       <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
       <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
@@ -1130,7 +1217,9 @@
 
     let current = 0;
     const userAnswers = {};
+    const seenQuestions = new Set(); // Track which questions have been viewed
     const startTime = new Date();
+    let navPanelVisible = false;
 
     function renderQuestion(index) {
       const q = questions[index];
@@ -1150,13 +1239,55 @@
         </div>
       `;
 
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
       document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
       document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
       document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
       
-      // Update progress bar
-      const progressPercent = ((index + 1) / questions.length) * 100;
-      document.getElementById("progress").style.width = `${progressPercent}%`;
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
     }
 
     function nextQuestion() {
@@ -1215,9 +1346,10 @@
       window.location.href = "result.html";
     }
 
+    // Initialize the quiz
     renderQuestion(current);
 
-    // Stopwatch Timer ⏱️
+    // Stopwatch Timer
     let minutes = 0, seconds = 0;
     const timerEl = document.getElementById("timer");
     setInterval(() => {
