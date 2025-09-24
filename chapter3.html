@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #065f46;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #047857;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #ecfdf5;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #bbf7d0;
+      border-left: 4px solid #047857;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #047857;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #065f46;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #047857;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #10b981;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #047857;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Motion</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "A car moving at a speed 'V' is stopped in a certain distance when the breaks produce a deceleration 'a'. If the speed of the car is 'nv', what must be the deceleration of the car to stop it in the same distance and in the same time?",
+        options: ["A) √n · a", "B) n · a", "C) n² · a", "D) n³ · a"],
+        correct: "C"
+      },
+      {
+        number: "Question 02",
+        text: "A boy throws a ball vertically upwards from a bridge with velocity 5 m/s. It strikes water surface after 2 s. The height of the bridge is (Take g = 10 m/s²)",
+        options: ["A) 20 m", "B) 15 m", "C) 12 m", "D) 10 m"],
+        correct: "D"
+      },
+      {
+        number: "Question 03",
+        text: "Two girls are standing at the ends 'A' and 'B' of a ground where AB = b. The girl at 'B' starts running in a direction perpendicular to 'AB' with velocity 'V₁'. The girl at 'A' starts running simultaneously with velocity 'V₂' and in shortest distance meets the other girl in time 't'. The value of 't' is",
+        options: ["A) b/√(V₁² + V₂²)", "B) b/(V₁ + V₂)", "C) b/(V₂ - V₁)", "D) b/√(V₂² - V₁²)"],
+        correct: "D"
+      },
+      {
+        number: "Question 04",
+        text: "Two boys are standing at points A and B on ground, where distance AB = x. The boy at B starts running perpendicular to AB with velocity v₁. The boy at A starts running simultaneously with velocity v and meets the other boy in time t. The value of t is",
+        options: ["A) [x/(v-v₁)]¹ᐟ²", "B) [x/(v₁-v)]¹ᐟ²", "C) [x²/(v²-v₁²)]¹ᐟ²", "D) [x²/(v₁²-v²)]¹ᐟ²"],
+        correct: "C"
+      },
+      {
+        number: "Question 05",
+        text: "A body when projected at an angle 'θ' with the horizontal reaches a maximum height 'H'. The time of flight of the body will be (g = acceleration due to gravity)",
+        options: ["A) ½ √(2H/g)", "B) √(g/2H)", "C) 2 √(2H/g)", "D) √(2H/g)"],
+        correct: "C"
+      },
+      {
+        number: "Question 06",
+        text: "The acceleration (a) - time (T) graph for the body starting from rest is given below. The maximum speed of the body is",
+        options: ["A) 40 m/s", "B) 80 m/s", "C) 160 m/s", "D) 200 m/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 07",
+        text: "At any time 't', the co-ordinates of moving particle are x = at² and y = bt². The speed of the particle is",
+        options: ["A) 2t√(a² + b²)", "B) 2t√(a² - b²)", "C) 2t(a + b)", "D) 2t/√(a² + b²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 08",
+        text: "A body starts from rest and moves with a uniform acceleration. The ratio of the distance covered by the body in the nth second of its motion to the total distance travelled in n second is",
+        options: ["A) 2/n² - 1/n", "B) 2/n - 1/n²", "C) 1/n - 1/n²", "D) 2/n² + 1/n"],
+        correct: "B"
+      },
+      {
+        number: "Question 09",
+        text: "The velocity time graph of a body moving in a straight line is shown in figure. The ratio of displacement to distance travelled by the body in time 0 to 8 s is",
+        options: ["A) 8 : 5", "B) 3 : 5", "C) 5 : 9", "D) 7 : 4"],
+        correct: "C"
+      },
+      {
+        number: "Question 10",
+        text: "A force acting on a body of mass 5 Kg is (4i - 2j + 3k)N. If the body is initially at rest then the magnitude of its velocity at the end of 10 second in m/s will be",
+        options: ["A) 3√35", "B) 2√29", "C) √19", "D) 3√23"],
+        correct: "B"
+      },
+      {
+        number: "Question 11",
+        text: "Two bodies A and B move in same straight line starting from same position. Body A moves with constant velocity 'u' and body B moves with constant acceleration 'a'. When their velocities become equal, the distance between them is",
+        options: ["A) u/2a", "B) u²/4a", "C) u²/a", "D) u²/2a"],
+        correct: "B"
+      },
+      {
+        number: "Question 12",
+        text: "A body travelling with uniform acceleration crosses two points A and B with velocities 20 m/s and 30 m/s respectively. The speed of the body at mid point of A and B is (nearly)",
+        options: ["A) 25 m/s", "B) 25.5 m/s", "C) 24 m/s", "D) 10√6 m/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 13",
+        text: "The co-ordinates of a moving particle at any time 't' are given by x = αt³ and y = βt³ where α and β are constants. The speed of the particle at time 't' is given by",
+        options: ["A) t√(α² + β²)", "B) 3t√(α² + β²)", "C) t²√(α² + β²)", "D) 3t²√(α² + β²)"],
+        correct: "D"
+      },
+      {
+        number: "Question 14",
+        text: "A ball is released from the top of a tower of height H m. It takes T second to reach the ground. The height of the ball from the ground after T/4 second is",
+        options: ["A) 13H/16", "B) 15H/16", "C) 11H/16", "D) 9H/16"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "Two cars start from a point at the same time in a straight line and their positions are represented by x₁(t) = at + bt² and x₂(t) = Ft - t². At what time do the cars have the same velocity?",
+        options: ["A) (a + F)/[2(b - 1)]", "B) (a - F)/(1 + b)", "C) (a + F)/[2(1 + b)]", "D) (F - a)/[2(1 + b)]"],
+        correct: "D"
+      },
+      {
+        number: "Question 16",
+        text: "For the velocity-time graph shown in the figure below, the distance covered by the body in last two second of its motion is 'S₁'. What is the ratio of 'S₁' to the total distance covered by it",
+        options: ["A) 1/2", "B) 1/4", "C) 1/3", "D) 2/3"],
+        correct: "C"
+      },
+      {
+        number: "Question 17",
+        text: "A bullet is fired on a target with velocity V. Its velocity decreases from V to V/2 when it penetrates 30 cm in a target. Through what thickness it will penetrate further in the target before coming to rest?",
+        options: ["A) 5 cm", "B) 8 cm", "C) 10 cm", "D) 12 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 18",
+        text: "A vehicle runs on a straight road of length 'L'. It travels half the distance with speed V and the remaining distance with speed V/3. Its average speed is",
+        options: ["A) 3V/2", "B) V", "C) V/2", "D) 2V/3"],
+        correct: "D"
+      },
+      {
+        number: "Question 19",
+        text: "The following figures show the variation of displacement with time of a particular object. Figure (a) and (b) show object at rest and object moving with uniform velocity in positive x direction respectively.",
+        options: [
+          "A) Figure (b) and (c) show object at rest and object moving with uniform velocity in negative x direction respectively",
+          "B) Figure (c) and (d) show object at rest and object moving with uniform velocity in negative x direction respectively",
+          "C) Figure (a) and (b) show object at rest",
+          "D) All figures show object in motion"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 20",
+        text: "A velocity - time graph of a body is shown below. The distance covered by the body from 6 second to 9 second is",
+        options: ["A) 22.5 m", "B) 60.0 m", "C) 82.5 m", "D) 120.0 m"],
+        correct: "C"
+      },
+      {
+        number: "Question 21",
+        text: "The ratio of weight of a man in a stationery lift and weight when the lift is moving downward with a uniform acceleration 'a' is 3 : 2. Then the value of 'a' is",
+        options: ["A) 3g/2", "B) 8g/3", "C) 2g/3", "D) g"],
+        correct: "C"
+      },
+      {
+        number: "Question 22",
+        text: "Which of the following person is in an inertial frame of reference?",
+        options: [
+          "A) A pilot in an aeroplane which is taking off",
+          "B) A child revolving in a merry-go-round",
+          "C) A driver in a bus which is moving with constant velocity",
+          "D) A man in a train which is slowing down to stop"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 23",
+        text: "For a projectile, the maximum height and horizontal range are same. The angle of projection 'θ' of the projectile is",
+        options: ["A) tan⁻¹(1/2)", "B) tan⁻¹(2)", "C) tan⁻¹(1/4)", "D) tan⁻¹(4)"],
+        correct: "D"
+      },
+      {
+        number: "Question 24",
+        text: "A driver applies the brakes on seeing the red traffic signal 400 m ahead. At the time of applying brakes, the vehicle was moving with 15 m/s and retarding at 0.3 m/s². The distance covered by the vehicle from the traffic light one minute after application of brakes is",
+        options: ["A) 375 m", "B) 360 m", "C) 40 m", "D) 25 m"],
+        correct: "D"
+      },
+      {
+        number: "Question 25",
+        text: "The acceleration of a moving body can be found from",
+        options: [
+          "A) area under velocity - time graph",
+          "B) area under distance - time graph",
+          "C) slope of the velocity - time graph",
+          "D) slope of the distance - time graph"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 26",
+        text: "The position 'x' of a particle varies with a time as x = at² - bt³ where 'a' and 'b' are constants. The acceleration of the particle will be zero at",
+        options: ["A) 2a/3b", "B) a/b", "C) a/3b", "D) Zero"],
+        correct: "C"
+      },
+      {
+        number: "Question 27",
+        text: "A small steel ball is dropped from a height of 1.5 m into a glycerine jar. The ball reaches the bottom of the jar 1.5 s after it was dropped. If the retardation is 2.66 m/s², the height of the glycerine in the jar is about (acceleration due to gravity g = 9.8 m/s²)",
+        options: ["A) 7.0 m", "B) 7.5 m", "C) 5.5 m", "D) 3.2 m"],
+        correct: "D"
+      },
+      {
+        number: "Question 28",
+        text: "Two bodies A and B start from the same point at the same instant and move along a straight line. Body A moves with uniform acceleration a and body B moves with uniform velocity v. They meet after time t. The value of t is",
+        options: ["A) 2v/a", "B) a/2v", "C) v/2a", "D) √(v/a)"],
+        correct: "A"
+      },
+      {
+        number: "Question 29",
+        text: "Which one of the following statements is Wrong?",
+        options: [
+          "A) A body can have zero velocity and still be accelerated",
+          "B) A body can have a constant velocity and still have a varying speed",
+          "C) A body can have a constant speed and still have a varying velocity",
+          "D) The direction of the velocity of a body can change when its acceleration is constant"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 30",
+        text: "A large number of bullets are fired in all directions with same speed 'U'. The maximum area on the ground on which the bullets will spread is",
+        options: ["A) πu²/g", "B) πu⁴/g²", "C) π²u⁴/g²", "D) π²u²/g²"],
+        correct: "B"
+      },
+      {
+        number: "Question 31",
+        text: "A ball is projected vertically upwards from ground. It reaches a height 'h' in time t₁, continues its motion and then takes a time t₂ to reach ground. The height h in terms of g, t₁ and t₂ is (g = acceleration due to gravity)",
+        options: ["A) ½ gt₁/t₂", "B) ½ gt₁t₂", "C) gt₁t₂", "D) 2gt₁t₂"],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "Two cars A and B start from a point at the same time in a straight line and their positions are represented by R_A(t) = at + bt² and R_B(t) = xt - t². At what time do the cars have same velocity?",
+        options: ["A) (x-a)/[2(b+1)]", "B) (x+a)/[2(b-1)]", "C) (x-a)/(b+1)", "D) (x+a)/(b-1)"],
+        correct: "A"
+      },
+      {
+        number: "Question 33",
+        text: "A bullet is fired on a target with velocity 'V'. Its velocity decreases from 'V' to 'V/2' when it penetrates 30 cm in a target. Through what thickness it will penetrate further in the target before coming to rest?",
+        options: ["A) 5 cm", "B) 8 cm", "C) 10 cm", "D) 20 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 34",
+        text: "Two trains, each 30 m long are travelling in opposite directions with velocities 5 m/s and 10 m/s. They will cross after",
+        options: ["A) 4 s", "B) 3 s", "C) 2 s", "D) 1 s"],
+        correct: "C"
+      },
+      {
+        number: "Question 35",
+        text: "A body is released from the top of a tower 'H' metre high. It takes t second to reach the ground. The height of the body t/2 second after release is",
+        options: ["A) H/2 metre from ground", "B) H/4 metre from ground", "C) 3H/4 metre from ground", "D) H/6 metre from ground"],
+        correct: "C"
+      },
+      {
+        number: "Question 36",
+        text: "A shell is fired at an angle of 30° to the horizontal with velocity 196 m/s. The time of flight is [sin 30° = 1/2 = cos 60°]",
+        options: ["A) 6.5 s", "B) 20 s", "C) 16.5 s", "D) 10 s"],
+        correct: "B"
+      },
+      {
+        number: "Question 37",
+        text: "A student is throwing balls vertically upwards such that he throws the 2nd ball when the 1st ball reaches maximum height. If he throws balls at an interval of 3 second, the maximum height of the balls is (g = 10 m/s²)",
+        options: ["A) 45 m", "B) 35 m", "C) 25 m", "D) 30 m"],
+        correct: "A"
+      },
+      {
+        number: "Question 38",
+        text: "A driver applies the brakes on seeing the red traffic signal 400 m ahead. At the time of applying the brakes, the vehicle was moving with 15 m/s and retarding at 0.3 m/s². The distance covered by the vehicle from the traffic light 1 minute after the application of brakes is",
+        options: ["A) 25 m", "B) 360 m", "C) 40 m", "D) 375 m"],
+        correct: "A"
+      },
+      {
+        number: "Question 39",
+        text: "A body at rest falls through a height 'h' with velocity 'V'. If it has to fall down further for its velocity to become three times, the distance travelled in that interval is",
+        options: ["A) 8 h", "B) 6 h", "C) 4 h", "D) 12 h"],
+        correct: "A"
+      },
+      {
+        number: "Question 40",
+        text: "A bomb is dropped by an aeroplane flying horizontally with a velocity 200 km/hr and at a height of 980 m. At the time of dropping a bomb, the distance of the aeroplane from the target on the ground to hit directly is (g = 9.8 m/s²)",
+        options: ["A) (√2 × 10⁴)/9 m", "B) 10⁴/9 m", "C) 10⁴/(9√2) m", "D) 10⁴/18 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "A cricket player hit a ball like a projectile but the fielder caught the ball after 2 second. The maximum height reached by a ball is (g = 10 m/s²)",
+        options: ["A) 2 m", "B) 5 m", "C) 4 m", "D) 3 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 42",
+        text: "Two bodies 'A' and 'B' start from the same point at the same instant and move along a straight line. 'A' moves with uniform acceleration (a) and 'B' moves with uniform velocity (V). They meet after time 't'. The value of 't' is",
+        options: ["A) 2V/a", "B) √(V/a)", "C) a/(2V)", "D) V/(2a)"],
+        correct: "A"
+      },
+      {
+        number: "Question 43",
+        text: "A moving body is covering distances which are proportional to square of the time. Then, the acceleration of the body is",
+        options: ["A) zero", "B) increasing", "C) constant but not zero", "D) decreasing"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "result.html";
+    }
+
+    renderQuestion(current);
+
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
