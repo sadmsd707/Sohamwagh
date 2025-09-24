@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #065f46;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #047857;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .diagram-placeholder {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      text-align: center;
+      color: #64748b;
+      font-style: italic;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #ecfdf5;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #bbf7d0;
+      border-left: 4px solid #047857;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #047857;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #065f46;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #047857;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #10b981;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #047857;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Laws of Motion</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "A ball is dropped on the floor from a height of 20 m. It rebounds to a height of 5 m. Ball remains in contact with floor for 1 s. The average acceleration during contact is (acceleration due to gravity = 10 m/s²)",
+        options: ["A) 30 m/s²", "B) 20 m/s²", "C) 40 m/s²", "D) 35 m/s²"],
+        correct: "A"
+      },
+      {
+        number: "Question 02",
+        text: "A mass 'M' is suspended by a rope from a rigid support at point 'P' as shown in figure. Another rope is tied at end 'Q' and pulled horizontally with a force 'F'. If the rope makes an angle 'θ' with vertical then the tension in the string 'PQ' is",
+        options: ["A) F sin θ", "B) F/sin θ", "C) F cos θ", "D) F/cos θ"],
+        correct: "B",
+        diagram: "Diagram showing mass M hanging from point P, with horizontal force F applied at Q"
+      },
+      {
+        number: "Question 03",
+        text: "A machine gun fires a bullet of mass 35 gram with a speed of 600 m/s. The person holding the gun can extract a maximum force of 147 N on it. The number of bullets that can be fired from the gun per second is",
+        options: ["A) 3", "B) 5", "C) 7", "D) 9"],
+        correct: "C"
+      },
+      {
+        number: "Question 04",
+        text: "The weight of man in a stationary lift is w₁ and when it is moving downwards with uniform acceleration 'a' is w₂. If the ratio w₁ : w₂ = 4 : 3, then the value of 'a' is (g = acceleration due to gravity)",
+        options: ["A) 8g/3", "B) 8g/4", "C) 3g/4", "D) 4g"],
+        correct: "C"
+      },
+      {
+        number: "Question 05",
+        text: "A constant force acts on two different masses independently and produces accelerations A₁ and A₂. When the same force acts on their combined mass, the acceleration produced is",
+        options: ["A) A₁ - A₂", "B) A₁ + A₂", "C) A₁A₂/(A₁ + A₂)", "D) √[(A₁² + A₂²)/2]"],
+        correct: "C"
+      },
+      {
+        number: "Question 06",
+        text: "A conveyor belt is moving with constant velocity (V). Sand is being dropped on the belt at the rate of M kg/s. The force necessary to keep the belt moving with a constant velocity V m/s will be",
+        options: ["A) MV/2 N", "B) 2MV N", "C) Zero N", "D) MV N"],
+        correct: "D"
+      },
+      {
+        number: "Question 07",
+        text: "A child stands on a weighing machine inside a lift. When the lift is going down with acceleration g/3, the machine shows a reading 20 N. When the lift goes upwards with acceleration g/3, the reading would be (g = gravitational acceleration)",
+        options: ["A) 40 N", "B) 30 N", "C) 20 N", "D) 50 N"],
+        correct: "A"
+      },
+      {
+        number: "Question 08",
+        text: "Which one of the following person is in an inertial frame of reference?",
+        options: [
+          "A) A person in a train which is slowing down to stop",
+          "B) A person revolving in a merry-go-round",
+          "C) A person in a bus which is moving with constant velocity",
+          "D) A person in an aeroplane which is taking off"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 09",
+        text: "Force is applied to a body of mass 3 kg at rest on a frictionless horizontal surface as shown in the force against time (F-t) graph. The speed of the body after 1 s is",
+        options: ["A) 8 m/s", "B) 6 m/s", "C) 4 m/s", "D) 2 m/s"],
+        correct: "C",
+        diagram: "Force-time graph showing force of 8N from 0 to 0.5s, then 0N from 0.5 to 1s"
+      },
+      {
+        number: "Question 10",
+        text: "Which one of the following is 'NOT' a contact force?",
+        options: ["A) Force of friction", "B) Normal reaction", "C) Gravitational force", "D) Viscous force"],
+        correct: "C"
+      },
+      {
+        number: "Question 11",
+        text: "Two blocks of masses 6 kg and 4 kg are placed in contact with each other on a smooth surface as shown. If a force of 5 N is applied on a heavier block, the force on the lighter block is",
+        options: ["A) 5N", "B) 4N", "C) 2N", "D) 1N"],
+        correct: "C",
+        diagram: "Diagram showing 6kg and 4kg blocks in contact, with 5N force applied to 6kg block"
+      },
+      {
+        number: "Question 12",
+        text: "The mass of the lift is 200 kg, when it ascends with an acceleration of 4 m/s² then the tension in the cable supporting the lift will be [Given: Acceleration due to gravity g = 10 m/s²]",
+        options: ["A) 800 N", "B) 2800 N", "C) 4200 N", "D) 2000 N"],
+        correct: "B"
+      },
+      {
+        number: "Question 13",
+        text: "Two identical blocks each of mass 'M' attached to the ends of a massless inextensible string which passes over a pulley with a fixed axis as shown below. A small mass 'm' is now placed on the block B. The acceleration with which the two blocks move together is [g = gravitational acceleration]",
+        options: ["A) mg/(2M+m)", "B) Mg/(M+2m)", "C) Mg/(2M+m)", "D) mg/(M+2m)"],
+        correct: "A",
+        diagram: "Diagram showing two blocks M connected by string over pulley, with mass m on one block"
+      },
+      {
+        number: "Question 14",
+        text: "A machine gun fires bullets of mass 30 g with velocity of 1000 m/s. The man holding the gun can exert a maximum force of 300 N on it. How many bullets can he fire per second at most?",
+        options: ["A) 3", "B) 6", "C) 10", "D) 9"],
+        correct: "C"
+      },
+      {
+        number: "Question 15",
+        text: "A spring balance is attached to the ceiling of a lift. A man hangs his bag on the spring and the spring balance reads 49 N, when the lift is stationary. If the lift moves downward with an acceleration of 5 m/s², the reading of the spring balance will be (g = 9.8 m/s²)",
+        options: ["A) 15 N", "B) 24 N", "C) 49 N", "D) 74 N"],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "A door 1.2 m wide requires a force of 1 N to be applied perpendicular at the free end to open or close it. The perpendicular force required at a point 0.2 m distant from the hinges for opening or closing the door is",
+        options: ["A) 3.6 N", "B) 2.4 N", "C) 1.2 N", "D) 6.0 N"],
+        correct: "D"
+      },
+      {
+        number: "Question 17",
+        text: "A spring balance is attached to the ceiling of a lift. A man hangs his bag on the spring and the spring balance reads 49 N, when the lift is stationary. If the lift moves downward with an acceleration of 5 m/s², the reading of the spring balance will be (g = 9.8 m/s²)",
+        options: ["A) 74 N", "B) 15 N", "C) 24 N", "D) 49 N"],
+        correct: "C"
+      },
+      {
+        number: "Question 18",
+        text: "The weight of a man in a lift moving upwards with an acceleration 'a' is 620 N. When the lift moves downwards with the same acceleration, his weight is found to be 340 N. The real weight of the man is",
+        options: ["A) 620 N", "B) 680 N", "C) 380 N", "D) 480 N"],
+        correct: "D"
+      },
+      {
+        number: "Question 19",
+        text: "A block of mass m is moving on rough horizontal surface with momentum p. The coefficient of friction between the block and surface is μ. The distance covered by block before it stops is [g = acceleration due to gravity]",
+        options: ["A) 2μM²g/p²", "B) p/(2μMg)", "C) 2μMg/p", "D) p²/(2μM²g)"],
+        correct: "D"
+      },
+      {
+        number: "Question 20",
+        text: "A body of mass 2 kg is acted upon by two forces each of magnitude 1 N and inclined at 60° with each other. The acceleration of the body in m/s is [cos 60° = 0.5]",
+        options: ["A) √0.75", "B) √0.65", "C) √0.20", "D) √0.35"],
+        correct: "A"
+      },
+      {
+        number: "Question 21",
+        text: "A block of mass M is pulled along a smooth horizontal surface with a rope of mass m by force F. The acceleration of the block will be",
+        options: ["A) F/(M-m)", "B) F/(M+m)", "C) F/m", "D) F/M"],
+        correct: "B"
+      },
+      {
+        number: "Question 22",
+        text: "An aircraft is moving with uniform velocity 150 m/s in the space. If all the forces acting on it are balanced, then it will",
+        options: ["A) keep moving with same velocity", "B) remain floating at its place", "C) escape in space", "D) fall down on earth"],
+        correct: "A"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      
+      // Create diagram placeholder if needed
+      const diagramHTML = q.diagram 
+        ? `<div class="diagram-placeholder">[Diagram: ${q.diagram}]</div>` 
+        : '';
+      
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}${diagramHTML}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "result.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
