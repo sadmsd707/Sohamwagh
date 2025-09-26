@@ -16,150 +16,338 @@
       background: #f5f7fa;
       color: #333;
       line-height: 1.6;
+      overflow-x: hidden;
     }
 
     header {
       background: #2563eb;
       color: white;
-      padding: 15px 50px;
+      padding: 15px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
     }
 
     header h1 {
       font-size: 1.8rem;
+      font-weight: 700;
     }
 
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-    }
-
-    nav ul li a {
-      text-decoration: none;
-      color: white;
-      font-weight: 500;
-    }
-
-    nav ul li a:hover {
-      color: #dbeafe;
-    }
-
-    .logout-btn {
-      background: #dbeafe;
-      color: #1e3a8a;
+    /* Hamburger Menu Styles */
+    .hamburger {
+      background: none;
       border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
       cursor: pointer;
-      font-weight: 500;
-      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    /* Side Navigation Panel */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s ease;
+      z-index: 1000;
+      padding-top: 70px;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
     }
 
     .hero {
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       background: linear-gradient(to right, #2563eb, #1e3a8a);
       color: white;
     }
 
     .hero h2 {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       margin-bottom: 20px;
+      font-weight: 700;
     }
 
     .hero p {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       margin-bottom: 30px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .hero button {
       background: white;
       color: #2563eb;
       border: none;
-      padding: 12px 25px;
-      font-size: 1rem;
-      border-radius: 25px;
+      padding: 14px 30px;
+      font-size: 1.1rem;
+      border-radius: 30px;
       cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
 
     .hero button:hover {
       background: #dbeafe;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     .categories {
-      padding: 50px 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
+      padding: 70px 20px;
       max-width: 1200px;
       margin: auto;
     }
 
+    .categories h2 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+      color: #1e3a8a;
+    }
+
+    .cards-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 25px;
+    }
+
     .card {
       background: white;
-      padding: 25px;
+      padding: 30px;
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       text-align: center;
+      transition: all 0.3s ease;
+      border-top: 4px solid #2563eb;
+      flex: 1;
+      min-width: 250px;
+      max-width: 280px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
 
     .card h3 {
       color: #2563eb;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .card p {
+      color: #555;
+      line-height: 1.6;
     }
 
     footer {
       background: #1e3a8a;
       color: white;
       text-align: center;
-      padding: 20px;
+      padding: 30px;
       margin-top: 50px;
     }
-  </style>
-  <script>
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      window.location.href = "login.html";
+
+    footer p {
+      font-size: 1rem;
     }
 
-    function logout() {
-      localStorage.removeItem("isLoggedIn");
-      window.location.href = "login.html";
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .hero h2 {
+        font-size: 2.2rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .cards-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .card {
+        width: 100%;
+        max-width: 400px;
+      }
     }
-  </script>
+  </style>
 </head>
 <body>
   <header>
     <h1>Soham</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="exam.html">Practice</a></li>
-        <li><a href="scores">Scores</a></li>
-        <li><a href="index.html">Login</a></li>
-      </ul>
-    </nav>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </header>
+
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="exam.html">Practice</a></li>
+      <li><a href="scores.html">Scores</a></li>
+      <li><a href="board-preparation.html">Board Preparation</a></li>
+      <li><a href="about-us.html">About Us</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
 
   <section class="hero">
     <h2>Prepare Smarter for Your Entrance Exams</h2>
-    <p>Practice MCQs, track your progress, and boost your performance.</p>
-    <button onclick="window.location.href='exam.html'">Start Practicing</button>
+    <p>Practice MCQs, track your progress, and boost your performance with our comprehensive exam preparation platform.</p>
+    <button onclick="window.location.href='exam.html'">Start Practicing Now</button>
   </section>
 
   <section class="categories">
-    <div class="card">
-      <h3>Physics</h3>
-      <p>Practice questions from mechanics, optics, thermodynamics, and other important topics.</p>
+    <h2>Subjects</h2>
+    <div class="cards-container">
+      <div class="card">
+        <h3>Physics</h3>
+        <p>Practice questions from mechanics, optics, thermodynamics, and other important topics. Our physics section covers all key concepts with detailed explanations.</p>
+      </div>
+      <div class="card">
+        <h3>Chemistry</h3>
+        <p>Sharpen your knowledge in organic, inorganic, and physical chemistry with tailored quizzes. Master chemical reactions and equations with ease.</p>
+      </div>
+      <div class="card">
+        <h3>Mathematics</h3>
+        <p>Test your problem-solving skills with MCQs from algebra, geometry, calculus, and statistics. Build strong mathematical foundations.</p>
+      </div>
+      <div class="card">
+        <h3>Biology</h3>
+        <p>Explore life sciences with comprehensive questions on botany, zoology, genetics, and human physiology. Perfect for medical entrance exams.</p>
+      </div>
     </div>
-    <div class="card">
-      <h3>Chemistry</h3>
-      <p>Sharpen your knowledge in organic, inorganic, and physical chemistry with tailored quizzes.</p>
-    </div>
-    <div class="card">
-      <h3>Mathematics</h3>
-      <p>Test your problem-solving skills with MCQs from algebra, geometry, calculus.
+  </section>
 
+  <footer>
+    <p>&copy; 2023 Soham - Entrance Exam Practice. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Check if user is logged in
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      window.location.href = "login.html";
+    }
+
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
