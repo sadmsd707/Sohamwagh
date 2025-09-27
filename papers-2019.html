@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Papers - 2019</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f8fafc;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 15px 40px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      bottom: -40px;
+      background: #1e40af;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .back-btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+    }
+
+    .page-title {
+      text-align: center;
+      padding: 60px 20px 30px;
+      color: #1e3a8a;
+    }
+
+    .page-title h2 {
+      font-size: 2.5rem;
+    }
+
+    .subjects-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 50px;
+    }
+
+    .subject-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-left: 5px solid #1e40af;
+      transition: transform 0.2s;
+    }
+
+    .subject-box:hover {
+      transform: translateY(-3px);
+    }
+
+    .subject-box h3 {
+      font-size: 1.2rem;
+      color: #1e3a8a;
+    }
+
+    .view-btn {
+      padding: 8px 18px;
+      background: #1e40af;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+
+    .view-btn:hover {
+      background: #3b82f6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #1e3a8a;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .subject-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .view-btn {
+        align-self: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Soham</h1>
+    <a href="previous-papers.html" class="back-btn">⬅ Back</a>
+  </header>
+
+  <section class="page-title">
+    <h2>2019 Papers</h2>
+  </section>
+
+  <section class="subjects-container">
+
+    <div class="subject-box">
+      <h3>Marathi</h3>
+      <a class="view-btn" href="marathi-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>English</h3>
+      <a class="view-btn" href="english-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>AST (Applied Science & Tech)</h3>
+      <a class="view-btn" href="ast-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>Mathematics & Statistics</h3>
+      <a class="view-btn" href="maths-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>Physics</h3>
+      <a class="view-btn" href="physics-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>Chemistry</h3>
+      <a class="view-btn" href="chemistry-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+    <div class="subject-box">
+      <h3>Biology</h3>
+      <a class="view-btn" href="bio-2019.pdf" target="_blank">View Paper</a>
+    </div>
+
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Soham. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
