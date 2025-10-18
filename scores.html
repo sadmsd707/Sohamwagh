@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Scores</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 15px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav ul li a:hover {
+      color: #dbeafe;
+    }
+
+    .logout-btn {
+      background: #dbeafe;
+      color: #1e3a8a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-left: 20px;
+      transition: background 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #bfdbfe;
+    }
+
+    .scores-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .scores-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .scores-header h2 {
+      color: #1e3a8a;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .scores-header p {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+
+    .subject-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .subject-tab {
+      background: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .subject-tab.active {
+      background: #2563eb;
+      color: white;
+    }
+
+    .subject-tab:hover:not(.active) {
+      background: #dbeafe;
+    }
+
+    .test-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+    }
+
+    .test-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .test-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .test-title {
+      font-size: 1.3rem;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    .test-date {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .score-display {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #1e3a8a;
+      border: 3px solid #bfdbfe;
+    }
+
+    .score-details {
+      flex: 1;
+    }
+
+    .score-details p {
+      margin-bottom: 5px;
+      color: #64748b;
+    }
+
+    .score-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .score-progress {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .test-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .review-btn {
+      background: #dbeafe;
+      color: #1e3a8a;
+    }
+
+    .review-btn:hover {
+      background: #bfdbfe;
+    }
+
+    .retake-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .retake-btn:hover {
+      background: #1e3a8a;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      grid-column: 1 / -1;
+    }
+
+    .no-results p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .start-practice-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .start-practice-btn:hover {
+      background: #1e3a8a;
+    }
+
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+    }
+
+    /* Detailed Result Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 15px;
+    }
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin: 0;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748b;
+      transition: color 0.3s ease;
+    }
+    .close-btn:hover {
+      color: #374151;
+    }
+
+    /* Your Layout Styles */
+    .result-container {
+      max-width: 700px;
+      margin: auto;
+    }
+    .result-header {
+      background: #047857;
+      color: rgb(255, 255, 255);
+      padding: 15px;
+      border-radius: 8px 8px 0 0;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .result-card {
+      background: white;
+      padding: 20px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .score-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .score-box {
+      background: #fef3c7;
+      color: #b45309;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .chart-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    .pie-chart {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      position: relative;
+      background: #d1d5db;
+    }
+    .pie-chart::after {
+      content: '';
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      width: 50%;
+      height: 50%;
+      background: white;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    .chart-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .chart-labels .correct-label {
+      background: #10b981;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .chart-labels .wrong-label {
+      background: #ef4444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .stat-box {
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .stat-box.attempted { 
+      border-left: 4px solid #8b5cf6; 
+      background: #ede9fe; 
+      color: #4c1d95; 
+    }
+    .stat-box.unattempted { 
+      border-left: 4px solid #6366f1; 
+      background: #eef2ff; 
+      color: #3730a3; 
+    }
+    .stat-box.accuracy { 
+      border-left: 4px solid #f59e0b; 
+      background: #fef3c7; 
+      color: #92400e; 
+    }
+    .stat-box.time { 
+      border-left: 4px solid #0ea5e9; 
+      background: #e0f2fe; 
+      color: #075985; 
+    }
+    .stat-box.negative { 
+      border-left: 4px solid #dc2626; 
+      background: #fee2e2; 
+      color: #991b1b; 
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .grid button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: default;
+      transition: transform 0.2s ease;
+    }
+    .correct {
+      background: #10b981;
+      color: white;
+    }
+    .wrong {
+      background: #ef4444;
+      color: white;
+      border: 2px solid #dc2626;
+      font-weight: 700;
+      transform: scale(1.05);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    .unattempted {
+      background: #d1d5db;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      nav ul {
+        gap: 10px;
+      }
+      
+      .test-results {
+        grid-template-columns: 1fr;
+      }
+      
+      .test-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .modal-content {
+        padding: 15px;
+      }
+      
+      .score-display {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .score-circle {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      .score-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="exam.html">Practice</a></li>
+        <li><a href="#" style="color: #dbeafe;">Scores</a></li>
+        <li><a href="index.html">Login</a></li>
+      </ul>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <section class="scores-container">
+    <div class="scores-header">
+      <h2>Your MHT-CET Test Results</h2>
+      <p>Review your past performance and track your progress</p>
+    </div>
+
+    <div class="subject-tabs">
+      <div class="subject-tab active" onclick="filterTests('all')">All Subjects</div>
+      <div class="subject-tab" onclick="filterTests('physics')">Physics</div>
+      <div class="subject-tab" onclick="filterTests('chemistry')">Chemistry</div>
+      <div class="subject-tab" onclick="filterTests('mathematics')">Mathematics</div>
+    </div>
+
+    <div class="test-results" id="testResults">
+      <!-- Test results will be dynamically inserted here -->
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2023 Soham - MHT-CET Exam Practice. All rights reserved.</p>
+  </footer>
+
+  <!-- Detailed Result Modal -->
+  <div class="modal" id="resultModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">MHT-CET Test Result</h2>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      
+      <div id="modalContent">
+        <!-- Detailed result content will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentScoreIndex = 0;
+    let currentQuestionIndex = 0;
+
+    // Check if user is logged in
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      window.location.href = "login.html";
+    }
+
+    // Function to get saved test results
+    function getSavedTests() {
+      const savedTests = [];
+      
+      // Get all keys from localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        
+        // Check if key is a quiz result
+        if (key && key.startsWith("quizResults")) {
+          try {
+            const testData = JSON.parse(localStorage.getItem(key));
+            if (testData && testData.total) {
+              // Add timestamp and subject if missing
+              if (!testData.timestamp) {
+                testData.timestamp = new Date().toISOString();
+              }
+              if (!testData.subject) {
+                testData.subject = "physics"; // Default subject
+              }
+              if (!testData.title) {
+                testData.title = "MHT-CET Quiz";
+              }
+              
+              savedTests.push({
+                id: key,
+                ...testData
+              });
+            }
+          } catch (e) {
+            console.error("Error parsing test data:", e);
+          }
+        }
+      }
+      
+      return savedTests;
+    }
+
+    // Function to filter tests by subject
+    function filterTests(subject) {
+      // Update active tab
+      document.querySelectorAll('.subject-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Filter tests
+      const savedTests = getSavedTests();
+      let filteredTests = subject === 'all' 
+        ? savedTests 
+        : savedTests.filter(test => test.subject === subject);
+      
+      // Display filtered tests
+      displayTests(filteredTests);
+    }
+
+    // Function to display tests
+    function displayTests(tests) {
+      const testResultsContainer = document.getElementById('testResults');
+      
+      if (tests.length === 0) {
+        testResultsContainer.innerHTML = `
+          <div class="no-results">
+            <p>No test results found for this subject.</p>
+            <button class="start-practice-btn" onclick="window.location.href='exam.html'">Start Practicing</button>
+          </div>
+        `;
+        return;
+      }
+      
+      testResultsContainer.innerHTML = tests.map((test, index) => {
+        // Calculate wrong count
+        const wrong = test.details ? test.details.filter(q => q.userAns !== "Not Answered" && !q.isCorrect).length : 0;
+        
+        // Determine color based on score
+        let progressColor;
+        if (test.accuracy >= 80) progressColor = '#10b981'; // Green
+        else if (test.accuracy >= 60) progressColor = '#f59e0b'; // Yellow
+        else progressColor = '#ef4444'; // Red
+        
+        // Format date
+        const date = new Date(test.timestamp);
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        return `
+          <div class="test-card">
+            <div class="test-header">
+              <div class="test-title">${test.title}</div>
+              <div class="test-date">${formattedDate}</div>
+            </div>
+            
+            <div class="score-display">
+              <div class="score-circle">${test.accuracy}%</div>
+              <div class="score-details">
+                <p>${test.correct}/${test.total} correct answers</p>
+                <p>Time spent: ${test.time || 'N/A'}</p>
+                <div class="score-bar">
+                  <div class="score-progress" style="width: ${test.accuracy}%; background: ${progressColor};"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="test-actions">
+              <button class="action-btn review-btn" onclick="viewDetailedResult('${test.id}')">Review Answers</button>
+              <button class="action-btn retake-btn" onclick="retakeTest('${test.id}')">Retake Test</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Function to view detailed result
+    function viewDetailedResult(testId) {
+      const testData = JSON.parse(localStorage.getItem(testId));
+      if (!testData) return;
+      
+      // Calculate additional stats
+      const wrong = testData.details.filter(q => q.userAns !== "Not Answered" && !q.isCorrect).length;
+      const unattempted = testData.details.filter(q => q.userAns === "Not Answered").length;
+      const attempted = testData.total - unattempted;
+      
+      // Calculate percentages for pie chart
+      const correctPercent = (testData.correct / testData.total) * 100;
+      const wrongPercent = (wrong / testData.total) * 100;
+      
+      // Format timestamp
+      const date = new Date(testData.timestamp);
+      const formattedDate = date.toLocaleString('en-IN', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      document.getElementById('modalTitle').textContent = `${testData.title || 'MHT-CET Quiz'} - Detailed Result`;
+      
+      document.getElementById('modalContent').innerHTML = `
+        <div class="result-container">
+          <div class="result-header">${testData.title || 'MHT-CET Quiz'}</div>
+          <div class="result-card">
+            <p><strong>Test taken on:</strong> ${formattedDate}</p>
+            <div class="score-section">
+              <div class="score-box">${testData.correct} / ${testData.total}</div>
+              <div class="chart-wrapper">
+                <div class="pie-chart" style="background: conic-gradient(
+                  #10b981 0% ${correctPercent}%,
+                  #ef4444 ${correctPercent}% ${correctPercent + wrongPercent}%,
+                  #d1d5db ${correctPercent + wrongPercent}% 100%
+                );"></div>
+                <div class="chart-labels">
+                  <div class="correct-label">Correct: ${testData.correct}</div>
+                  <div class="wrong-label">Wrong: ${wrong}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-box attempted">Attempted<br>${attempted} / ${testData.total}</div>
+              <div class="stat-box unattempted">Unattempted<br>${unattempted}</div>
+              <div class="stat-box accuracy">Accuracy<br>${testData.accuracy}%</div>
+              <div class="stat-box time">Time<br>${testData.time || 'N/A'}</div>
+              <div class="stat-box negative">Negative Marks<br>0.0 / ${testData.total.toFixed(1)}</div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <h3>Question Grid</h3>
+            <div class="grid" id="questionGrid">
+              ${testData.details.map((res, i) => {
+                let className = '';
+                if (res.userAns === "Not Answered") {
+                  className = 'unattempted';
+                } else if (res.isCorrect) {
+                  className = 'correct';
+                } else {
+                  className = 'wrong';
+                }
+                return `<button class="${className}">${i + 1}</button>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('resultModal').style.display = 'flex';
+    }
+
+    // Function to retake a test
+    function retakeTest(testId) {
+      if (confirm("Are you sure you want to retake this test?")) {
+        alert(`Starting test - This would redirect to the test page in a real application`);
+        // In a real app, this would redirect to the test page
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('resultModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('resultModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Initialize the page with all tests
+    window.onload = function() {
+      const savedTests = getSavedTests();
+      displayTests(savedTests);
+    };
+  </script>
+</body>
+</html>
