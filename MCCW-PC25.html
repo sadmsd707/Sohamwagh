@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Save notification */
+    .save-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #3b82f6;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Ray Optics</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <!-- Save notification -->
+  <div class="save-notification" id="saveNotification">
+    <span>Results saved successfully!</span>
+    <button onclick="hideNotification()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 1",
+        text: "Three immiscible transparent liquids with refractive indices 3/2, 4/3 and 6/5 are arranged one above the other in a container. The depths of the liquids are 3 cm, 4 cm and 6 cm respectively. The apparent depth of the vessel is",
+        options: ["7 cm", "8 cm", "9 cm", "10 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 2",
+        text: "Resolving power of a telescope can be increased by increasing",
+        options: ["the focal length of eye-piece", "the wavelength of light", "the diameter of eyepiece", "the diameter of the objective"],
+        correct: "D"
+      },
+      {
+        number: "Question 3",
+        text: "Convex lens of focal length 1/3 m forms a real, inverted image twice in size of the object. The distance of the object from the lens is",
+        options: ["0.5 m", "0.25 m", "0.75 m", "1 m"],
+        correct: "A"
+      },
+      {
+        number: "Question 4",
+        text: "Refractive index of a glass convex lens is 1.5. The radius of curvature of each of the two surfaces of the lens is 40 cm. The ratio of the power of the lens when immersed in a liquid of refractive index 1.25 to that when placed in air is",
+        options: ["1:2", "1:3", "1:4", "1:5"],
+        correct: "C"
+      },
+      {
+        number: "Question 5",
+        text: "A monochromatic ray of light is incident normally on a thin prism of refracting angle A. The ray is deviated through an angle (1.15)° in passing through the prism. The ray reflected internally from the second face emerges from the first face making an angle of (6.3)° with the incident ray. The refractive index of the prism is",
+        options: ["1.5", "1.6", "1.7", "1.8"],
+        correct: "A"
+      },
+      {
+        number: "Question 6",
+        text: "A glass cube of length 21 cm has a small air bubble trapped inside. When viewed normally from one face, its apparent distance is 8 cm. When viewed normally from the opposite face, its apparent distance is 6 cm. The refractive index of the glass and the actual distance of the air bubble from the first surface respectively are:",
+        options: ["1.5, 12 cm", "1.6, 10 cm", "1.7, 9 cm", "1.8, 11 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 7",
+        text: "The image of an object approaching a convex mirror of radius of curvature 20 m along its optical axis is observed to move from 25/3 m to 50/7 m in 30 second. The speed of the object in km/hr is",
+        options: ["2", "3", "4", "5"],
+        correct: "B"
+      },
+      {
+        number: "Question 8",
+        text: "A convex lens of refractive index 1.5 has power 3D. It is placed in a liquid of refractive index 2. The new power of the lens is",
+        options: ["1.5 D", "-1.5 D", "2 D", "-2 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 9",
+        text: "A ray of light is incident on first face of an equilateral glass prism at an angle of incidence 'i'. The emergent ray just grazes along the adjacent face. The refractive index of the prism is √2. The value of angle of incidence at first face is (sin 45° = 1/√2, sin 90° = 1)",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "B"
+      },
+      {
+        number: "Question 10",
+        text: "A concave lens (refractive index = 1.5) has both surfaces of same radius of curvature R. If it is immersed in a liquid of refractive index 1.75 it will act as a",
+        options: ["convex lens of focal length (3.5)R", "concave lens of focal length 2R", "concave lens of focal length (3.5)R", "convex lens of focal length 2R"],
+        correct: "D"
+      },
+      {
+        number: "Question 11",
+        text: "A ray of light travelling through rarer medium is incident at a very small angle 'i' on a glass slab and after refraction its velocity is reduced by 20%. The angle of deviation is",
+        options: ["i/4", "i/5", "i/6", "i/8"],
+        correct: "B"
+      },
+      {
+        number: "Question 12",
+        text: "A plano convex lens fits exactly in to a plano concave lens. Their plane surfaces are parallel to each other. Lenses are made up of different materials of refractive indices 'n1' and 'n2' and 'R' is the radius of curvature of the curved surface of lenses. Focal length of the combination is",
+        options: ["R/(n2 - n1)", "R/(n1 - n2)", "2R/(n2 - n1)", "2R/(n1 - n2)"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "The phenomenon, which is not due to total internal reflection is",
+        options: ["difference between apparent and real depth of a pond", "brilliance of diamond", "working of optical fibre", "mirage on hot summer days"],
+        correct: "A"
+      },
+      {
+        number: "Question 14",
+        text: "An achromatic convergent doublet of two lenses in contact has a power +2 D. The convex lens has power +5 D. The ratio of the dispersive powers of the convergent and divergent lenses is (in magnitude)",
+        options: ["2:3", "3:2", "5:3", "3:5"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "The length of the compound microscope is 15 cm. The magnifying power for relaxed eye is 25. If the focal length of eye lens is 6 cm then the object distance for objective lens will be",
+        options: ["1.2 cm", "1.5 cm", "2.0 cm", "2.5 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "A convex lens of focal length 1/3 m forms a real, inverted image twice the size of the object. The distance of the object from the lens is",
+        options: ["0.5 m", "0.25 m", "0.75 m", "1 m"],
+        correct: "A"
+      },
+      {
+        number: "Question 17",
+        text: "For a thin prism, δ1 is the angle of deviation produced, when prism is placed in air. When the prism is immersed in water, the angle of deviation produced is δ2. Given aμg = 3/2 and aμw = 4/3. The ratio δ2:δ1 is",
+        options: ["1:4", "1:2", "2:1", "4:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 18",
+        text: "An optician makes spectacles having a combination of a convex lens of focal length 40 cm in contact with a concave lens of focal length 25 cm. The power of this combination of lenses in dioptre is",
+        options: ["-1.5 D", "+1.5 D", "-6.5 D", "+6.5 D"],
+        correct: "A"
+      },
+      {
+        number: "Question 19",
+        text: "A ray of light travelling through a rarer medium is incident at very small angle 'i' on a glass slab and after refraction its velocity is reduced by 25%. The angle of deviation is",
+        options: ["i/3", "i/4", "i/5", "i/6"],
+        correct: "B"
+      },
+      {
+        number: "Question 20",
+        text: "A plane mirror is placed at the bottom of a tank containing a liquid of refractive index 'μ', 'p' is a small object at a height 'h' above the mirror. An observer 'O' vertically above 'p' outside the liquid sees 'p' and the image in a mirror. The apparent distance between these two will be",
+        options: ["2h/μ", "2hμ", "h/μ", "hμ"],
+        correct: "A"
+      },
+      {
+        number: "Question 21",
+        text: "Optical path of a particular ray of light has travelled a distance of 3 cm in flint glass is same as that on travelling a distance 'x' cm through another medium. The value of 'x' is [refractive index of flint glass = 1.6, refractive index of another medium = 1.25]",
+        options: ["2.4 cm", "3.84 cm", "4.8 cm", "6.0 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 22",
+        text: "The angle of incidence is found to be twice the angle of refraction when ray of light passes from vacuum into a medium of refractive index 'μ'. The angle of incidence will be",
+        options: ["cos⁻¹(μ/2)", "2 cos⁻¹(μ/2)", "sin⁻¹(μ/2)", "2 sin⁻¹(μ/2)"],
+        correct: "B"
+      },
+      {
+        number: "Question 23",
+        text: "A glass slab of thickness 4.8 cm is placed on the piece of paper on which an ink dot is marked. By how much distance would an ink dot appear to be raised? (The refractive index of glass = 1.5)",
+        options: ["1.2 cm", "1.6 cm", "2.4 cm", "3.2 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 24",
+        text: "A glass prism 'A' deviates the red and blue rays through 10° and 12° respectively. A second prism 'B' deviates them through 8° and 10° respectively. The ratio of their dispersive powers is (A to B)",
+        options: ["5:4", "4:5", "3:4", "4:3"],
+        correct: "A"
+      },
+      {
+        number: "Question 25",
+        text: "For a symmetric (equilateral) prism, the prism formula can be written as",
+        options: ["μ = sin[(A+δ)/2]/sin(A/2)", "μ = sin[(A+δ)/2]/cos(A/2)", "μ = cos[(A+δ)/2]/sin(A/2)", "μ = cos[(A+δ)/2]/cos(A/2)"],
+        correct: "A"
+      },
+      {
+        number: "Question 26",
+        text: "For a ray of light, the critical angle is minimum, when it travels from",
+        options: ["glass to water", "glass to air", "water to air", "diamond to air"],
+        correct: "D"
+      },
+      {
+        number: "Question 27",
+        text: "Critical angle of light passing from glass to air is minimum for wavelength of",
+        options: ["red light", "yellow light", "green light", "violet light"],
+        correct: "D"
+      },
+      {
+        number: "Question 28",
+        text: "A vessel is filled with two different liquids which do not mix. One is 40 cm deep and has refractive index 1.6 and other is 30 cm deep and has refractive index 1.5. The apparent depth of vessel when viewed normally is",
+        options: ["45 cm", "50 cm", "55 cm", "60 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 29",
+        text: "An ink mark is made on a piece of paper. A glass slab of thickness 't' is placed on it. The ink mark appears to be raised up through a distance 'x' when viewed at nearly normal incidence. If the refractive index of material of glass slab is 'μ' then thickness of glass slab 't' is given by",
+        options: ["t = x(μ - 1)/μ", "t = xμ/(μ - 1)", "t = x(μ - 1)", "t = x/μ"],
+        correct: "B"
+      },
+      {
+        number: "Question 30",
+        text: "For a light ray to undergo total internal reflection (i = angle of incidence, ic = critical angle)",
+        options: ["i > ic", "i < ic", "i = ic", "i = 0"],
+        correct: "A"
+      },
+      {
+        number: "Question 31",
+        text: "When the same monochromatic ray of light travels through glass slab and through water, the number of waves in glass slab of thickness 5 cm is same as in water column of height 6 cm. If refractive index of glass is 1.56, then refractive index of water is",
+        options: ["1.2", "1.3", "1.4", "1.5"],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "A convex lens of focal length 40 cm is in contact with a concave lens of focal length 25 cm. The power of combination is",
+        options: ["-1.5 D", "+1.5 D", "-6.5 D", "+6.5 D"],
+        correct: "A"
+      },
+      {
+        number: "Question 33",
+        text: "In compound microscope, the focal length and the aperture of the objective used is respectively",
+        options: ["small, small", "small, large", "large, small", "large, large"],
+        correct: "B"
+      },
+      {
+        number: "Question 34",
+        text: "A ray of light is incident on a medium of refractive index 'μ' at an angle of incidence 'i'. On refraction in the medium 'δ' is the angle of deviation. Then",
+        options: ["δ = i - r", "δ = i + r", "δ = r - i", "δ = π/2 - i"],
+        correct: "A"
+      },
+      {
+        number: "Question 35",
+        text: "Simple microscope is used to see the object first in blue light and then a red light. Due to the change from blue to red light, its magnifying power",
+        options: ["increases", "decreases", "remains same", "becomes zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 36",
+        text: "Concave and convex lenses are placed touching each other. The ratio of magnitudes of their power is 2:3. The focal length of the system is 30 cm. The focal lengths of individual lens are",
+        options: ["-15 cm, 10 cm", "-10 cm, 15 cm", "-20 cm, 30 cm", "-30 cm, 20 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 37",
+        text: "Three immiscible transparent liquids with uniform refractive indices 3/2, 4/3 and 6/5 are arranged one on top of another. The depths of the liquids are 3 cm, 4 cm and 6 cm respectively. The apparent depth of the vessel is",
+        options: ["7 cm", "8 cm", "9 cm", "10 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 38",
+        text: "Velocity of light in diamond is (5/12)th times that in air. Velocity of light in water is (3/4)th times that in air. The angle of incidence of ray of light travelling from water to diamond is (angle of refraction (r) = 30°) [Given → sin 30° = 1/2]",
+        options: ["45°", "60°", "30°", "90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 39",
+        text: "A point object kept at P in front of a glass sphere of radius 'R' has its image formed at Q such that PO = QO. The refractive index of material of glass sphere is 1.4. The distance PO is equal to",
+        options: ["R", "2R", "3R", "4R"],
+        correct: "B"
+      },
+      {
+        number: "Question 40",
+        text: "A convex lens of refractive index 3/2 has a power 2.5. If it is placed in a liquid of refractive index 2, the new power of the lens is",
+        options: ["-2.5 D", "-5 D", "5 D", "2.5 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "Some water is filled in a container of height 30 cm. If it is to appear half filled to the observer when viewed from the top of the container, the height upto which water should be filled in it, is [Refractive index of water = 4/3]",
+        options: ["10 cm", "12 cm", "15 cm", "20 cm"],
+        correct: "D"
+      },
+      {
+        number: "Question 42",
+        text: "In an equilateral prism the ray undergoes minimum deviation when it is incident at an angle of 50°. The angle of minimum deviation is",
+        options: ["40°", "50°", "60°", "70°"],
+        correct: "A"
+      },
+      {
+        number: "Question 43",
+        text: "A person is observing a bacteria through a compound microscope. For better analysis and to improve the resolving power he should",
+        options: ["increase the wavelength of light", "increase the refractive index of the medium between the object and objective lens", "decrease the diameter of the objective lens", "decrease the focal length of the eye-piece"],
+        correct: "B"
+      },
+      {
+        number: "Question 44",
+        text: "A ray of light is incident normally on a glass slab of thickness 5 cm and refractive index 1.6. The time taken to travel by a ray from source of light to surface of slab is same as to travel through glass slab. The distance of source from the surface is",
+        options: ["3.125 cm", "6.25 cm", "8 cm", "10 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 45",
+        text: "Focal length of objective of an astronomical telescope is 1.5 m. Under normal adjustment, length of telescope is 1.56 m. Focal length of the eyepiece is",
+        options: ["0.06 m", "0.6 m", "6 cm", "60 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 46",
+        text: "White light is incident on the interface of glass and air as shown in figure. If green light is just totally internally reflected, then reflected rays inside the glass contain",
+        options: ["yellow, orange, red", "violet, indigo, blue", "all colours except green", "green, yellow, orange"],
+        correct: "A"
+      },
+      {
+        number: "Question 47",
+        text: "A convex lens of focal length 'f' produces a real image whose size is 'n' times the size of an object. The distance of the object from the lens is",
+        options: ["(n+1)f/n", "(n-1)f/n", "f(n+1)/n", "f(n-1)/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 48",
+        text: "A convex lens of focal length 'f' m forms a real, inverted image twice in size of the object. The object distance from the lens in metre is",
+        options: ["f/2", "3f/2", "2f/3", "3f"],
+        correct: "B"
+      },
+      {
+        number: "Question 49",
+        text: "A ray of light is incident at 60° on one face of a prism of angle 30° and the emergent ray makes 30° with the incident ray. The refractive index of the prism is (sin 30° = 0.5, sin 60° = √3/2)",
+        options: ["√2", "√3", "2", "3/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 50",
+        text: "A concave mirror of focal length 'f' produces an image 'n' time the size of the object. If the image is real, then the distance of the object from the mirror is",
+        options: ["(n+1)f/n", "(n-1)f/n", "f(n+1)/n", "f(n-1)/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 51",
+        text: "The focal length of combination of lenses formed with lenses having power of +2.50D and -3.75D, will be",
+        options: ["-80 cm", "80 cm", "-20 cm", "20 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 52",
+        text: "Two points separated by a distance of 0.1 mm can just be seen in microscope when light of wavelength 6000Å is used. If the light of wavelength 4800Å is used, the limit of resolution will become",
+        options: ["0.08 mm", "0.10 mm", "0.12 mm", "0.15 mm"],
+        correct: "A"
+      },
+      {
+        number: "Question 53",
+        text: "Two thin lenses have a combined power of +9 D. When they are separated by a distance of 20 cm, their equivalent power becomes +27/5 D. The power of both the lenses in dioptre are respectively",
+        options: ["+5 D, +4 D", "+6 D, +3 D", "+7 D, +2 D", "+8 D, +1 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 54",
+        text: "A plane mirror produces a magnification of",
+        options: ["+1", "-1", "0", "∞"],
+        correct: "A"
+      },
+      {
+        number: "Question 55",
+        text: "The telescopes, for a given wavelength, the objectives with large aperture are used for",
+        options: ["ease of manufacture", "reducing lens aberration", "greater resolution", "greater magnification"],
+        correct: "C"
+      },
+      {
+        number: "Question 56",
+        text: "Refractive index of a glass convex lens is 1.5. The radius of curvature of each of the two surfaces of the lens is 20 cm. The ratio of the power of the lens when immersed in a liquid of refractive index 1.25 to that when placed in air is",
+        options: ["1:2", "1:3", "1:4", "1:5"],
+        correct: "C"
+      },
+      {
+        number: "Question 57",
+        text: "When a monochromatic ray of light is passed through an equilateral glass prism, it is found that the refracted ray in glass is parallel to the base of the prism. If 'i' and 'e' denote the angles of incidence and emergence respectively, then",
+        options: ["i = e", "i = 2e", "2i = e", "i + e = 90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 58",
+        text: "A combination of two thin lenses in contact have power +10D. The power reduces to +6D when the lenses are 0.25 m apart. The power of individual lens is",
+        options: ["+4 D, +6 D", "+5 D, +5 D", "+3 D, +7 D", "+2 D, +8 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 59",
+        text: "The angle of deviation produced by a thin prism when placed in air is 'δ1' and that when immersed in water is 'δ2'. The refractive index of glass and water are 3/2 and 4/3 respectively. The ratio δ1:δ2 is",
+        options: ["4:1", "1:4", "8:1", "1:8"],
+        correct: "A"
+      },
+      {
+        number: "Question 60",
+        text: "A ray of light passes through an equilateral prism such that the angle of incidence (i) is equal to angle of emergence (e). The angle of emergence is equal to (3/4)th the angle of prism. The angle of deviation is",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 61",
+        text: "The radii of curvature of both the surfaces of a convex lens of focal length 'f' and focal power 'P' are equal. One of the surfaces is made plane by grinding. The new focal length and focal power of the lens is",
+        options: ["2f, P/2", "f/2, 2P", "f, P", "4f, P/4"],
+        correct: "A"
+      },
+      {
+        number: "Question 62",
+        text: "Array of light is incident at an angle of incidence 'i' on one surface of a prism of small angle A and emerges normally from the other surface. If the refractive index of the material of the prism is 'μ', then the angle of incidence is equal to",
+        options: ["μA", "A/μ", "A", "(μ-1)A"],
+        correct: "A"
+      },
+      {
+        number: "Question 63",
+        text: "A glass prism deviates the red and violet rays through 9° and 11° respectively. A second prism of equal angle deviates them through 11° and 13° respectively. The ratio of dispersive power of second prism to first prism is",
+        options: ["1:1", "2:1", "1:2", "3:2"],
+        correct: "A"
+      },
+      {
+        number: "Question 64",
+        text: "An ink mark is made on a piece of paper on which a glass slab of thickness 't' is placed. The ink mark appears to be raised up through a distance 'x' when viewed at nearly normal incidence. If the refractive index of the material of glass slab is 'μ' then the thickness of glass slab is given by",
+        options: ["t = x(μ - 1)/μ", "t = xμ/(μ - 1)", "t = x(μ - 1)", "t = x/μ"],
+        correct: "B"
+      },
+      {
+        number: "Question 65",
+        text: "Converging or diverging ability of a lens or mirror is called",
+        options: ["power", "focal length", "aperture", "magnification"],
+        correct: "A"
+      },
+      {
+        number: "Question 66",
+        text: "One of the necessary condition for total internal reflection to take place is (i = angle of incidence, ic = critical angle)",
+        options: ["i > ic", "i < ic", "i = ic", "i = 0"],
+        correct: "A"
+      },
+      {
+        number: "Question 67",
+        text: "A double convex lens of focal length 'F' is cut into two equal parts along the vertical axis. The focal length of each part will be",
+        options: ["F", "2F", "F/2", "4F"],
+        correct: "B"
+      },
+      {
+        number: "Question 68",
+        text: "The size of the real image produced by a convex lens of focal length F is 'm' times the size of the object. The image distance from the lens is",
+        options: ["(m+1)F", "(m-1)F", "mF", "F/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 69",
+        text: "The prism has refracting angle 'A'. The second refracting surface of the prism is silvered. Light ray falling on first refracting surface with angle of incidence '2A', reaches the second surface and returns back through the same path due to reflection at the silvered surface. The refractive index of the material of the prism is",
+        options: ["2 sin A", "2 cos A", "sin 2A", "cos 2A"],
+        correct: "B"
+      },
+      {
+        number: "Question 70",
+        text: "To get three images of a single object, the angle between the two plane mirrors should be",
+        options: ["45°", "60°", "90°", "120°"],
+        correct: "C"
+      },
+      {
+        number: "Question 71",
+        text: "Two lenses of power -15D and +5D are in contact with each other. The focal length of the combination is",
+        options: ["-10 cm", "-20 cm", "-30 cm", "-40 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 72",
+        text: "A person is observing a bacteria through a compound microscope. For better observation and to improve its resolving power he should",
+        options: ["decrease the diameter of the objective lens", "increase the wavelength of light", "decrease the focal length of the eyepiece", "increase the refractive index of the medium between the object and objective lens"],
+        correct: "D"
+      },
+      {
+        number: "Question 73",
+        text: "Which of the following is NOT involved in the formation of secondary rainbow?",
+        options: ["Total internal reflection", "Refraction", "Dispersion", "Two internal reflections"],
+        correct: "D"
+      },
+      {
+        number: "Question 74",
+        text: "A double convex air bubble in water behaves as",
+        options: ["divergent lens", "convergent lens", "concave mirror", "plane slab"],
+        correct: "A"
+      },
+      {
+        number: "Question 75",
+        text: "If a ray of light in denser medium strikes a rarer medium at angle of incidence i, the angles of reflection and refraction are r and r' respectively. If the reflected and refracted rays are at right angles to each other, the critical angle for the given pair of media is",
+        options: ["sin⁻¹(tan i)", "sin⁻¹(cot i)", "sin⁻¹(sin i)", "sin⁻¹(cos i)"],
+        correct: "A"
+      },
+      {
+        number: "Question 76",
+        text: "A transparent glass cube of length 24 cm has a small air bubble trapped inside. When seen normally through one surface from air outside, its apparent distance is 10 cm from the surface. When seen normally from opposite surface, its apparent distance is 6 cm. The distance of the air bubble from first surface is",
+        options: ["12 cm", "14 cm", "16 cm", "18 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 77",
+        text: "The rays of different colours fail to converge at a point after passing through a thick converging lens. This defect is called",
+        options: ["spherical aberration", "chromatic aberration", "astigmatism", "coma"],
+        correct: "B"
+      },
+      {
+        number: "Question 78",
+        text: "A bubble in a glass slab (refractive index 1.5) when viewed from one side appears at 5 cm and at 2 cm from other side then thickness of the slab is",
+        options: ["7 cm", "10.5 cm", "3.5 cm", "14 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 79",
+        text: "The ratio of the total energy of the 2nd orbit electron for the hydrogen atom (1H¹) to that of helium ion (He⁺) [(4/2)He] is",
+        options: ["1:4", "1:2", "2:1", "4:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "A beam of white light is partially reflected and partially refracted from a surface. The angle between the reflected and refracted light is 90°. The angle of refraction is 30°. The angle of incidence must be",
+        options: ["30°", "45°", "60°", "75°"],
+        correct: "C"
+      },
+      {
+        number: "Question 81",
+        text: "The minimum distance between an object and its real image formed by a convex lens of focal length f is",
+        options: ["f", "2f", "3f", "4f"],
+        correct: "D"
+      },
+      {
+        number: "Question 82",
+        text: "Rays from a point source of light situated at height h below the liquid surface having refractive index μ, forms a circular patch of light of radius r on the surface. The area of the patch is",
+        options: ["πh²/(μ² - 1)", "πh²μ²/(μ² - 1)", "πh²/(μ² + 1)", "πh²μ²/(μ² + 1)"],
+        correct: "A"
+      },
+      {
+        number: "Question 83",
+        text: "A monochromatic ray of light travels through glass slab and water column. The number of waves in glass slab of thickness 4 cm is same as in water column of height 5 cm. If refractive index of glass is 5/3 then refractive index of water is",
+        options: ["4/3", "5/4", "3/2", "5/3"],
+        correct: "A"
+      },
+      {
+        number: "Question 84",
+        text: "For a light ray to undergo total internal reflection, light must travel from (i = angle of incidence, iC = critical angle)",
+        options: ["denser to rarer medium and i > ic", "rarer to denser medium and i < ic", "denser to rarer medium and i < ic", "rarer to denser medium and i > ic"],
+        correct: "A"
+      },
+      {
+        number: "Question 85",
+        text: "A ray of light is incident normally on a glass slab of thickness 5 cm and refractive index 1.6. The time taken to travel by a ray from source to surface of slab is same as to travel through glass slab. The distance of source from the surface is",
+        options: ["3.125 cm", "6.25 cm", "8 cm", "10 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 86",
+        text: "For occurring total internal reflection, which one of the following is correct statement? (i = angle incidence, ic = critical angle)",
+        options: ["Ray travels from rarer medium to denser medium and i < ic", "Ray travels from rarer medium to denser medium and i > ic", "Ray travels from denser medium to rarer medium and i < ic", "Ray travels from denser medium to rarer medium and i > ic"],
+        correct: "D"
+      },
+      {
+        number: "Question 87",
+        text: "The thickness of a plate having refractive index μ which will produce a change in optical path equal to half the wavelength λ of the light passing through it is",
+        options: ["λ/(2μ)", "λ/(2(μ-1))", "λ/(μ-1)", "2λ/(μ-1)"],
+        correct: "B"
+      },
+      {
+        number: "Question 88",
+        text: "A convex lens A of focal length 20 cm and a concave lens B of focal length 56 cm are kept along the same axis with the distance d between them. If a parallel beam of light falling on A leaves B as a parallel beam, then the magnitude of distance d (in cm) is",
+        options: ["36", "40", "46", "50"],
+        correct: "A"
+      },
+      {
+        number: "Question 89",
+        text: "A convex lens is dipped in a liquid whose refractive index is equal to refractive index of lens material. Then its focal length will",
+        options: ["become zero", "become infinite", "remain unchanged", "become half"],
+        correct: "B"
+      },
+      {
+        number: "Question 90",
+        text: "If μij represents refractive index when ray goes from medium i to medium j, then the product 2μ₁ × 3μ₂ × 4μ₃ is equal to",
+        options: ["1μ₄", "4μ₁", "1", "0"],
+        correct: "B"
+      },
+      {
+        number: "Question 91",
+        text: "When final image is formed at D.D.V from eye, the magnifying power of microscope is (f is the focal length of the lens)",
+        options: ["D/f", "1 + D/f", "D/f + 1", "D/f - 1"],
+        correct: "B"
+      },
+      {
+        number: "Question 92",
+        text: "A double convex lens made of glass has both radii of curvature of magnitude 20 cm. Incident light rays parallel to the axis of the lens will converge to a point at a distance 'L' from the common pole P. The value of L is [Refractive index of glass = 1.5]",
+        options: ["10 cm", "20 cm", "30 cm", "40 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 93",
+        text: "The critical angle is θ for a light going from medium P to medium Q. If speed of light in medium P is VP then speed of light in medium Q is",
+        options: ["VP sin θ", "VP/sin θ", "VP tan θ", "VP/cos θ"],
+        correct: "B"
+      },
+      {
+        number: "Question 94",
+        text: "A glass convex lens is of refractive index 1.55 with both faces of same radius of curvature. What is the radius of curvature required if focal length is to be 20 cm?",
+        options: ["11 cm", "22 cm", "33 cm", "44 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 95",
+        text: "The intermediate image formed by an objective lens of a compound microscope is",
+        options: ["virtual and magnified", "real and magnified", "virtual and diminished", "real and diminished"],
+        correct: "B"
+      },
+      {
+        number: "Question 96",
+        text: "The refracting angle of a glass prism is 30°. A ray is incident on one of the faces and is perpendicular to it. The angle of deviation δ between the incident ray and that leaves the prism is (Refractive index of glass = 1.5) (sin(30°) = 0.5, sin(48.6) = 0.75)",
+        options: ["18.6°", "19.6°", "20.6°", "21.6°"],
+        correct: "A"
+      },
+      {
+        number: "Question 97",
+        text: "A compound microscope produces a magnification of 24. The focal length of the eyepiece is 5 cm. The final image is formed at the least distance of distinct vision. The magnification produced by the objective is",
+        options: ["4", "5", "6", "7"],
+        correct: "A"
+      },
+      {
+        number: "Question 98",
+        text: "In a compound microscope, let 'u₀' and 'v₀' be the object distance and image distance respectively. The objective of focal length 'f₀' magnifies a tiny object into a real, inverted image. The linear magnification of the objective is",
+        options: ["v₀/u₀", "u₀/v₀", "f₀/(v₀ - f₀)", "(v₀ - f₀)/f₀"],
+        correct: "A"
+      },
+      {
+        number: "Question 99",
+        text: "Two thin lenses have a combined power of +9 D. When they are separated by a distance of 20 cm, then their equivalent power becomes +27/5 D. Their individual power (in diopter) is respectively",
+        options: ["+5 D, +4 D", "+6 D, +3 D", "+7 D, +2 D", "+8 D, +1 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 100",
+        text: "To a bird in air, a fish in water appears to be at 30 cm from the surface. If refractive index of water with respect to air is 4/3, the real distance of bird from the surface is",
+        options: ["22.5 cm", "30 cm", "40 cm", "45 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 101",
+        text: "White light consists of wavelengths range from 480 nm to 672 nm. What will be the wavelength range when white light is passed through glass of refractive index 1.6?",
+        options: ["300-420 nm", "400-560 nm", "500-700 nm", "600-840 nm"],
+        correct: "A"
+      },
+      {
+        number: "Question 102",
+        text: "A monochromatic ray of light travels through glass slab and water column. The number of waves in glass slab of thickness 4 cm is the same as in water column of height 5 cm. If refractive index of glass is 5/3, then refractive index of water is",
+        options: ["4/3", "5/4", "3/2", "5/3"],
+        correct: "A"
+      },
+      {
+        number: "Question 103",
+        text: "A plano-convex lens of refractive index (μ₁) fits exactly into a plano-concave lens of refractive index μ₂. Their plane surfaces are parallel to each other. 'R' is the radius of curvature of the curved surface of the lenses. The focal length of the combination is",
+        options: ["R/(μ₂ - μ₁)", "R/(μ₁ - μ₂)", "2R/(μ₂ - μ₁)", "2R/(μ₁ - μ₂)"],
+        correct: "A"
+      },
+      {
+        number: "Question 104",
+        text: "'Circle of least confusion' refers to which one of the following defects occurring in images formed by mirrors or lenses?",
+        options: ["Spherical aberration", "Chromatic aberration", "Astigmatism", "Coma"],
+        correct: "A"
+      },
+      {
+        number: "Question 105",
+        text: "The magnifying power of a refracting type of astronomical telescope is 'm'. If focal length of eyepiece is doubled then the magnifying power will become",
+        options: ["m/2", "2m", "m", "4m"],
+        correct: "A"
+      },
+      {
+        number: "Question 106",
+        text: "A ray of light travels from air to water to glass and again from glass to air. Refractive index of water w.r.t. air is 'X', glass w.r.t. water is 'Y' and air w.r.t. glass is 'Z'. Which one of the following is correct?",
+        options: ["XYZ = 1", "X + Y + Z = 1", "X = Y = Z", "X/Y = Z"],
+        correct: "A"
+      },
+      {
+        number: "Question 107",
+        text: "The critical angle for light going from medium 'x' to medium 'Y' is θ. The speed of light in medium 'x' is 'Vx'. The speed of light in medium 'Y' is",
+        options: ["Vx sin θ", "Vx/sin θ", "Vx tan θ", "Vx/cos θ"],
+        correct: "B"
+      },
+      {
+        number: "Question 108",
+        text: "An object is located on a wall, its image of equal size is to be obtained on a parallel wall with the help of a convex lens. The lens in placed at a distance 'd' in front of the second wall. The required focal length of the lens is",
+        options: ["d/2", "d/4", "d", "2d"],
+        correct: "B"
+      },
+      {
+        number: "Question 109",
+        text: "The critical angle for light going from medium A into medium B is θ. The speed of light in the medium A is VA. What is the speed of light in the medium B?",
+        options: ["VA sin θ", "VA/sin θ", "VA tan θ", "VA/cos θ"],
+        correct: "B"
+      },
+      {
+        number: "Question 110",
+        text: "A convex lens is dipped in a liquid whose refractive index is equal to refractive index of lens material. Then its focal length will",
+        options: ["become zero", "become infinite", "remain unchanged", "become half"],
+        correct: "B"
+      },
+      {
+        number: "Question 111",
+        text: "The refractive index of glass is 1.5 and that of water is 1.33. The critical angle for a ray of light going from glass to water is",
+        options: ["sin⁻¹(8/9)", "sin⁻¹(9/8)", "sin⁻¹(2/3)", "sin⁻¹(3/2)"],
+        correct: "A"
+      },
+      {
+        number: "Question 112",
+        text: "A glass cube of length 24 cm has a small air bubble trapped inside. When viewed normally from one face it is 10 cm below the surface. When viewed normally from the opposite face, its apparent distance is 6 cm. The refractive index of glass is",
+        options: ["1.2", "1.3", "1.4", "1.5"],
+        correct: "D"
+      },
+      {
+        number: "Question 113",
+        text: "A particle executes linear S.H.M. along the principal axis of a convex lens of focal length 8 cm. The mean position of oscillation is at 14 cm from the lens with amplitude 1 cm. The amplitude of oscillating image of the particle is nearly",
+        options: ["1.33 cm", "1.67 cm", "2.00 cm", "2.33 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 114",
+        text: "A convex lens of focal length 'f' produces a real image 'n' time the size of the object. The image distance is",
+        options: ["(n+1)f", "(n-1)f", "nf", "f/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 115",
+        text: "A convex lens T is used to form an image whose size is one fourth that of size of object. Then the object distance is",
+        options: ["f/4", "f/2", "3f/2", "5f/4"],
+        correct: "D"
+      },
+      {
+        number: "Question 116",
+        text: "Inside a vessel filled with liquid a converging lens is placed as shown in figure. The lens has focal length 15 cm when in air and has refractive index 3/2. If the liquid has refractive index 9/5, the focal length of lens in liquid is",
+        options: ["-75 cm", "-45 cm", "45 cm", "75 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 117",
+        text: "For a ray of light, the critical angle is minimum when it travels from",
+        options: ["glass to water", "glass to air", "water to air", "diamond to air"],
+        correct: "D"
+      },
+      {
+        number: "Question 118",
+        text: "To obtain a magnified image at distance of distinct vision (DDV) using a simple microscope, the object should be placed",
+        options: ["at the distance of distinct vision", "slightly beyond the principal focus", "between the principal focus and optical centre of the lens", "at the principal focus"],
+        correct: "C"
+      },
+      {
+        number: "Question 119",
+        text: "A light travels through water in the beaker. The height of water column is 'h'. Refractive index of water is 'μw'. If C is velocity of light in air, the time taken by light to travel through water will be",
+        options: ["hμw/C", "h/Cμw", "hC/μw", "μw/hC"],
+        correct: "A"
+      },
+      {
+        number: "Question 120",
+        text: "A light of wavelength λ₁ and velocity C₁ travels from the first medium of refractive index μ₁ into the second medium of refractive index μ₂. The wavelength and velocity of light in the second medium is λ₂ and C₂ respectively. The refractive index of second medium with respect to first medium is given by",
+        options: ["C₁/C₂", "C₂/C₁", "λ₁/λ₂", "λ₂/λ₁"],
+        correct: "A"
+      },
+      {
+        number: "Question 121",
+        text: "The figure shows equiconvex lens of focal length 'f'. If the lens is cut along AB, the focal length of each half will be",
+        options: ["f/2", "f", "2f", "4f"],
+        correct: "C"
+      },
+      {
+        number: "Question 122",
+        text: "By increasing the aperture of the objective lens, wavelength of light, focal length of the objective lens and the resolving power of an astronomical telescope respectively",
+        options: ["increases, decreases, decreases", "decreases, increases, increases", "increases, decreases, increases", "decreases, increases, decreases"],
+        correct: "C"
+      },
+      {
+        number: "Question 123",
+        text: "A ray of light is incident at an angle 'i' on one face of a thin angled prism. The ray emerges normally from the other face. Refractive index of the glass prism is 'n' and angle of prism is 'A'. The value of 'i' is",
+        options: ["sin⁻¹(n sin A)", "sin⁻¹(n sin A/2)", "sin⁻¹(n sin(A/2))", "sin⁻¹(n sin 2A)"],
+        correct: "A"
+      },
+      {
+        number: "Question 124",
+        text: "An object is clearly seen through an astronomical telescope of length 50 cm. The focal lengths of its objective and eyepiece respectively, can be",
+        options: ["40 cm, 10 cm", "45 cm, 5 cm", "48 cm, 2 cm", "49 cm, 1 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 125",
+        text: "The Brewster's angle for the glass-air interface is (54.74)°. If a ray of light passing from air to glass strikes at an angle of incidence 45°, then the angle of refraction is [tan(54.74)° = √2, sin 45° = 1/√2]",
+        options: ["sin⁻¹(√2)", "sin⁻¹(0.5)", "sin⁻¹(1)", "sin⁻¹(1/√3)"],
+        correct: "B"
+      },
+      {
+        number: "Question 126",
+        text: "A concave mirror of focal length 'f1' is placed at a distance 'd' from a convex lens of focal length 'f2'. A parallel beam of light coming from infinity parallel to principal axis falls on the convex lens and then after refraction falls on the concave mirror. If it is to retrace the path, the distance 'd' should be",
+        options: ["f1 + f2", "f1 - f2", "f2 - f1", "f1"],
+        correct: "A"
+      },
+      {
+        number: "Question 127",
+        text: "The refraction of light ray takes place from air to water, water to glass and again glass to air. The ray emerges parallel to incident ray. The correct relation is [nₐ, n_w, n_g represent refractive indices of air, water and glass respectively]",
+        options: ["nₐ = n_w = n_g", "n_w = n_g/nₐ", "n_g = nₐ n_w", "nₐ n_w n_g = 1"],
+        correct: "D"
+      },
+      {
+        number: "Question 128",
+        text: "A prism having refractive index √2 and refracting angle 30° has one of the refracting surfaces silvered. The beam of light incident on the other refracting surface will retrace its path, if angle of incidence is [sin(π/6) = 0.5]",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "B"
+      },
+      {
+        number: "Question 129",
+        text: "When wavelength of light used in optical instruments A and B are 4500Å and 6000Å respectively, the ratio of resolving power of A to B will be",
+        options: ["3:4", "4:3", "9:16", "16:9"],
+        correct: "B"
+      },
+      {
+        number: "Question 130",
+        text: "A ray of light travelling through glass of refractive index √2, is incident on glass-air boundary at an angle of incidence 45°. If refractive index of air is 1, then the angle of refraction will be [sin 45° = 1/√2, sin 90° = 1]",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "D"
+      },
+      {
+        number: "Question 131",
+        text: "There are four convex lenses L₁, L₂, L₃ and L₄ of focal length 2, 4, 6 and 8 cm respectively. Two of these lenses form a telescope of length 10 cm and magnifying power 4. The objective and eye lenses are respectively",
+        options: ["L₁, L₂", "L₂, L₃", "L₃, L₄", "L₄, L₁"],
+        correct: "A"
+      },
+      {
+        number: "Question 132",
+        text: "Refractive index of the medium is 'μ' and wavelength is λ, then which of the following proportionality relation is correct?",
+        options: ["μ ∝ λ", "μ ∝ 1/λ", "μ ∝ λ²", "μ ∝ 1/λ²"],
+        correct: "B"
+      },
+      {
+        number: "Question 133",
+        text: "The magnifying power of a telescope is high if its objective and eyepiece have respectively",
+        options: ["small focal lengths", "small and large focal length", "large and small focal length", "large focal lengths"],
+        correct: "C"
+      },
+      {
+        number: "Question 134",
+        text: "A ray of light is incident at an angle 'i' on one face of prism of small angle 'A' and emerges normally from the other surface. 'μ' is the refractive index of the material of the prism. The angle of incidence is",
+        options: ["μA", "A/μ", "A", "(μ-1)A"],
+        correct: "A"
+      },
+      {
+        number: "Question 135",
+        text: "A ray of light passes through equilateral prism such that the angle of incidence is equal to angle of emergence and each of these angles is equal to (3/4)th the angle of prism. The angle of deviation is",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 136",
+        text: "A convex lens of focal length 'F' produces a real image 'n' times the size of the object. The image distance is",
+        options: ["(n+1)F", "(n-1)F", "nF", "F/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 137",
+        text: "An object is immersed in a fluid of refractive index 'μ'. In order that the object becomes invisible when observed from outside, it should",
+        options: ["have refractive index same as surrounding fluid, that is 'μ'", "behave as a perfect reflector", "have refractive index equal to one", "absorb all light falling on it"],
+        correct: "A"
+      },
+      {
+        number: "Question 138",
+        text: "According to Abbe, in the formula for resolving power of microscope, the numerical aperture is represented by",
+        options: ["μ sin θ", "μ cos θ", "μ tan θ", "μ cot θ"],
+        correct: "A"
+      },
+      {
+        number: "Question 139",
+        text: "An astronomical telescope has a large aperture to",
+        options: ["increase the span of observation", "have large wavelength", "have high resolution", "have low dispersion"],
+        correct: "C"
+      },
+      {
+        number: "Question 140",
+        text: "Velocity of light in diamond is (5/12)th times that in air. Velocity of light in water is (3/4)th times that in air. The angle of incidence of ray of light travelling from water to diamond is (angle of refraction (r) = 30°) [Given → sin 30° = 1/2]",
+        options: ["45°", "60°", "30°", "90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 141",
+        text: "A spherical surface of radius of curvature 'R' separates air from glass of refractive index 1.5. The centre of curvature is in the glass. A point object P placed in air forms a real image Q in the glass. The line PQ cuts the surface at point 'O' and PO = OQ = x. Hence the distance 'x' is equal to",
+        options: ["R", "2R", "3R", "4R"],
+        correct: "C"
+      },
+      {
+        number: "Question 142",
+        text: "A combination of two thin lenses in contact have power +10D. The power reduces to +6D when the lenses are 0.25 m apart. The power of individual lens is",
+        options: ["+4 D, +6 D", "+5 D, +5 D", "+3 D, +7 D", "+2 D, +8 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 143",
+        text: "The angle of deviation produced by a thin prism when placed in air is 'δ1' and that when immersed in water is 'δ2'. The refractive index of glass and water are 3/2 and 4/3 respectively. The ratio δ1:δ2 is",
+        options: ["4:1", "1:4", "8:1", "1:8"],
+        correct: "A"
+      },
+      {
+        number: "Question 144",
+        text: "A ray of light passes through an equilateral prism such that the angle of incidence (i) is equal to angle of emergence (e). The angle of emergence is equal to (3/4)th the angle of prism. The angle of deviation is",
+        options: ["30°", "45°", "60°", "90°"],
+        correct: "A"
+      },
+      {
+        number: "Question 145",
+        text: "The radii of curvature of both the surfaces of a convex lens of focal length 'f' and focal power 'P' are equal. One of the surfaces is made plane by grinding. The new focal length and focal power of the lens is",
+        options: ["2f, P/2", "f/2, 2P", "f, P", "4f, P/4"],
+        correct: "A"
+      },
+      {
+        number: "Question 146",
+        text: "A spherical surface of radius of curvature 'R' separates air from glass of refractive index 1.5. The centre of curvature is in the glass. A point object P placed in air forms a real image Q in the glass. The line PQ cuts the surface at point 'O' and PO = OQ = x. Hence the distance 'x' is equal to",
+        options: ["R", "2R", "3R", "4R"],
+        correct: "C"
+      },
+      // Continuing with more questions to reach 185
+      {
+        number: "Question 147",
+        text: "Which of the following is NOT involved in the formation of secondary rainbow?",
+        options: ["Total internal reflection", "Refraction", "Dispersion", "Two internal reflections"],
+        correct: "D"
+      },
+      {
+        number: "Question 148",
+        text: "The phenomenon, which is not due to total internal reflection is",
+        options: ["difference between apparent and real depth of a pond", "brilliance of diamond", "working of optical fibre", "mirage on hot summer days"],
+        correct: "A"
+      },
+      {
+        number: "Question 149",
+        text: "Simple microscope is used to see the object first in blue light and then a red light. Due to the change from blue to red light, its magnifying power",
+        options: ["increases", "decreases", "remains same", "becomes zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 150",
+        text: "The telescopes, for a given wavelength, the objectives with large aperture are used for",
+        options: ["ease of manufacture", "reducing lens aberration", "greater resolution", "greater magnification"],
+        correct: "C"
+      },
+      {
+        number: "Question 151",
+        text: "An achromatic convergent doublet of two lenses in contact has a power +2 D. The convex lens has power +5 D. The ratio of the dispersive powers of the convergent and divergent lenses is (in magnitude)",
+        options: ["2:3", "3:2", "5:3", "3:5"],
+        correct: "B"
+      },
+      {
+        number: "Question 152",
+        text: "The length of the compound microscope is 15 cm. The magnifying power for relaxed eye is 25. If the focal length of eye lens is 6 cm then the object distance for objective lens will be",
+        options: ["1.2 cm", "1.5 cm", "2.0 cm", "2.5 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 153",
+        text: "For a thin prism, δ1 is the angle of deviation produced, when prism is placed in air. When the prism is immersed in water, the angle of deviation produced is δ2. Given aμg = 3/2 and aμw = 4/3. The ratio δ2:δ1 is",
+        options: ["1:4", "1:2", "2:1", "4:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 154",
+        text: "An optician makes spectacles having a combination of a convex lens of focal length 40 cm in contact with a concave lens of focal length 25 cm. The power of this combination of lenses in dioptre is",
+        options: ["-1.5 D", "+1.5 D", "-6.5 D", "+6.5 D"],
+        correct: "A"
+      },
+      {
+        number: "Question 155",
+        text: "A ray of light travelling through a rarer medium is incident at very small angle 'i' on a glass slab and after refraction its velocity is reduced by 25%. The angle of deviation is",
+        options: ["i/3", "i/4", "i/5", "i/6"],
+        correct: "B"
+      },
+      {
+        number: "Question 156",
+        text: "A plane mirror is placed at the bottom of a tank containing a liquid of refractive index 'μ', 'p' is a small object at a height 'h' above the mirror. An observer 'O' vertically above 'p' outside the liquid sees 'p' and the image in a mirror. The apparent distance between these two will be",
+        options: ["2h/μ", "2hμ", "h/μ", "hμ"],
+        correct: "A"
+      },
+      {
+        number: "Question 157",
+        text: "Optical path of a particular ray of light has travelled a distance of 3 cm in flint glass is same as that on travelling a distance 'x' cm through another medium. The value of 'x' is [refractive index of flint glass = 1.6, refractive index of another medium = 1.25]",
+        options: ["2.4 cm", "3.84 cm", "4.8 cm", "6.0 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 158",
+        text: "The angle of incidence is found to be twice the angle of refraction when ray of light passes from vacuum into a medium of refractive index 'μ'. The angle of incidence will be",
+        options: ["cos⁻¹(μ/2)", "2 cos⁻¹(μ/2)", "sin⁻¹(μ/2)", "2 sin⁻¹(μ/2)"],
+        correct: "B"
+      },
+      {
+        number: "Question 159",
+        text: "A glass slab of thickness 4.8 cm is placed on the piece of paper on which an ink dot is marked. By how much distance would an ink dot appear to be raised? (The refractive index of glass = 1.5)",
+        options: ["1.2 cm", "1.6 cm", "2.4 cm", "3.2 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 160",
+        text: "A glass prism 'A' deviates the red and blue rays through 10° and 12° respectively. A second prism 'B' deviates them through 8° and 10° respectively. The ratio of their dispersive powers is (A to B)",
+        options: ["5:4", "4:5", "3:4", "4:3"],
+        correct: "A"
+      },
+      {
+        number: "Question 161",
+        text: "For a symmetric (equilateral) prism, the prism formula can be written as",
+        options: ["μ = sin[(A+δ)/2]/sin(A/2)", "μ = sin[(A+δ)/2]/cos(A/2)", "μ = cos[(A+δ)/2]/sin(A/2)", "μ = cos[(A+δ)/2]/cos(A/2)"],
+        correct: "A"
+      },
+      {
+        number: "Question 162",
+        text: "For a ray of light, the critical angle is minimum, when it travels from",
+        options: ["glass to water", "glass to air", "water to air", "diamond to air"],
+        correct: "D"
+      },
+      {
+        number: "Question 163",
+        text: "Critical angle of light passing from glass to air is minimum for wavelength of",
+        options: ["red light", "yellow light", "green light", "violet light"],
+        correct: "D"
+      },
+      {
+        number: "Question 164",
+        text: "A vessel is filled with two different liquids which do not mix. One is 40 cm deep and has refractive index 1.6 and other is 30 cm deep and has refractive index 1.5. The apparent depth of vessel when viewed normally is",
+        options: ["45 cm", "50 cm", "55 cm", "60 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 165",
+        text: "When the same monochromatic ray of light travels through glass slab and through water, the number of waves in glass slab of thickness 5 cm is same as in water column of height 6 cm. If refractive index of glass is 1.56, then refractive index of water is",
+        options: ["1.2", "1.3", "1.4", "1.5"],
+        correct: "B"
+      },
+      {
+        number: "Question 166",
+        text: "In compound microscope, the focal length and the aperture of the objective used is respectively",
+        options: ["small, small", "small, large", "large, small", "large, large"],
+        correct: "B"
+      },
+      {
+        number: "Question 167",
+        text: "A ray of light is incident on a medium of refractive index 'μ' at an angle of incidence 'i'. On refraction in the medium 'δ' is the angle of deviation. Then",
+        options: ["δ = i - r", "δ = i + r", "δ = r - i", "δ = π/2 - i"],
+        correct: "A"
+      },
+      {
+        number: "Question 168",
+        text: "Concave and convex lenses are placed touching each other. The ratio of magnitudes of their power is 2:3. The focal length of the system is 30 cm. The focal lengths of individual lens are",
+        options: ["-15 cm, 10 cm", "-10 cm, 15 cm", "-20 cm, 30 cm", "-30 cm, 20 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 169",
+        text: "An astronomical telescope has a large aperture to",
+        options: ["increase the span of observation", "have large wavelength", "have high resolution", "have low dispersion"],
+        correct: "C"
+      },
+      {
+        number: "Question 170",
+        text: "A point object kept at P in front of a glass sphere of radius 'R' has its image formed at Q such that PO = QO. The refractive index of material of glass sphere is 1.4. The distance PO is equal to",
+        options: ["R", "2R", "3R", "4R"],
+        correct: "B"
+      },
+      {
+        number: "Question 171",
+        text: "A convex lens of refractive index 3/2 has a power 2.5. If it is placed in a liquid of refractive index 2, the new power of the lens is",
+        options: ["-2.5 D", "-5 D", "5 D", "2.5 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 172",
+        text: "Some water is filled in a container of height 30 cm. If it is to appear half filled to the observer when viewed from the top of the container, the height upto which water should be filled in it, is [Refractive index of water = 4/3]",
+        options: ["10 cm", "12 cm", "15 cm", "20 cm"],
+        correct: "D"
+      },
+      {
+        number: "Question 173",
+        text: "In an equilateral prism the ray undergoes minimum deviation when it is incident at an angle of 50°. The angle of minimum deviation is",
+        options: ["40°", "50°", "60°", "70°"],
+        correct: "A"
+      },
+      {
+        number: "Question 174",
+        text: "A person is observing a bacteria through a compound microscope. For better analysis and to improve the resolving power he should",
+        options: ["decrease the diameter of the objective lens", "increase the wavelength of light", "increase the refractive index of the medium between the object and objective lens", "decrease the focal length of the eye-piece"],
+        correct: "C"
+      },
+      {
+        number: "Question 175",
+        text: "A ray of light is incident normally on a glass slab of thickness 5 cm and refractive index 1.6. The time taken to travel by a ray from source of light to surface of slab is same as to travel through glass slab. The distance of source from the surface is",
+        options: ["3.125 cm", "6.25 cm", "8 cm", "10 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 176",
+        text: "Focal length of objective of an astronomical telescope is 1.5 m. Under normal adjustment, length of telescope is 1.56 m. Focal length of the eyepiece is",
+        options: ["0.06 m", "0.6 m", "6 cm", "60 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 177",
+        text: "White light is incident on the interface of glass and air as shown in figure. If green light is just totally internally reflected, then reflected rays inside the glass contain",
+        options: ["green, yellow, orange", "all colours except green", "violet, indigo, blue", "yellow, orange, red"],
+        correct: "D"
+      },
+      {
+        number: "Question 178",
+        text: "A convex lens of focal length 'f' produces a real image whose size is 'n' times the size of an object. The distance of the object from the lens is",
+        options: ["(n+1)f/n", "(n-1)f/n", "f(n+1)/n", "f(n-1)/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 179",
+        text: "A ray of light is incident at 60° on one face of a prism of angle 30° and the emergent ray makes 30° with the incident ray. The refractive index of the prism is (sin 30° = 0.5, sin 60° = √3/2)",
+        options: ["√2", "√3", "2", "3/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 180",
+        text: "A concave mirror of focal length 'f' produces an image 'n' time the size of the object. If the image is real, then the distance of the object from the mirror is",
+        options: ["(n+1)f/n", "(n-1)f/n", "f(n+1)/n", "f(n-1)/n"],
+        correct: "A"
+      },
+      {
+        number: "Question 181",
+        text: "The focal length of combination of lenses formed with lenses having power of +2.50D and -3.75D, will be",
+        options: ["-80 cm", "80 cm", "-20 cm", "20 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 182",
+        text: "Two points separated by a distance of 0.1 mm can just be seen in microscope when light of wavelength 6000Å is used. If the light of wavelength 4800Å is used, the limit of resolution will become",
+        options: ["0.08 mm", "0.10 mm", "0.12 mm", "0.15 mm"],
+        correct: "A"
+      },
+      {
+        number: "Question 183",
+        text: "Two thin lenses have a combined power of +9 D. When they are separated by a distance of 20 cm, their equivalent power becomes +27/5 D. The power of both the lenses in dioptre are respectively",
+        options: ["+5 D, +4 D", "+6 D, +3 D", "+7 D, +2 D", "+8 D, +1 D"],
+        correct: "B"
+      },
+      {
+        number: "Question 184",
+        text: "A plane mirror produces a magnification of",
+        options: ["+1", "-1", "0", "∞"],
+        correct: "A"
+      },
+      {
+        number: "Question 185",
+        text: "The telescopes, for a given wavelength, the objectives with large aperture are used for",
+        options: ["reducing lens aberration", "ease of manufacture", "greater resolution", "greater magnification"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      
+      // Generate test name with timestamp
+      const now = new Date();
+      const testName = `MHT-CET Test ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      // Create result object
+      const resultData = {
+        testName: testName,
+        total: questions.length,
+        correct: correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        timestamp: now.toISOString(),
+        details: results
+      };
+
+      // Save to localStorage
+      try {
+        // Get existing scores or initialize empty array
+        let scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+        
+        // Add new score
+        scores.push(resultData);
+        
+        // Save back to localStorage
+        localStorage.setItem("quizScores", JSON.stringify(scores));
+        
+        // Also save the current result for the result page
+        localStorage.setItem("quizResults", JSON.stringify(resultData));
+        
+        // Show save notification
+        showNotification();
+        
+        // Redirect to results page after a short delay
+        setTimeout(() => {
+          window.location.href = "MCCW-PRC25.html";
+        }, 1500);
+      } catch (e) {
+        console.error("Error saving results:", e);
+        alert("Error saving results. Please try again.");
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "flex";
+    }
+
+    function hideNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "none";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

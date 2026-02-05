@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Save notification */
+    .save-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #3b82f6;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Current Electricity</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <!-- Save notification -->
+  <div class="save-notification" id="saveNotification">
+    <span>Results saved successfully!</span>
+    <button onclick="hideNotification()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+
+  <script>
+    const questions = [
+      // Questions 1-20
+      {
+        number: "Question 01",
+        text: "A 2.5 V battery is connected to a potentiometer wire. A cell of e.m.f. 1.08 V is balanced by the voltage drop across 2.16 m of wire. The length of the potentiometer wire is",
+        options: ["4.5 m", "5 m", "5.4 m", "6 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "In metre-bridge experiment the balance point is obtained if the gaps are closed by 2Ω and 3Ω. A shunt of xΩ is added to 3Ω resistor to shift the balance point by 22.5 cm. The value of x is",
+        options: ["1 Ω", "2 Ω", "3 Ω", "4 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 03",
+        text: "A galvanometer coil has a resistance 80Ω and current for full-scale deflection is 10mA. A resistance of 920Ω is connected in series with the galvanometer to make a voltmeter. If the least count of the voltmeter is 0.2V, the number of divisions on the scale is",
+        options: ["20", "30", "40", "50"],
+        correct: "D"
+      },
+      {
+        number: "Question 04",
+        text: "Figure shows currents in different parts of electrical circuit. The value of current 'i' is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "C"
+      },
+      {
+        number: "Question 05",
+        text: "Kirchhoff's voltage law and current law are based (respectively) on the conservation of",
+        options: ["Charge and energy", "Energy and charge", "Energy and momentum", "Momentum and energy"],
+        correct: "B"
+      },
+      {
+        number: "Question 06",
+        text: "When a resistance of 100Ω is connected in series with a galvanometer of resistance 'G', its range is 'V'. To double its range, a resistance of 1000Ω is connected in series. The value of 'G' is",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 07",
+        text: "The potentiometer wire is 5 m long and potential difference of 4 V is maintained between the ends. The e.m.f. of the cell which balances against a length of 200 cm of the potentiometer wire is",
+        options: ["1.2 V", "1.4 V", "1.6 V", "1.8 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 08",
+        text: "Two batteries of e.m.f 4 V and 8 V with internal resistance 1Ω and 2Ω respectively are connected in a circuit with a resistance of 9Ω as shown in the figure. The current and potential difference between the points 'P' and 'Q' is",
+        options: ["1 A, 9 V", "1 A, 7 V", "2 A, 9 V", "2 A, 7 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 09",
+        text: "With a resistance 'X' connected in series with a galvanometer of resistance 100Ω, it acts as a voltmeter of range 0-15V. To double the range, a resistance of 1500Ω is to be connected in series with 'X'. The value of 'X' in ohm is",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "C"
+      },
+      {
+        number: "Question 10",
+        text: "The current (I) drawn from the battery in the given circuit is",
+        options: ["0.2 A", "0.5 A", "0.6 A", "0.8 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 11",
+        text: "The value of the shunt resistance that allows 10% of the main current through the galvanometer of 99Ω is",
+        options: ["9 Ω", "10 Ω", "11 Ω", "12 Ω"],
+        correct: "C"
+      },
+      {
+        number: "Question 12",
+        text: "By increasing the temperature, the specific resistance of a conductor and a semiconductor respectively",
+        options: ["Increases, decreases", "Increases, increases", "Decreases, decreases", "Decreases, increases"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "The length of a potentiometer wire is 'L'. A cell of e.m.f. 'E' is balanced at a length L/4 from the positive end of the wire. If the length of the original wire is increased by L/3, then using the same cell null point is obtained at",
+        options: ["L/3", "L/5", "L/6", "L/7"],
+        correct: "A"
+      },
+      {
+        number: "Question 14",
+        text: "Two cells of e.m.f.s E₁ and E₂ (E₁ > E₂) are connected as shown in figure. When the potentiometer is connected between A and B, the balancing length of the potentiometer wire is 3.60 m. On connecting the potentiometer between A and C, the balancing length is 0.90 m. The ratio E₁/E₂ is",
+        options: ["3:1", "4:1", "5:1", "6:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "When cell of e.m.f. 'E₁' is connected to potentiometer wire, the balancing length is 'ℓ₁'. Another cell of e.m.f. 'E₂' (E₁ > E₂) is connected so that two cells oppose each other, the balancing length is 'ℓ₂'. The ratio E₁:E₂ is",
+        options: ["(ℓ₁+ℓ₂):(ℓ₁-ℓ₂)", "(ℓ₁-ℓ₂):(ℓ₁+ℓ₂)", "ℓ₁:ℓ₂", "(ℓ₁+ℓ₂):ℓ₁"],
+        correct: "A"
+      },
+      {
+        number: "Question 16",
+        text: "In the given circuit, current flowing through the circuit is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 17",
+        text: "The voltmeter has range 10 V and its internal resistance is 50Ω. To increase the range of voltmeter to 15 V, the resistance which is to be connected is",
+        options: ["25Ω resistance in series", "125Ω resistance in parallel", "25Ω resistance in parallel", "125Ω resistance in series"],
+        correct: "A"
+      },
+      {
+        number: "Question 18",
+        text: "In the given electrical network, the value of resistance 'R' when the current in the galvanometer will be zero, is",
+        options: ["2 Ω", "4 Ω", "6 Ω", "8 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 19",
+        text: "In the circuit shown in the figure, P ≠ R. The reading of the galvanometer remains the same with switch 'S' open or closed. Then",
+        options: ["P = Q", "Q = R", "P = Q = R", "P/Q = R/Q"],
+        correct: "A"
+      },
+      {
+        number: "Question 20",
+        text: "If an ammeter is to be used in place of a galvanometer then we must connect",
+        options: ["high resistance in series", "low resistance in series", "high resistance in parallel", "low resistance in parallel"],
+        correct: "D"
+      },
+      {
+        number: "Question 21",
+        text: "If the length of the potentiometer wire is increased by keeping constant potential difference across the wire, then",
+        options: ["the potential gradient is increased", "the null point is obtained at larger distance", "there is no change in the null point", "the null point is obtained at shorter distance"],
+        correct: "B"
+      },
+      {
+        number: "Question 22",
+        text: "Only 4% of the total current in the circuit passes through a galvanometer. If the resistance of the galvanometer is G, then the shunt resistance connected to the galvanometer is",
+        options: ["G/24", "G/25", "G/26", "G/27"],
+        correct: "A"
+      },
+      {
+        number: "Question 23",
+        text: "The potential difference (V_A - V_B) between the points A and B in the given figure is",
+        options: ["2 V", "3 V", "4 V", "5 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 24",
+        text: "A null point is obtained at 200 cm on potentiometer wire when cell in secondary circuit is shunted by 5Ω. When a resistance of 15Ω is used for shunting, null point moves to 300 cm. The internal resistance of the cell is",
+        options: ["5 Ω", "10 Ω", "15 Ω", "20 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 25",
+        text: "To determine the internal resistance of a cell with potentiometer, when the cell is shunted by a resistance of 5Ω, the balancing length is 250 cm. When the cell is shunted by 20Ω, the balancing length of potentiometer wire is 400 cm. The internal resistance of the cell is",
+        options: ["5 Ω", "10 Ω", "15 Ω", "20 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 26",
+        text: "Two cells E₁ and E₂ having equal e.m.f 'E' and internal resistances r₁ and r₂ (r₁ > r₂) respectively are connected in series. This combination is connected to an external resistance 'R'. It is observed that the potential difference across the cell E₁ becomes zero. The value of R will be",
+        options: ["r₁ - r₂", "r₁ + r₂", "r₁", "r₂"],
+        correct: "A"
+      },
+      {
+        number: "Question 27",
+        text: "If only 5% of the total current is to be passed through galvanometer of resistance G, then the resistance of the shunt will be",
+        options: ["G/19", "G/20", "G/21", "G/22"],
+        correct: "A"
+      },
+      {
+        number: "Question 28",
+        text: "The scale of a galvanometer is divided into 160 equal divisions. The galvanometer shows full scale deflection of 16 mA and maximum voltage is 80 mV. Now the range is changed so that galvanometer reads 160 V. The required resistance to be connected is",
+        options: ["4995Ω in series", "4.95 × 10⁻³Ω in parallel", "9.5 × 10⁻³Ω in parallel", "9995Ω in series"],
+        correct: "D"
+      },
+      {
+        number: "Question 29",
+        text: "Two identical galvanometers are converted into an ammeter and into milliammeter. For the same current, the value of shunt of the ammeter as compared to that of milliammeter is",
+        options: ["smaller", "larger", "equal", "cannot be compared"],
+        correct: "A"
+      },
+      {
+        number: "Question 30",
+        text: "When a resistance of 200Ω is connected in series with a galvanometer of resistance 'G', its range is 'V'. To triple its range, a resistance of 2000Ω is connected in series. The value of 'G' is",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 31",
+        text: "When a resistance of 100Ω is connected in series with a galvanometer of resistance G, its range is V. To double its range a resistance of 1000Ω is connected in series. The value of G is",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 32",
+        text: "The potential difference (V_A - V_B) between the points A and B in the given part of the circuit",
+        options: ["2 V", "3 V", "4 V", "5 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 33",
+        text: "The figure shows currents in a part of electric circuit. Then current I is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 34",
+        text: "A galvanometer may be converted into ammeter or a voltmeter. In which of the following cases the resistance of the device so obtained will be the largest?",
+        options: ["Voltmeter of range 1 V", "Ammeter of range 10 A", "Voltmeter of range 10 V", "Ammeter of range 1 A"],
+        correct: "C"
+      },
+      {
+        number: "Question 35",
+        text: "A galvanometer has resistance 80Ω and it is shunted with resistance 20Ω. If 20% of the main current flows through galvanometer, then what is the value of main current?",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 36",
+        text: "A cell balances against a length of 150 cm on a potentiometer wire when it is shunted by a resistance of 5Ω. But when it is shunted by a resistance of 10Ω, then balancing length increases by 25 cm. The balancing length when the cell is in an open circuit is",
+        options: ["175 cm", "180 cm", "185 cm", "190 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 37",
+        text: "A battery of 6 V is connected to the ends of uniform wire 3 m long and of resistance 100Ω. The difference of potential between two points 50 cm apart on the wire is",
+        options: ["0.5 V", "1 V", "1.5 V", "2 V"],
+        correct: "B"
+      },
+      {
+        number: "Question 38",
+        text: "Kirchhoff's second law is based on the law of conservation of",
+        options: ["charge", "energy", "momentum", "mass"],
+        correct: "B"
+      },
+      {
+        number: "Question 39",
+        text: "In the following electrical network, the value of I is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "C"
+      },
+      {
+        number: "Question 40",
+        text: "The current drawn from the battery in the given network is (Internal resistance of the battery is negligible)",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "The potential difference (V_A - V_B) between the points 'A' and 'B' in the given part of the circuit is",
+        options: ["2 V", "3 V", "4 V", "5 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 42",
+        text: "In an ammeter, 0.25% of main current passes through the galvanometer. If the resistance of the galvanometer is 'G', the resistance of ammeter will be",
+        options: ["G/400", "G/399", "G/401", "G"],
+        correct: "A"
+      },
+      {
+        number: "Question 43",
+        text: "In potentiometer experiment, cells of e.m.f. E₁ and E₂ are connected in series (E₁ > E₂) the balancing length is 80 cm of the wire. If the polarity of E₂ is reversed, the balancing length becomes 20 cm. The ratio, E₁/E₂ is",
+        options: ["3:1", "5:3", "5:1", "4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 44",
+        text: "In the circuit, current flowing through the circuit is",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 45",
+        text: "Two identical galvanometers are converted into voltmeter and millivoltmeter. As compared to the series resistance of voltmeter, the series resistance of millivoltmeter will be",
+        options: ["smaller", "larger", "equal", "cannot be compared"],
+        correct: "A"
+      },
+      {
+        number: "Question 46",
+        text: "Potential difference between the points A and B is nearly",
+        options: ["2 V", "3 V", "4 V", "5 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 47",
+        text: "In an ammeter, 4% of the main current is passing through the galvanometer. If shunt resistance is 5Ω, then resistance of galvanometer will be",
+        options: ["95 Ω", "100 Ω", "105 Ω", "110 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 48",
+        text: "In a Wheatstone's bridge, the resistances in four arms are as shown in the figure. The balancing condition of the bridge is",
+        options: ["P/Q = R/S", "P/R = Q/S", "P/S = Q/R", "PQ = RS"],
+        correct: "A"
+      },
+      {
+        number: "Question 49",
+        text: "When a galvanometer is shunted by a resistance 's', its current capacity increases 'n' times. If the same galvanometer is shunted by another resistance 's1', its capacity will increase to 'n1' times original current. The value of 'n1' is",
+        options: ["(s + G)/(s1 + G)", "(s1 + G)/(s + G)", "n(s + G)/(s1 + G)", "n(s1 + G)/(s + G)"],
+        correct: "C"
+      },
+      {
+        number: "Question 50",
+        text: "In a meter bridge experiment, the balance point is obtained if the gaps are closed by 2Ω and 3Ω. A shunt of XΩ is added to 3Ω resistor to shift the null point by 22.5 cm. The value of 'x' is",
+        options: ["1 Ω", "2 Ω", "3 Ω", "4 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 51",
+        text: "When a galvanometer is shunted by a resistance 'S', its current capacity increases 'n' times. If the same galvanometer is shunted by another resistance S', its current capacity increases to n'. The value of n' in terms of n, S and S' is",
+        options: ["n(S + G)/(S' + G)", "n(S' + G)/(S + G)", "(S + G)/(S' + G)", "(S' + G)/(S + G)"],
+        correct: "B"
+      },
+      {
+        number: "Question 52",
+        text: "Resistances in the left gap and right gap of a meter bridge are 10Ω and 30Ω respectively. If the resistances in the two gaps are interchanged, the balance point will shift to right by",
+        options: ["10 cm", "20 cm", "30 cm", "40 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 53",
+        text: "The new switching circuit for the following circuit by simplifying the given circuit is",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "C"
+      },
+      {
+        number: "Question 54",
+        text: "In the following circuit, a power of 50 watt is absorbed in the section AB of the circuit. The value of resistance 'x' is",
+        options: ["5 Ω", "10 Ω", "15 Ω", "20 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 55",
+        text: "The range of voltmeter of resistance 'G' Ω is 'V' volt. The resistance required to be connected in series with it in order to convert it into a voltmeter of range 'nV' volt, will be",
+        options: ["(n-1)G", "nG", "G/n", "G/(n-1)"],
+        correct: "A"
+      },
+      {
+        number: "Question 56",
+        text: "When cell of E.M.F. 'E₁' is connected to potentiometer wire, the balancing length is l₁. Another cell of E.M.F. 'E₂' (E₁ > E₂) is connected so that two cells oppose each other, then the balancing length is l₂. The ratio E₁:E₂ is",
+        options: ["(l₁+l₂):(l₁-l₂)", "(l₁-l₂):(l₁+l₂)", "l₁:l₂", "(l₁+l₂):l₁"],
+        correct: "A"
+      },
+      {
+        number: "Question 57",
+        text: "A galvanometer of resistance 'G' is shunted by resistance of 'S' ohm. To keep the main current in the circuit unchanged the resistance to be put in series with Galvanometer is",
+        options: ["S", "G", "G-S", "S-G"],
+        correct: "A"
+      },
+      {
+        number: "Question 58",
+        text: "The resistances in the left and right gap of a metre bridge are 40Ω and 60Ω respectively. When the bridge is balanced, the distance of the null point from the centre of the wire towards left is",
+        options: ["10 cm", "20 cm", "30 cm", "40 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 59",
+        text: "When moving coil galvanometer (MCG) is converted into a voltmeter, the series resistance is 'n' times the resistance of galvanometer. How many times that of MCG the voltmeter is now capable of measuring voltage?",
+        options: ["n times", "n+1 times", "n-1 times", "1/n times"],
+        correct: "B"
+      },
+      {
+        number: "Question 60",
+        text: "In potentiometer experiment, the balancing length is 8 m when two cells E₁ and E₂ are joined in series. When two cells are connected in opposition the balancing length is 4 m. The ratio of the e.m.f. of the two cells (E₁/E₂) is",
+        options: ["3:1", "2:1", "1:1", "1:2"],
+        correct: "A"
+      },
+      {
+        number: "Question 61",
+        text: "A wire of length 3 m connected in the left gap of a meter-bridge balances 8Ω resistance in the right gap at a point, which divides the bridge wire in the ratio 3:2. The length of the wire corresponding to resistance of 1Ω is",
+        options: ["0.2 m", "0.3 m", "0.4 m", "0.5 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 62",
+        text: "Five current carrying conductors meet at point P. What is the magnitude and direction of the current in conductor PQ?",
+        options: ["3 A form P to Q", "1 A form P to Q", "1 A form Q to P", "2 A form Q to P"],
+        correct: "C"
+      },
+      {
+        number: "Question 63",
+        text: "Only 4% of the total current in the circuit passed through a galvanometer. If the resistance of the galvanometer is G, then the shunt resistance connected to the galvanometer is",
+        options: ["G/24", "G/25", "G/26", "G/27"],
+        correct: "A"
+      },
+      {
+        number: "Question 64",
+        text: "A 10 m long wire of resistance 20Ω is connected in series with a battery of e.m.f. 3 V (negligible internal resistance) and a resistance of 10Ω. The potential gradient along the wire is",
+        options: ["0.1 V/m", "0.2 V/m", "0.3 V/m", "0.4 V/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 65",
+        text: "In a given meter bridge, the current flowing through 40Ω resistor is",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 66",
+        text: "A charged spherical conductor of radius 'R' is connected momentarily to another uncharged spherical conductor of radius 'r' by means of a thin conducting wire, then the ratio of the surface charge density of the first to the second conductor is",
+        options: ["R/r", "r/R", "R²/r²", "r²/R²"],
+        correct: "B"
+      },
+      {
+        number: "Question 67",
+        text: "A potentiometer wire of length 4 m and resistance 5Ω is connected in series with a resistance of 992Ω and a cell of e.m.f. 4 V with internal resistance 3Ω. The length of 0.75 m on potentiometer wire balances the e.m.f. of",
+        options: ["1 V", "1.5 V", "2 V", "2.5 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 68",
+        text: "Resistance of a potentiometer wire is 2Ω/m. A cell of e.m.f. 1.5 V balances at 300 cm. The current through the wire is",
+        options: ["0.25 A", "0.5 A", "0.75 A", "1 A"],
+        correct: "A"
+      },
+      {
+        number: "Question 69",
+        text: "In the given circuit, if dI/dt = -1 A/s then the value of (V_A - V_B) at this instance will be",
+        options: ["18 V", "9 V", "24 V", "30 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 70",
+        text: "A potentiometer wire has length of 5 m and resistance of 16Ω. The driving cell has an e.m.f. of 5 V and an internal resistance of 4Ω. When the two cells of e.m.f.s 1.3 V and 1.1 V are connected so as to assist each other and then oppose each other, the balancing lengths are respectively",
+        options: ["2.4 m, 0.2 m", "2.4 m, 0.4 m", "2.8 m, 0.2 m", "2.8 m, 0.4 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 71",
+        text: "An electron of mass 'm' and charge 'q' is accelerated from rest in a uniform electric field of strength 'E'. The velocity acquired by the electron, when it travels a distance 'L', is",
+        options: ["√(2qEL/m)", "√(qEL/m)", "√(qEL/2m)", "√(2qEL/m²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 72",
+        text: "In potentiometer experiments, two cells of e.m.f. 'E₁' and 'E₂' are connected in series (E₁ > E₂), the balancing length is 64 cm of the wire. If the polarity of E₂ is reversed, the balancing length becomes 32 cm. The ratio E₁/E₂ is",
+        options: ["3:1", "4:1", "5:1", "6:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 73",
+        text: "A galvanometer has resistance 'G' and range 'Vg'. How much resistance is required to read voltage upto 'V' volt?",
+        options: ["G(V/Vg - 1)", "G(Vg/V - 1)", "G(V - Vg)/Vg", "G(Vg - V)/V"],
+        correct: "A"
+      },
+      {
+        number: "Question 74",
+        text: "If only 1% of total current is passed through a galvanometer of resistance 'G' then the resistance of the shunt is",
+        options: ["G/99", "G/100", "G/101", "G/102"],
+        correct: "A"
+      },
+      {
+        number: "Question 75",
+        text: "A voltmeter of resistance 150Ω connected across a cell of e.m.f. 3 V reads 2.5 V. What is the internal resistance of the cell?",
+        options: ["30 Ω", "40 Ω", "50 Ω", "60 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 76",
+        text: "A galvanometer of resistance 20Ω gives a deflection of 5 divisions when 1 mA current flows through it. The galvanometer scale has 50 divisions. To convert the galvanometer into a voltmeter of range 25 volt, we should connect a resistance of",
+        options: ["2480Ω in series", "20Ω in parallel", "2480Ω in parallel", "1240Ω in series"],
+        correct: "A"
+      },
+      {
+        number: "Question 77",
+        text: "Five current carrying conductors meet at a point 'O' as shown in figure. The magnitude and direction of the current in conductor 'OP' is",
+        options: ["10.5 A from P to O", "11.5 A from O to P", "6.5 A from O to P", "9 A from P to O"],
+        correct: "C"
+      },
+      {
+        number: "Question 78",
+        text: "10 A current is flowing in two straight parallel wires in the same direction. Force of attraction between them is 1 × 10⁻³ N. If the current is doubled in both the wires the force will be",
+        options: ["1 × 10⁻³ N", "2 × 10⁻³ N", "4 × 10⁻³ N", "8 × 10⁻³ N"],
+        correct: "C"
+      },
+      {
+        number: "Question 79",
+        text: "A galvanometer of resistance G is shunted with a resistance of 10% of G. The part of the total current that flows through the galvanometer is",
+        options: ["1/11", "1/10", "1/9", "1/8"],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "A galvanometer of resistance G can be converted into a voltmeter of range V by connecting a resistance R in series with it. The series resistance required to change its range to V/3 is",
+        options: ["R/3", "2R/3", "R", "3R"],
+        correct: "B"
+      },
+      {
+        number: "Question 81",
+        text: "In a potentiometer experiment, the null point is obtained on 7th wire for given cell. To shift the null point on 9th wire for the same cell what should we do?",
+        options: ["Increase resistance in main circuit", "Decrease resistance in main circuit", "Decrease applied e.m.f.", "Attach resistance in series with a cell"],
+        correct: "B"
+      },
+      {
+        number: "Question 82",
+        text: "Water rises to a height of 20 mm in a capillary tube of cross-sectional area A. If the area of cross-section of the tube is made (A/4), then water will rise to a height of",
+        options: ["10 mm", "20 mm", "40 mm", "80 mm"],
+        correct: "C"
+      },
+      {
+        number: "Question 83",
+        text: "The current associated with an electron of charge e moving in a circular orbit of radius r with speed v around the positively charged nucleus is given by",
+        options: ["ev/2πr", "ev/πr", "ev/r", "2πr/ev"],
+        correct: "A"
+      },
+      {
+        number: "Question 84",
+        text: "A galvanometer of resistance 200Ω is to be converted into an ammeter. The value of shunt resistance which allows 3% of the main current through the galvanometer is equal to (nearly)",
+        options: ["6.2 Ω", "6.5 Ω", "6.8 Ω", "7.1 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 85",
+        text: "In the following network, the current through galvanometer will",
+        options: ["flow in a direction which depends on value of V", "be zero", "flow from S to Q", "flow from Q to S"],
+        correct: "B"
+      },
+      {
+        number: "Question 86",
+        text: "Electrical conductivity of insulators is",
+        options: ["sometimes small and sometimes large", "exactly zero", "extremely large", "extremely small"],
+        correct: "D"
+      },
+      {
+        number: "Question 87",
+        text: "A potentiometer is used to measure the potential difference between A and B, the null point is obtained at 0.9 m. Now potential difference between A and C is measured, the null point is obtained at 0.3 m. The ratio E₂/E₁ is (E₁ > E₂)",
+        options: ["1:2", "1:3", "2:3", "3:4"],
+        correct: "A"
+      },
+      {
+        number: "Question 88",
+        text: "In the following electrical network, the value of 'I' is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 89",
+        text: "Two cells of e.m.f.'s E₁ and E₂ (E₁ > E₂) are connected as shown in figure. When a potentiometer is connected between A and B the balancing length of the potentiometer wire is 300 cm. By connecting the same potentiometer between A and C, the balancing length is 100 cm. The ratio of E₁/E₂ is",
+        options: ["3:1", "4:1", "5:1", "6:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 90",
+        text: "Potentiometer wire is 4 m long and potential difference of 3 V is maintained between the ends. The e.m.f. of the cell which balances against a length of 100 cm of the potentiometer wire is",
+        options: ["0.75 V", "1.0 V", "1.25 V", "1.5 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 91",
+        text: "The resistances in the left and right gap of a balanced metre bridge are 120Ω and 360Ω respectively. If the resistances are interchanged the balance point shifts by",
+        options: ["20 cm", "30 cm", "40 cm", "50 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 92",
+        text: "An electrical circuit consists of the resistances R, r₁, R₂ and voltage sources E₁ and E₂ as shown in the figure. The correct equation for the loop EBCD is",
+        options: ["E₂ - I₂r₂ - E₁ - I₁r₁ = 0", "E₁ - (I₁ + I₂)R + I₂r₂ = 0", "E₁ - (I₁ + I₂)R + I₁r₁ = 0", "E₁ - (I₁ + I₂)R - I₁r₁ = 0"],
+        correct: "D"
+      },
+      {
+        number: "Question 93",
+        text: "A galvanometer of resistance 'G' is shunted by a resistance of 5Ω. To keep the main current in the circuit unchanged, the resistance to be put in series with the same galvanometer is",
+        options: ["5 Ω", "G", "G-5", "5-G"],
+        correct: "A"
+      },
+      {
+        number: "Question 94",
+        text: "The length of a potentiometer wire is L. A cell of e.m.f. E is balanced at a length L/3 from the positive end of the wire. If the length of the wire is increased L/2 at what distance will the same cell gives a balance point?",
+        options: ["L/2", "L/3", "L/4", "L/5"],
+        correct: "B"
+      },
+      {
+        number: "Question 95",
+        text: "Let A be the cross-sectional area and ρ be the specific resistance of a potentiometer wire. If I is the current passing through the wire, then the potential gradient along the length of the wire is",
+        options: ["Iρ/A", "A/Iρ", "I/ρA", "ρA/I"],
+        correct: "A"
+      },
+      {
+        number: "Question 96",
+        text: "To determine the internal resistance of a cell by using a potentiometer, the null point is at 1 m when the cell is shunted by 3Ω resistance and at a length 1.5 m when cell is shunted by 6Ω resistance. The internal resistance of the cell is",
+        options: ["2 Ω", "3 Ω", "4 Ω", "5 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 97",
+        text: "The resistance in the left and right gaps of a meter bridge are 10Ω and 30Ω respectively. If the bridge is balanced, then the distance of the null point from the center of the wire is",
+        options: ["10 cm", "20 cm", "30 cm", "40 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 98",
+        text: "When an additional resistance 1980Ω is connected in series with a voltmeter, each scale division has 100 times larger value. The resistance of the voltmeter is",
+        options: ["20 Ω", "30 Ω", "40 Ω", "50 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 99",
+        text: "An ammeter of resistance 'R' gives a full scale deflection when a current of 2 A passes through it. If it is to be converted into an ammeter to measure maximum current of 10 A, the required shunt is",
+        options: ["R/4", "R/5", "R/6", "R/7"],
+        correct: "A"
+      },
+      {
+        number: "Question 100",
+        text: "A resistance of 20Ω is connected in the left gap of a metre bridge and an unknown resistance greater than 20Ω is connected in the right gap. When these resistances are interchanged, the balance point shift by 20 cm. The unknown resistance is",
+        options: ["30 Ω", "40 Ω", "50 Ω", "60 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 101",
+        text: "In metre bridge experiment, the null point is obtained at 20 cm from left end of the wire, when resistance X is balanced against another resistance Y",
+        options: ["X < Y", "X > Y", "X = Y", "Cannot be determined"],
+        correct: "A"
+      },
+      {
+        number: "Question 102",
+        text: "A galvanometer of resistance G has voltage range V_g. Resistance require to convert it to read voltage up to V is",
+        options: ["G(V/V_g - 1)", "G(V_g/V - 1)", "G(V - V_g)/V_g", "G(V_g - V)/V"],
+        correct: "A"
+      },
+      {
+        number: "Question 103",
+        text: "The current drawn from the battery in the give network is (Internal resistance of the battery is negligible)",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 104",
+        text: "To determine the internal resistance of a cell by using a potentiometer, the null point is at 1 m, when shunted by 3Ω resistance and at a length 1.5 m, when cell is shunted by 6Ω resistance. The internal resistance of the cell is",
+        options: ["2 Ω", "3 Ω", "4 Ω", "5 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 105",
+        text: "In the given circuit, the current in 8Ω resistance is 1.5 A. The total current (I) flowing in the circuit is",
+        options: ["2 A", "3 A", "4 A", "5 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 106",
+        text: "A balanced bridge is shown in the circuit diagram. The metre bridge wire has resistance 1Ω cm⁻¹. The current drawn from the battery is (Internal resistance of battery is negligible)",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 107",
+        text: "In potentiometer experiment, cells of e.m.f. 'E₁' and 'E₂' are connected in series (E₁ > E₂) the balancing length is 64 cm of the wire. If the polarity of E₂ is reversed, the balancing length becomes 32 cm. The ratio E₁/E₂ is",
+        options: ["3:1", "4:1", "5:1", "6:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 108",
+        text: "Eddy currents are produced when",
+        options: ["a thick metal plate is kept in a steady magnetic field", "a circular coil is placed in a steady magnetic field", "a thick metal plate is kept in a varying magnetic field", "a stead current is passed through a coil"],
+        correct: "C"
+      },
+      {
+        number: "Question 109",
+        text: "In a potentiometer experiment, when three cells A, B and C are connected in series, the balancing length is found to be 420 cm. If cells A and B are connected in series the balancing length is 220 cm and for cells B and C connected in series the balancing length is 320 cm. The emf of cells A, B and C are respectively in the ratio of",
+        options: ["1:2:3", "2:3:4", "3:4:5", "1:1:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 110",
+        text: "In a potentiometer experiment, the balancing length for a cell 240 cm. On shunting the cell with a resistance of 2Ω, the balancing length become half the initial balancing length. The internal resistance of the cell is",
+        options: ["1 Ω", "2 Ω", "3 Ω", "4 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 111",
+        text: "The Kirchhoff's current law and voltage law are respectively based upon the conservation of",
+        options: ["charge and energy", "energy and charge", "mass and energy", "energy and mass"],
+        correct: "A"
+      },
+      {
+        number: "Question 112",
+        text: "In a Wheatstone bridge, three resistance P, Q and R are connected in the three arms and the fourth arm is formed by two resistances S₁ and S₂ connected in parallel. The condition for the bridge to be balanced is",
+        options: ["P/Q = R/(S₁+S₂)", "P/Q = (S₁S₂)/(S₁+S₂)R", "P/Q = R(S₁+S₂)/S₁S₂", "P/Q = S₁S₂/R(S₁+S₂)"],
+        correct: "C"
+      },
+      {
+        number: "Question 113",
+        text: "The Kirchhoff's current law and voltage law are respectively based upon the conservation of",
+        options: ["charge and energy", "energy and charge", "mass and energy", "energy and mass"],
+        correct: "A"
+      },
+      {
+        number: "Question 114",
+        text: "A moving coil galvanometer is converted into an ammeter, reading up to 0.04 A by connecting a shunt of resistance '3r' across it and then into an ammeter reading up to 0.8 A, when a shunt of resistance 'r' is connected across it. What is the maximum current which can be sent through this galvanometer if no shunt is used?",
+        options: ["0.01 A", "0.02 A", "0.03 A", "0.04 A"],
+        correct: "A"
+      },
+      {
+        number: "Question 115",
+        text: "Two wires 'A' and 'B' of equal length are connected in left and right gap respectively of meter bridge, null point is obtained at 40 cm, from the left end. Diameters of the wires 'A' and 'B' are in the ratio 3:1 respectively, the ratio of specific resistance of 'A' to that of 'B' is",
+        options: ["1:9", "9:1", "3:1", "1:3"],
+        correct: "A"
+      },
+      {
+        number: "Question 116",
+        text: "A galvanometer of resistance 50Ω is converted to an ammeter. After shunting, the effective resistance of ammeter is 2.5Ω. The value of shunt is",
+        options: ["2.5 Ω", "5 Ω", "7.5 Ω", "10 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 117",
+        text: "Consider the circuit shown in the figure. The value of current 'I' is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 118",
+        text: "In potentiometer experiment, null point is obtained at a particular point for a cell on potentiometer wire 'x' cm long. If length of potentiometer wire is increased by few centimeters without changing the cell, the balancing length will [Driving source is not changed]",
+        options: ["increase", "decrease", "remain same", "become zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 119",
+        text: "A galvanometer has resistance 'G' Ω and 'I_g' is current flowing through it which produces full scale deflection. 'S₁' is the value of shunt which converts it into an ammeter of range 0 to '3I' and 'S₂' is the shunt value which converts it into an ammeter of range 0 to '4I', the ratio S₂:S₁ is",
+        options: ["3:4", "4:3", "2:3", "3:2"],
+        correct: "A"
+      },
+      {
+        number: "Question 120",
+        text: "The current drawn from the battery in the given network is (Internal resistance of battery is neglected)",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 121",
+        text: "In the given circuit, current flowing through it is",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 122",
+        text: "In an atom, electron of charge (-e) performs U.C.M. around a stationary positively charged nucleus, with period of revolution 'T'. If 'r' is the radius of the orbit of the electron and 'v' is the orbital velocity, then the circulating current (I) is proportional to",
+        options: ["v/r", "vr", "v²/r", "v/r²"],
+        correct: "A"
+      },
+      {
+        number: "Question 123",
+        text: "What will be the resistance of the shunt when 5% of the main current is passed through a galvanometer of resistance G?",
+        options: ["G/19", "G/20", "G/21", "G/22"],
+        correct: "A"
+      },
+      {
+        number: "Question 124",
+        text: "The deflection in moving coil galvanometer of resistance 45Ω falls from 30 divisions to 3 divisions. The length of the shunt wire required to convert galvanometer to ammeter is [specific resistance of material of shunt wire = 5 × 10⁻⁷Ω m and area of cross-section of wire = 4 × 10⁻⁷ m²]",
+        options: ["0.9 m", "1.2 m", "1.5 m", "1.8 m"],
+        correct: "A"
+      },
+      {
+        number: "Question 125",
+        text: "The value of current 'I' in the given current distribution is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 126",
+        text: "Two students X and Y perform potentiometer experiment separately and null point was obtained as shown in diagram. During the experiment, (i) X increases the value of R (resistance) (ii) Y decreases the value of S (resistance) without any other change. The position of null point obtained by students X and Y respectively",
+        options: ["would shift towards B by both X and Y", "would shift towards point B would shift towards A", "would shift towards point A, would shift towards B", "would shift towards A by both X and Y"],
+        correct: "C"
+      },
+      {
+        number: "Question 127",
+        text: "A milliammeter of resistance 40Ω has a range 0-30 mA. What will be the resistance used in series to convert it into voltmeter of range 0-15 V?",
+        options: ["460 Ω", "480 Ω", "500 Ω", "520 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 128",
+        text: "A 10 m long wire of resistance 20Ω is connected in series with a battery of e.m.f. 3 volt and a resistance of 10Ω. The potential gradient along the wire in volt/meter is",
+        options: ["0.1 V/m", "0.2 V/m", "0.3 V/m", "0.4 V/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 129",
+        text: "A potentiometer wire of length 100 cm and resistance 3Ω is connected in series with resistance of 8Ω and an accumulator of 4 volt whose internal resistance is 1Ω. A cell of e.m.f. 'E' is balanced by 50 cm length of the wire. The e.m.f. of the cell is",
+        options: ["1 V", "1.5 V", "2 V", "2.5 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 130",
+        text: "In meter-bridge experiment a resistance of 18Ω is connected in left gap and an unknown resistance R is connected in right gap. The null point is obtained at ℓ₁ from left end. If unknown resistance is replaced by (R/3)Ω, the null point is obtained at 1.5ℓ₁. The unknown resistance is",
+        options: ["6 Ω", "9 Ω", "12 Ω", "15 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 131",
+        text: "Which of the following instruments is 'NOT' a direct reading instrument?",
+        options: ["Ammeter", "Voltmeter", "Potentiometer", "Galvanometer"],
+        correct: "C"
+      },
+      {
+        number: "Question 132",
+        text: "In conversion of moving coil galvanometer into an ammeter of required range, the resistance of ammeter so formed is [s = shunt and G = resistance of galvanometer]",
+        options: ["sG/(s+G)", "s+G", "s-G", "G-s"],
+        correct: "A"
+      },
+      {
+        number: "Question 133",
+        text: "A potentiometer wire is 4 m long and potential difference of 3 V is maintained between the ends. The e.m.f. of the cell which balances against a length of 100 cm of the potentiometer wire is",
+        options: ["0.75 V", "1.0 V", "1.25 V", "1.5 V"],
+        correct: "A"
+      },
+      {
+        number: "Question 134",
+        text: "An ammeter of resistance 20Ω gives full scale deflection when 1 mA current flows through it. What is the maximum current that can be measured by connecting 4 resistors each of 16Ω in parallel with the meter?",
+        options: ["5 mA", "10 mA", "15 mA", "20 mA"],
+        correct: "A"
+      },
+      {
+        number: "Question 135",
+        text: "Two galvanometers 'G₁' and 'G₂' require 2 mA and 3 mA respectively to produce the same deflection. Then",
+        options: ["sensitivity of G₂ is 3/2 times that of G₁", "G₁ is less sensitive than G₂", "G₁ and G₂ are equally sensitive", "G₁ is more sensitive than G₂"],
+        correct: "D"
+      },
+      {
+        number: "Question 136",
+        text: "The unknown resistances are connected in two gaps of a metre bridge. The null point is at 20 cm from zero end. A resistance of 15Ω is connected in series with the smaller of the two. The null point shifts to 40 cm. The smaller resistance is",
+        options: ["5 Ω", "10 Ω", "15 Ω", "20 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 137",
+        text: "A potentiometer is used to measure the potential difference between A and B, the null point is obtained at 0.9 m. Now potential difference between A and C is measured, the null point is obtained at 0.3 m. The ratio E₂/E₁ is (E₁ > E₂)",
+        options: ["1:2", "1:3", "2:3", "3:4"],
+        correct: "A"
+      },
+      {
+        number: "Question 138",
+        text: "The length of potentiometer wire is 4 m and is connected in series with an accumulator. The e.m.f. (Unknown) of a cell balances against 1.5 m length of wire. If the length of potentiometer wire is doubled, then the new balancing length of wire will be",
+        options: ["1.5 m", "3 m", "4.5 m", "6 m"],
+        correct: "B"
+      },
+      {
+        number: "Question 139",
+        text: "The sensitivity of moving coil galvanometer is inversely proportional to",
+        options: ["twist constant of phosphor", "current it measures", "magnetic induction of horse shoe magnet", "number of turns in the coil"],
+        correct: "A"
+      },
+      {
+        number: "Question 140",
+        text: "In the circuit shown, the potential difference across the 4.5μF capacitor is",
+        options: ["2 V", "3 V", "4 V", "5 V"],
+        correct: "B"
+      },
+      {
+        number: "Question 141",
+        text: "A galvanometer has resistance 'G' and range 'Vg'. How much resistance is required to read voltage upto 'V' volt?",
+        options: ["G(V+Vg)", "G(V-Vg)", "GVg", "G(Vg-1)"],
+        correct: "A"
+      },
+      {
+        number: "Question 142",
+        text: "A potentiometer wire has length 4 m and resistance 5Ω. It is connected in series with 495Ω resistance and a cell of e.m.f. 4 V. The potential gradient along the wire is",
+        options: ["0.01 V/m", "0.02 V/m", "0.03 V/m", "0.04 V/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 143",
+        text: "When a resistance of 200Ω is connected in series with a galvanometer of resistance 'G' its range is 'V'. To triple its range, a resistance of 2000Ω is connected in series. The value of G is",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 144",
+        text: "Using Kirchhoff's law, find the current flowing through the given circuit.",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 145",
+        text: "In potentiometer experiment, cells of e.m.f. E and E₂ are connected in series (E₁ > E₂), the balancing length is 64 cm of the wire. If the polarity of E₂ is reversed, the balancing length becomes 32 cm. The ratio E₁/E₂ is",
+        options: ["3:1", "4:1", "5:1", "6:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 146",
+        text: "If the number of turns in the coil of galvanometer are decreased then the resistance of galvanometer",
+        options: ["increases", "decreases", "remains same", "becomes zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 147",
+        text: "In the experiment to determine the internal resistance of a cell (E1) using potentiometer, the resistance drawn from the resistance box is 'R'. The potential difference across the balancing length of the wire is equal to the terminal potential difference (V) of the cell. The value of internal resistance (r) of the cell is",
+        options: ["R(E1-V)/V", "R(V-E1)/E1", "R(E1-V)/E1", "R(V-E1)/V"],
+        correct: "A"
+      },
+      {
+        number: "Question 148",
+        text: "If only 2% of the total current passes through an ammeter having coil of resistance 'R' then the resistance of the shunt of an ammeter is",
+        options: ["R/49", "R/50", "R/51", "R/52"],
+        correct: "A"
+      },
+      {
+        number: "Question 149",
+        text: "In potentiometer experiment, the balancing length with a cell E₁ of unknown e.m.f. is ℓ₁ cm. By shunting the cell with resistance R Ω, the balancing length becomes ℓ₁/2 cm, the internal resistance (r) of a cell is",
+        options: ["R", "R/2", "2R", "R/3"],
+        correct: "A"
+      },
+      {
+        number: "Question 150",
+        text: "The length of a potentiometer wire is 'L'. A cell of e.m.f. 'E' is balanced at a length L/5 from the positive end of the wire. If the length of the wire is increased by L/2, at what distance will the same cell give a balance point?",
+        options: ["L/3", "L/4", "L/5", "L/6"],
+        correct: "A"
+      },
+      {
+        number: "Question 151",
+        text: "In the following network, I₁ = -0.4 A, I₄ = 1 A and I₅ = 0.4 A. The values of I₂, I₃ and I₆ respectively are",
+        options: ["1.4 A, -0.6 A, 0.4 A", "0.4 A, -0.6 A, 1.4 A", "1.4 A, 0.4 A, -0.6 A", "-0.6 A, 1.4 A, 0.4 A"],
+        correct: "A"
+      },
+      {
+        number: "Question 152",
+        text: "A galvanometer of resistance 100Ω requires 10μA current for full scale deflection. Now a resistance of 1Ω is connected to convert it into an ammeter. The minimum current required to obtain full scale deflection is",
+        options: ["1 mA", "10 mA", "100 mA", "1 A"],
+        correct: "A"
+      },
+      {
+        number: "Question 153",
+        text: "Kirchhoff's current law and voltage law respectively are based on the law of conservation of",
+        options: ["charge and energy", "energy and charge", "mass and energy", "energy and mass"],
+        correct: "A"
+      },
+      {
+        number: "Question 154",
+        text: "Sensitivity of a given potentiometer can be decreased by",
+        options: ["decreasing the potential gradient along the wire", "increasing the potential gradient along the wire", "decreasing the current through the wire", "increasing the current through the wire"],
+        correct: "B"
+      },
+      {
+        number: "Question 155",
+        text: "A stray magnetic field does 'NOT' affect the deflection of moving coil galvanometer because",
+        options: ["magnetic field inside galvanometer is very weak", "magnetic field inside galvanometer is zero", "magnetic field is equal to earth's magnetic field", "magnetic field inside galvanometer is very strong"],
+        correct: "D"
+      },
+      {
+        number: "Question 156",
+        text: "Two wires 'A' and 'B' of equal lengths are connected in left and right gaps, of meter bridge, respectively. The null point is obtained at 40 cm from left end. Diameters of the wires 'A' and 'B' are in the ratio 3:1, the ratio of specific resistance of 'A' to that of 'B' is",
+        options: ["1:9", "9:1", "3:1", "1:3"],
+        correct: "A"
+      },
+      {
+        number: "Question 157",
+        text: "In meter bridge experiment, to minimize an error due to contact resistance,",
+        options: ["increase the current flowing through meter bridge wire", "use non-uniform meter bridge wire", "repeat the experiment by interchanging the resistance in gaps", "changing the value of known resistance in the gap"],
+        correct: "C"
+      },
+      {
+        number: "Question 158",
+        text: "The deflection in a moving coil galvanometer is reduced to half when it is shunted with 'X' Ω coil. The relation between 'X' and resistance of galvanometer 'G' is",
+        options: ["X = G", "X = 2G", "X = G/2", "X = G/3"],
+        correct: "A"
+      },
+      {
+        number: "Question 159",
+        text: "In moving coil galvanometer, strong horse shoe magnet of concave shaped pole pieces is used to",
+        options: ["increase space for rotation of coil", "reduce weight of galvanometer", "produce magnetic field which is parallel to plane of coil at any position", "make magnetic induction weak at the centre"],
+        correct: "C"
+      },
+      {
+        number: "Question 160",
+        text: "For a metallic wire, the ratio of voltage to corresponding current is",
+        options: ["increases or decreases with rise in temperature depending upon the nature of the metal", "increases with rise in temperature", "independent of temperature", "decreases with rise in temperature"],
+        correct: "B"
+      },
+      {
+        number: "Question 161",
+        text: "A galvanometer has resistance of 100Ω and a current of 10mA produces full scale deflection in it. The resistance to be connected to it in series, to get a voltmeter of range 50 volt, is",
+        options: ["4900 Ω", "5000 Ω", "5100 Ω", "5200 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 162",
+        text: "The current in 1Ω resistor in the following circuit is",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 163",
+        text: "The range of an ammeter of resistance 'G' can be increased from 'I' to 'nI' by connecting",
+        options: ["series resistance of G/(n-1)Ω", "A shunt of G/(n-1)Ω", "A series resistance of G/(n+1)Ω", "A shunt of G/(n+1)Ω"],
+        correct: "B"
+      },
+      {
+        number: "Question 164",
+        text: "In the given electrical circuit, which one of the following equation is a correct equation?",
+        options: ["E₁ - (i₁ + i₂)R + i₁r₁ = 0", "E₂ - i₂r₂ - E₁ - i₁r₁ = 0", "E₁ - (i₁ + i₂)R - i₁r₁ = 0", "-E₂ - (i₁ + i₂)R + i₂r₂ = 0"],
+        correct: "C"
+      },
+      {
+        number: "Question 165",
+        text: "A potentiometer wire has length L for given cell of emf E, the balancing length is L/3 from the positive end of the wire. If the length of potentiometer wire is increased by 50%, then for the same cell, the balance point is obtained at length",
+        options: ["L/2", "L/3", "L/4", "L/5"],
+        correct: "B"
+      },
+      {
+        number: "Question 166",
+        text: "A 220 V input is supplied to a transformer. The output circuit draws a current of 2.0 A at 440 V. If the ratio of output to input power is 0.8, then the current drawn by primary winding is",
+        options: ["2 A", "4 A", "6 A", "8 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 167",
+        text: "In the network shown cell of emf E has internal resistance r and the galvanometer shows zero deflection. If the cell is replaced by a new cell of emf 2E and internal resistance 3r keeping everything else identical then",
+        options: ["The galvanometer will show deflection of 10 divisions", "The galvanometer show zero deflection", "Current will flow from A to B", "Current will flow from B to A"],
+        correct: "B"
+      },
+      {
+        number: "Question 168",
+        text: "In the following network, the current flowing through 15 Ω resistance is",
+        options: ["0.5 A", "1 A", "1.5 A", "2 A"],
+        correct: "B"
+      },
+      {
+        number: "Question 169",
+        text: "A conducting wire has length L₁ and diameter d₁. After stretching the same wire length becomes L₂ and diameter d₂. The ratio of resistance before and after stretching is",
+        options: ["(L₁/L₂)²", "(L₂/L₁)²", "(d₂/d₁)²", "(d₁/d₂)²"],
+        correct: "B"
+      },
+      {
+        number: "Question 170",
+        text: "The deflection in galvanometer falls to (1/4)th when it is shunted by 3 Ω. If additional shunt of 2 Ω is connected in parallel to earlier shunt, the deflection in galvanometer falls to",
+        options: ["1/2", "1/3", "1/4", "1/5"],
+        correct: "A"
+      },
+      {
+        number: "Question 171",
+        text: "Sensitivity of moving coil galvanometer is s. If a shunt of (1/8)th of the resistance of galvanometer is connected to moving coil galvanometer, its sensitivity becomes",
+        options: ["s/8", "s/9", "8s/9", "9s/8"],
+        correct: "B"
+      },
+      {
+        number: "Question 172",
+        text: "The resistivity of potentiometer wire is 40 × 10⁻⁸ Ω m and its area of cross-section is 8 × 10⁻⁶ m². If 0.2 A current is flowing through the wire, the potential gradient of the wire is",
+        options: ["0.1 V/m", "0.2 V/m", "0.3 V/m", "0.4 V/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 173",
+        text: "In a potentiometer experiment, the null point is obtained at a particular point for a cell on potentiometer wire x cm long. If the length of the potentiometer wire is increased without changing the cell, the balancing length will (Driving source is not changed)",
+        options: ["increase", "decrease", "remain same", "become zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 174",
+        text: "A galvanometer of resistance 30Ω is connected to a battery of emf 2 V with 1970 Ω resistance in series. A full scale deflection of 20 divisions is obtained in the galvanometer. To reduce the deflection to 10 divisions, the resistance in series required is",
+        options: ["3970 Ω", "4000 Ω", "4030 Ω", "4060 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 175",
+        text: "What is the maximum power output that can be obtained from a cell of emf E and internal resistance r?",
+        options: ["E²/4r", "E²/2r", "E²/r", "2E²/r"],
+        correct: "A"
+      },
+      {
+        number: "Question 176",
+        text: "A voltmeter of range 3 V and resistance 200Ω cannot be converted to an ammeter of range",
+        options: ["1 A", "2 A", "3 A", "4 A"],
+        correct: "D"
+      },
+      {
+        number: "Question 177",
+        text: "For measurement of potential difference, potentiometer is preferred in comparison to voltmeter because",
+        options: ["potentiometer is more sensitive than voltmeter", "measurement by potentiometer is more accurate", "potentiometer draws no current from the cell", "all of the above"],
+        correct: "D"
+      },
+      {
+        number: "Question 178",
+        text: "When a resistance of 100Ω is connected in series with a galvanometer of resistance R, its range is V. To double its range, a resistance of 1000Ω is connected in series. Find R.",
+        options: ["100 Ω", "200 Ω", "300 Ω", "400 Ω"],
+        correct: "A"
+      },
+      {
+        number: "Question 179",
+        text: "A 2 V battery, a 990Ω resistor and a potentiometer of 2 m length, all are connected in series. If the resistance of potentiometer wire is 10Ω, then the potential gradient of the potentiometer wire is",
+        options: ["0.01 V/m", "0.02 V/m", "0.03 V/m", "0.04 V/m"],
+        correct: "A"
+      },
+      {
+        number: "Question 180",
+        text: "The resistance of an ammeter is 13Ω and its scale is graduated for a current upto 100 A. After an additional shunt has been connected to this ammeter it becomes possible to measure currents upto 750 A by this meter. The value of shunt resistance is",
+        options: ["2 Ω", "3 Ω", "4 Ω", "5 Ω"],
+        correct: "A"
+      },
+      // Questions 181-204 (continued with placeholders - you should replace with actual questions)
+      {
+        number: "Question 181",
+        text: "MHT CET Current Electricity Question 181",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 182",
+        text: "MHT CET Current Electricity Question 182",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 183",
+        text: "MHT CET Current Electricity Question 183",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 184",
+        text: "MHT CET Current Electricity Question 184",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 185",
+        text: "MHT CET Current Electricity Question 185",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 186",
+        text: "MHT CET Current Electricity Question 186",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 187",
+        text: "MHT CET Current Electricity Question 187",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 188",
+        text: "MHT CET Current Electricity Question 188",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 189",
+        text: "MHT CET Current Electricity Question 189",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 190",
+        text: "MHT CET Current Electricity Question 190",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 191",
+        text: "MHT CET Current Electricity Question 191",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 192",
+        text: "MHT CET Current Electricity Question 192",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 193",
+        text: "MHT CET Current Electricity Question 193",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 194",
+        text: "MHT CET Current Electricity Question 194",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 195",
+        text: "MHT CET Current Electricity Question 195",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 196",
+        text: "MHT CET Current Electricity Question 196",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 197",
+        text: "MHT CET Current Electricity Question 197",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 198",
+        text: "MHT CET Current Electricity Question 198",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 199",
+        text: "MHT CET Current Electricity Question 199",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 200",
+        text: "MHT CET Current Electricity Question 200",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 201",
+        text: "MHT CET Current Electricity Question 201",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 202",
+        text: "MHT CET Current Electricity Question 202",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 203",
+        text: "MHT CET Current Electricity Question 203",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      },
+      {
+        number: "Question 204",
+        text: "MHT CET Current Electricity Question 204",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "B"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      
+      // Generate test name with timestamp
+      const now = new Date();
+      const testName = `MHT-CET Current Electricity Test ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      // Create result object
+      const resultData = {
+        testName: testName,
+        total: questions.length,
+        correct: correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        timestamp: now.toISOString(),
+        details: results
+      };
+
+      // Save to localStorage
+      try {
+        // Get existing scores or initialize empty array
+        let scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+        
+        // Add new score
+        scores.push(resultData);
+        
+        // Save back to localStorage
+        localStorage.setItem("quizScores", JSON.stringify(scores));
+        
+        // Also save the current result for the result page
+        localStorage.setItem("quizResults", JSON.stringify(resultData));
+        
+        // Show save notification
+        showNotification();
+        
+        // Redirect to results page after a short delay
+        setTimeout(() => {
+          window.location.href = "MCCW-PRC19.html";
+        }, 1500);
+      } catch (e) {
+        console.error("Error saving results:", e);
+        alert("Error saving results. Please try again.");
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "flex";
+    }
+
+    function hideNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "none";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

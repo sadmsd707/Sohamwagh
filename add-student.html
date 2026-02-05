@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Student - Soham Teacher Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Your Original Hamburger Menu Styles with Enhanced Animation */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: center;
+    }
+
+    /* Enhanced Hamburger Animation */
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Your Original Side Navigation Panel - Only animation enhanced */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      padding-top: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* White line effect between items (your original design had borders) */
+    .side-nav ul li::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 30px;
+      right: 30px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul li:last-child::after {
+      display: none;
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 70px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      margin: 0;
+      position: relative;
+    }
+
+    /* Enhanced hover animation */
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+    }
+
+    /* Add a subtle slide-in effect for the hover */
+    .side-nav ul li a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: white;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .side-nav ul li a:hover::before {
+      transform: translateX(0);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .side-nav ul li a:hover .nav-icon {
+      transform: scale(1.1);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* REST OF YOUR ORIGINAL CSS (unchanged) */
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    /* Form Container */
+    .form-container {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .form-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-icon {
+      background: #2563eb;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .form-title {
+      color: #1e3a8a;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .form-subtitle {
+      color: #64748b;
+      font-size: 1rem;
+      margin-top: 5px;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1e3a8a;
+      font-size: 1rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+    }
+
+    .form-control::placeholder {
+      color: #94a3b8;
+    }
+
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231e3a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 45px;
+    }
+
+    /* Date of Birth Calendar Icon */
+    .dob-container {
+      position: relative;
+    }
+
+    .dob-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    /* Age Display */
+    .age-display {
+      display: inline-block;
+      margin-left: 10px;
+      padding: 4px 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      color: #334155;
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+    }
+
+    /* Quick Add Section */
+    .quick-add-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .quick-add-section h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .quick-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .quick-action-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      transform: translateY(-2px);
+    }
+
+    .quick-action-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #2563eb;
+    }
+
+    .quick-action-text {
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    /* Student List Section Styles */
+    .student-list-section {
+      margin-top: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .student-list-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .list-title {
+      color: #1e3a8a;
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-icon {
+      background: #2563eb;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    /* Search and Filter */
+    .search-filter-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 45px 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+    }
+
+    .filter-select {
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #f8fafc;
+      min-width: 200px;
+    }
+
+    /* Student Table */
+    .student-table-container {
+      overflow-x: auto;
+    }
+
+    .student-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .student-table th {
+      background: #f1f5f9;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #1e3a8a;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .student-table td {
+      padding: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .student-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .student-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .student-name-cell {
+      display: flex;
+      align-items: center;
+    }
+
+    .class-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .class-11th-mhtcet-pcm { background: #dbeafe; color: #1e40af; }
+    .class-11th-mhtcet-pcb { background: #dcfce7; color: #166534; }
+    .class-11th-jee { background: #fef3c7; color: #92400e; }
+    .class-11th-neet { background: #fce7f3; color: #9d174d; }
+    .class-12th-mhtcet-pcm { background: #ede9fe; color: #5b21b6; }
+    .class-12th-mhtcet-pcb { background: #ccfbf1; color: #0f766e; }
+    .class-12th-jee { background: #fef7cd; color: #854d0e; }
+    .class-12th-neet { background: #fae8ff; color: #86198f; }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .edit-btn { color: #2563eb; }
+    .delete-btn { color: #ef4444; }
+
+    /* Age badge in table */
+    .age-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: #475569;
+      margin-left: 5px;
+      font-weight: 600;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #475569;
+    }
+
+    .empty-state p {
+      margin-bottom: 30px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .pagination-info {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 50px;
+    }
+
+    footer p {
+      font-size: 1rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .form-icon {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      .quick-actions {
+        justify-content: center;
+      }
+      
+      .list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .search-filter-container {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        min-width: 100%;
+      }
+      
+      .student-table {
+        min-width: 800px;
+      }
+      
+      .pagination {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Success Message */
+    .success-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+
+    .success-message.show {
+      transform: translateX(0);
+    }
+
+    .success-icon {
+      font-size: 1.5rem;
+    }
+
+    /* Field Info */
+    .field-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 5px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .info-icon {
+      color: #2563eb;
+    }
+
+    /* Auto-save indicator */
+    .auto-save-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #f59e0b;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      transform: translateY(150%);
+      transition: transform 0.3s ease;
+    }
+
+    .auto-save-indicator.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham - Teacher Dashboard</h1>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Side Navigation - Your Original Structure -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+       <li><a href="teacher-dashboard.html" class="nav-active"><span class="nav-icon">📊</span>Dashboard</a></li>
+      <li><a href="teacher-classes.html"><span class="nav-icon">🏫</span>My Classes</a></li>
+      <li><a href="attendance.html"><span class="nav-icon">📅</span>Attendance</a></li>
+      <li><a href="announcements.html"><span class="nav-icon">📢</span>Announcements</a></li>
+      <li><a href="create-test.html"><span class="nav-icon">✏️</span>Create Test</a></li>
+      <li><a href="my-tests.html"><span class="nav-icon">📝</span>My Tests</a></li>
+      <li><a href="sitting-arrangement.html"><span class="nav-icon">💺</span>Sitting Arrangement</a></li>
+      <li><a href="omr-scanner.html"><span class="nav-icon">📸</span>OMR Scanner</a></li>
+      <li><a href="teacher-scores.html"><span class="nav-icon">📈</span>Student Scores</a></li>
+      <li><a href="add-student.html"><span class="nav-icon">👨‍🎓</span>Add Student</a></li>
+      <li><a href="teacher-parent.html"><span class="nav-icon">👪</span>Parent Section</a></li>
+      <li><a href="teacher-resources.html"><span class="nav-icon">📚</span>Resources</a></li>
+      <li><a href="my-account.html"><span class="nav-icon">👤</span>My Account</a></li>
+      <li><a href="role-selection.html" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Success Message -->
+  <div class="success-message" id="successMessage">
+    <span class="success-icon">✅</span>
+    <span id="successText">Student added successfully!</span>
+  </div>
+
+  <!-- Auto-save Indicator -->
+  <div class="auto-save-indicator" id="autoSaveIndicator">
+    <span class="success-icon">💾</span>
+    <span>Data saved automatically</span>
+  </div>
+
+  <main class="dashboard">
+    <section class="welcome-section">
+      <h2>Add New Student</h2>
+      <p>Register a new student to your classes</p>
+    </section>
+
+    <div class="form-container">
+      <div class="form-header">
+        <div class="form-icon">👨‍🎓</div>
+        <div>
+          <div class="form-title">Student Registration</div>
+          <div class="form-subtitle">Fill in the student details to add them to your class</div>
+        </div>
+      </div>
+
+      <form id="addStudentForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="studentName">Full Name</label>
+            <input type="text" id="studentName" class="form-control" placeholder="Enter student's full name" required>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Enter the student's complete name as per official records</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="studentId">Student ID</label>
+            <input type="text" id="studentId" class="form-control" placeholder="Enter student ID" required>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Unique identifier for the student (will be used for login)</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="motherName">Mother's Name</label>
+            <input type="text" id="motherName" class="form-control" placeholder="Enter mother's full name" required>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Enter mother's name as per official records (required for student login)</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <div class="dob-container">
+              <input type="date" id="dateOfBirth" class="form-control" required>
+              <span class="dob-icon">📅</span>
+            </div>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Student's date of birth</span>
+              <span id="ageDisplay" class="age-display" style="display: none;">Age: </span>
+            </div>
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="studentClass">Select Class</label>
+            <select id="studentClass" class="form-control" required>
+              <option value="">Choose a class</option>
+              <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+              <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+              <option value="11th-jee">11th JEE</option>
+              <option value="11th-neet">11th NEET</option>
+              <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+              <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+              <option value="12th-jee">12th JEE</option>
+              <option value="12th-neet">12th NEET</option>
+            </select>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Select the appropriate class for the student</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="studentMobile">Student Mobile No.</label>
+            <input type="tel" id="studentMobile" class="form-control" placeholder="+91 98765 43210" required>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Student's personal contact number</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="parentMobile">Parent Mobile No.</label>
+            <input type="tel" id="parentMobile" class="form-control" placeholder="+91 98765 43210" required>
+            <div class="field-info">
+              <span class="info-icon">ℹ️</span>
+              <span>Parent or guardian's contact number</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success">
+            <span>Add Student</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="clearForm()">
+            <span>Clear Form</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="quick-add-section">
+      <h3><span class="icon">⚡</span> Quick Actions</h3>
+      <div class="quick-actions">
+        <div class="quick-action-btn" onclick="generateStudentId()">
+          <div class="quick-action-icon">🆔</div>
+          <div class="quick-action-text">Generate ID</div>
+        </div>
+        <div class="quick-action-btn" onclick="clearForm()">
+          <div class="quick-action-icon">🗑️</div>
+          <div class="quick-action-text">Clear Form</div>
+        </div>
+        <div class="quick-action-btn" onclick="toggleStudentList()">
+          <div class="quick-action-icon">👥</div>
+          <div class="quick-action-text" id="studentListToggleText">View All Students</div>
+        </div>
+        <div class="quick-action-btn" onclick="loadSavedData()">
+          <div class="quick-action-icon">📥</div>
+          <div class="quick-action-text">Load Saved Data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student List Section -->
+    <div class="student-list-section" id="studentListSection" style="display: none;">
+      <div class="student-list-container">
+        <div class="list-header">
+          <div class="list-title">
+            <div class="list-icon">👥</div>
+            <div>All Students</div>
+          </div>
+          <div class="list-actions">
+            <button class="btn btn-secondary" onclick="exportStudentData()">
+              <span>Export Data</span>
+            </button>
+            <button class="btn btn-secondary" onclick="toggleStudentList()">
+              <span>Close</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="search-filter-container">
+          <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search students by name, ID, or mother's name...">
+            <span class="search-icon">🔍</span>
+          </div>
+          <select class="filter-select" id="classFilter">
+            <option value="">All Classes</option>
+            <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+            <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+            <option value="11th-jee">11th JEE</option>
+            <option value="11th-neet">11th NEET</option>
+            <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+            <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+            <option value="12th-jee">12th JEE</option>
+            <option value="12th-neet">12th NEET</option>
+          </select>
+        </div>
+
+        <div class="student-table-container">
+          <table class="student-table" id="studentTable">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Mother's Name</th>
+                <th>Date of Birth</th>
+                <th>Age</th>
+                <th>Class</th>
+                <th>Student Mobile</th>
+                <th>Parent Mobile</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody">
+              <!-- Student data will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <div class="empty-icon">👨‍🎓</div>
+          <h3>No Students Found</h3>
+          <p>You haven't added any students yet. Add your first student to get started.</p>
+          <button class="btn btn-success" onclick="toggleStudentList()">
+            <span>Add Student</span>
+          </button>
+        </div>
+
+        <div class="pagination" id="pagination" style="display: none;">
+          <div class="pagination-info" id="paginationInfo">
+            Showing 0 of 0 students
+          </div>
+          <div class="pagination-controls" id="paginationControls">
+            <!-- Pagination buttons will be added here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Soham - Entrance Exam Practice. All rights reserved.</p>
+     <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+  </footer>
+
+  <script>
+    // Check if user is logged in and is a teacher
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("userRole") !== "teacher") {
+      window.location.href = "role-selection.html";
+    }
+
+    // Logout function
+    function logout() {
+      // Show loading state
+      const logoutBtn = event.target;
+      const originalText = logoutBtn.innerHTML;
+      logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
+      logoutBtn.disabled = true;
+      
+      setTimeout(() => {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        window.location.href = "role-selection.html";
+      }, 1000);
+    }
+
+    // Enhanced Hamburger menu functionality with animations
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      hamburger.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      hamburger.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
+    // Close menu with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Calculate age from date of birth
+    function calculateAge(dob) {
+      if (!dob) return null;
+      
+      const birthDate = new Date(dob);
+      const today = new Date();
+      
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      return age;
+    }
+
+    // Format date to display in readable format
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    // Update age display when DOB changes
+    document.getElementById('dateOfBirth').addEventListener('change', function() {
+      const dob = this.value;
+      const ageDisplay = document.getElementById('ageDisplay');
+      
+      if (dob) {
+        const age = calculateAge(dob);
+        ageDisplay.textContent = `Age: ${age} years`;
+        ageDisplay.style.display = 'inline-block';
+      } else {
+        ageDisplay.style.display = 'none';
+      }
+    });
+
+    // Auto-save functionality
+    const form = document.getElementById('addStudentForm');
+    const formFields = form.querySelectorAll('input, select');
+    
+    // Load saved data on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedData();
+    });
+
+    // Auto-save when form fields change
+    formFields.forEach(field => {
+      field.addEventListener('input', () => {
+        saveFormData();
+        showAutoSaveIndicator();
+      });
+      
+      field.addEventListener('change', () => {
+        saveFormData();
+        showAutoSaveIndicator();
+      });
+    });
+
+    // Save form data to localStorage
+    function saveFormData() {
+      const formData = {
+        studentName: document.getElementById('studentName').value,
+        studentId: document.getElementById('studentId').value,
+        motherName: document.getElementById('motherName').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value,
+        studentClass: document.getElementById('studentClass').value,
+        studentMobile: document.getElementById('studentMobile').value,
+        parentMobile: document.getElementById('parentMobile').value
+      };
+      
+      localStorage.setItem('studentFormData', JSON.stringify(formData));
+      
+      // Update age display if DOB is set
+      if (formData.dateOfBirth) {
+        const age = calculateAge(formData.dateOfBirth);
+        const ageDisplay = document.getElementById('ageDisplay');
+        ageDisplay.textContent = `Age: ${age} years`;
+        ageDisplay.style.display = 'inline-block';
+      }
+    }
+
+    // Load saved form data from localStorage
+    function loadSavedData() {
+      const savedData = localStorage.getItem('studentFormData');
+      if (savedData) {
+        const formData = JSON.parse(savedData);
+        document.getElementById('studentName').value = formData.studentName || '';
+        document.getElementById('studentId').value = formData.studentId || '';
+        document.getElementById('motherName').value = formData.motherName || '';
+        document.getElementById('dateOfBirth').value = formData.dateOfBirth || '';
+        document.getElementById('studentClass').value = formData.studentClass || '';
+        document.getElementById('studentMobile').value = formData.studentMobile || '';
+        document.getElementById('parentMobile').value = formData.parentMobile || '';
+        
+        // Update age display if DOB is set
+        if (formData.dateOfBirth) {
+          const age = calculateAge(formData.dateOfBirth);
+          const ageDisplay = document.getElementById('ageDisplay');
+          ageDisplay.textContent = `Age: ${age} years`;
+          ageDisplay.style.display = 'inline-block';
+        }
+      }
+    }
+
+    // Clear form function
+    function clearForm() {
+      document.getElementById('addStudentForm').reset();
+      document.getElementById('ageDisplay').style.display = 'none';
+      localStorage.removeItem('studentFormData');
+      showSuccessMessage('Form cleared successfully!', '🗑️');
+    }
+
+    // Show auto-save indicator
+    function showAutoSaveIndicator() {
+      const indicator = document.getElementById('autoSaveIndicator');
+      indicator.classList.add('show');
+      
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+
+    // Show success message
+    function showSuccessMessage(message, icon = '✅') {
+      const successMessage = document.getElementById('successMessage');
+      const successText = document.getElementById('successText');
+      
+      successMessage.innerHTML = `<span class="success-icon">${icon}</span><span>${message}</span>`;
+      successMessage.classList.add('show');
+      
+      setTimeout(() => {
+        successMessage.classList.remove('show');
+        // Reset to default message
+        successMessage.innerHTML = '<span class="success-icon">✅</span><span id="successText">Student added successfully!</span>';
+      }, 3000);
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Validate date of birth
+      const dob = document.getElementById('dateOfBirth').value;
+      if (!dob) {
+        alert('Please enter Date of Birth');
+        return;
+      }
+      
+      const age = calculateAge(dob);
+      if (age < 10 || age > 25) {
+        if (!confirm(`Student age is ${age} years. Are you sure this is correct?`)) {
+          return;
+        }
+      }
+      
+      // Show loading state
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="loading"></span> Adding Student...';
+      submitBtn.disabled = true;
+      
+      // Collect form data
+      const formData = {
+        studentName: document.getElementById('studentName').value,
+        studentId: document.getElementById('studentId').value,
+        motherName: document.getElementById('motherName').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value,
+        age: age,
+        studentClass: document.getElementById('studentClass').value,
+        studentMobile: document.getElementById('studentMobile').value,
+        parentMobile: document.getElementById('parentMobile').value,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Save to students list in localStorage
+      saveStudentToDatabase(formData);
+      
+      // Simulate API call
+      setTimeout(() => {
+        // Show success message
+        showSuccessMessage('Student added successfully!', '✅');
+        
+        // Clear form and saved data
+        this.reset();
+        document.getElementById('ageDisplay').style.display = 'none';
+        localStorage.removeItem('studentFormData');
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Update class statistics in localStorage
+        updateClassStatistics(formData.studentClass);
+        
+        // Refresh student list if visible
+        if (isStudentListVisible) {
+          loadStudents();
+        }
+      }, 1500);
+    });
+
+    // Save student to database (localStorage)
+    function saveStudentToDatabase(studentData) {
+      // Get existing students or initialize empty array
+      const existingStudents = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // Add new student
+      existingStudents.push(studentData);
+      
+      // Save back to localStorage
+      localStorage.setItem('students', JSON.stringify(existingStudents));
+      
+      // Also save to student credentials for login (INCLUDING MOTHER'S NAME)
+      saveStudentCredentials(
+        studentData.studentId, 
+        studentData.studentName, 
+        studentData.studentClass,
+        studentData.motherName  // Include mother's name
+      );
+    }
+
+    // Save student credentials for login (UPDATED to include mother's name)
+    function saveStudentCredentials(studentId, studentName, studentClass, motherName) {
+      // Get existing student credentials or initialize empty array
+      const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+      
+      // Check if student already exists
+      const existingStudentIndex = studentCredentials.findIndex(cred => cred.studentId === studentId);
+      
+      if (existingStudentIndex === -1) {
+        // Add new student credentials with default password AND mother's name
+        studentCredentials.push({
+          studentId: studentId,
+          password: '290108', // Default password for all students
+          name: studentName,
+          motherName: motherName, // Include mother's name
+          class: studentClass,
+          role: 'student'
+        });
+        
+        // Save back to localStorage
+        localStorage.setItem('studentCredentials', JSON.stringify(studentCredentials));
+      }
+    }
+
+    // Update class statistics
+    function updateClassStatistics(className) {
+      // Get existing class statistics or initialize empty object
+      const classStats = JSON.parse(localStorage.getItem('classStats')) || {};
+      
+      // Initialize class if it doesn't exist
+      if (!classStats[className]) {
+        classStats[className] = {
+          studentCount: 0,
+          testsCount: 0,
+          assignmentsCount: 0,
+          avgScore: 0
+        };
+      }
+      
+      // Update student count
+      classStats[className].studentCount += 1;
+      
+      // Save updated statistics
+      localStorage.setItem('classStats', JSON.stringify(classStats));
+    }
+
+    // Generate student ID function
+    function generateStudentId() {
+      const prefix = 'SOHAM';
+      const random = Math.floor(1000 + Math.random() * 9000);
+      const studentId = `${prefix}${random}`; // Format: SOHAM1234
+      document.getElementById('studentId').value = studentId;
+      
+      // Auto-save the generated ID
+      saveFormData();
+      showAutoSaveIndicator();
+    }
+
+    // Student list functionality
+    let allStudents = [];
+    let filteredStudents = [];
+    let currentPage = 1;
+    const studentsPerPage = 10;
+    let isStudentListVisible = false;
+
+    // Toggle student list visibility
+    function toggleStudentList() {
+      const studentListSection = document.getElementById('studentListSection');
+      const toggleText = document.getElementById('studentListToggleText');
+      
+      isStudentListVisible = !isStudentListVisible;
+      
+      if (isStudentListVisible) {
+        studentListSection.style.display = 'block';
+        toggleText.textContent = 'Hide Students';
+        loadStudents();
+        // Scroll to student list
+        studentListSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        studentListSection.style.display = 'none';
+        toggleText.textContent = 'View All Students';
+      }
+    }
+
+    // Load students from localStorage
+    function loadStudents() {
+      const studentsData = localStorage.getItem('students');
+      allStudents = studentsData ? JSON.parse(studentsData) : [];
+      filteredStudents = [...allStudents];
+      
+      renderStudentTable();
+      updatePagination();
+      setupEventListeners();
+    }
+
+    // Set up event listeners for search and filter
+    function setupEventListeners() {
+      const searchInput = document.getElementById('searchInput');
+      const classFilter = document.getElementById('classFilter');
+      
+      // Remove existing event listeners
+      searchInput.replaceWith(searchInput.cloneNode(true));
+      classFilter.replaceWith(classFilter.cloneNode(true));
+      
+      // Get new references
+      const newSearchInput = document.getElementById('searchInput');
+      const newClassFilter = document.getElementById('classFilter');
+      
+      newSearchInput.addEventListener('input', filterStudents);
+      newClassFilter.addEventListener('change', filterStudents);
+    }
+
+    // Filter students based on search and class filter
+    function filterStudents() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const selectedClass = document.getElementById('classFilter').value;
+      
+      filteredStudents = allStudents.filter(student => {
+        const matchesSearch = 
+          student.studentName.toLowerCase().includes(searchTerm) ||
+          student.studentId.toLowerCase().includes(searchTerm) ||
+          (student.motherName && student.motherName.toLowerCase().includes(searchTerm));
+        
+        const matchesClass = selectedClass === '' || student.studentClass === selectedClass;
+        
+        return matchesSearch && matchesClass;
+      });
+      
+      currentPage = 1;
+      renderStudentTable();
+      updatePagination();
+    }
+
+    // Render student table
+    function renderStudentTable() {
+      const tableBody = document.getElementById('studentTableBody');
+      const emptyState = document.getElementById('emptyState');
+      const tableContainer = document.querySelector('.student-table-container');
+      const pagination = document.getElementById('pagination');
+      
+      if (filteredStudents.length === 0) {
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        pagination.style.display = 'none';
+        return;
+      }
+      
+      tableContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+      pagination.style.display = 'flex';
+      
+      // Calculate pagination
+      const startIndex = (currentPage - 1) * studentsPerPage;
+      const endIndex = Math.min(startIndex + studentsPerPage, filteredStudents.length);
+      const studentsToShow = filteredStudents.slice(startIndex, endIndex);
+      
+      tableBody.innerHTML = '';
+      
+      studentsToShow.forEach(student => {
+        const row = document.createElement('tr');
+        
+        // Get initials for avatar
+        const nameParts = student.studentName.split(' ');
+        const initials = nameParts.length > 1 
+          ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}` 
+          : student.studentName.substring(0, 2);
+        
+        // Format class name for display
+        const className = student.studentClass
+          .replace(/-/g, ' ')
+          .replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+        
+        // Format date of birth
+        const formattedDOB = formatDate(student.dateOfBirth);
+        
+        // Calculate age if not already stored
+        const age = student.age || calculateAge(student.dateOfBirth);
+        
+        row.innerHTML = `
+          <td>
+            <div class="student-name-cell">
+              <div class="student-avatar">${initials.toUpperCase()}</div>
+              <div>${student.studentName}</div>
+            </div>
+          </td>
+          <td>${student.studentId}</td>
+          <td>${student.motherName || '-'}</td>
+          <td>${formattedDOB}</td>
+          <td><span class="age-badge">${age} yrs</span></td>
+          <td><span class="class-badge ${student.studentClass}">${className}</span></td>
+          <td>${student.studentMobile}</td>
+          <td>${student.parentMobile}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn edit-btn" onclick="editStudent('${student.studentId}')" title="Edit">
+                ✏️
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteStudent('${student.studentId}')" title="Delete">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Update pagination controls
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+      const paginationInfo = document.getElementById('paginationInfo');
+      const paginationControls = document.getElementById('paginationControls');
+      
+      // Update pagination info
+      const startIndex = (currentPage - 1) * studentsPerPage + 1;
+      const endIndex = Math.min(currentPage * studentsPerPage, filteredStudents.length);
+      paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${filteredStudents.length} students`;
+      
+      // Update pagination buttons
+      paginationControls.innerHTML = '';
+      
+      // Previous button
+      const prevButton = document.createElement('button');
+      prevButton.className = 'pagination-btn';
+      prevButton.innerHTML = '&laquo; Previous';
+      prevButton.disabled = currentPage === 1;
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderStudentTable();
+          updatePagination();
+        }
+      });
+      paginationControls.appendChild(prevButton);
+      
+      // Page buttons
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      // Adjust if we're at the end
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+        pageButton.textContent = i;
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          renderStudentTable();
+          updatePagination();
+        });
+        paginationControls.appendChild(pageButton);
+      }
+      
+      // Next button
+      const nextButton = document.createElement('button');
+      nextButton.className = 'pagination-btn';
+      nextButton.innerHTML = 'Next &raquo;';
+      nextButton.disabled = currentPage === totalPages;
+      nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderStudentTable();
+          updatePagination();
+        }
+      });
+      paginationControls.appendChild(nextButton);
+    }
+
+    // Edit student function
+    function editStudent(studentId) {
+      // Find the student
+      const student = allStudents.find(s => s.studentId === studentId);
+      if (!student) return;
+      
+      // Fill the form with student data
+      document.getElementById('studentName').value = student.studentName;
+      document.getElementById('studentId').value = student.studentId;
+      document.getElementById('motherName').value = student.motherName || '';
+      document.getElementById('dateOfBirth').value = student.dateOfBirth || '';
+      document.getElementById('studentClass').value = student.studentClass;
+      document.getElementById('studentMobile').value = student.studentMobile;
+      document.getElementById('parentMobile').value = student.parentMobile;
+      
+      // Update age display
+      if (student.dateOfBirth) {
+        const age = calculateAge(student.dateOfBirth);
+        const ageDisplay = document.getElementById('ageDisplay');
+        ageDisplay.textContent = `Age: ${age} years`;
+        ageDisplay.style.display = 'inline-block';
+      }
+      
+      // Show success message
+      showSuccessMessage('Student data loaded for editing!', '✏️');
+      
+      // Scroll to form
+      document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
+      
+      // Update form submission to handle editing
+      const form = document.getElementById('addStudentForm');
+      form.onsubmit = function(e) {
+        e.preventDefault();
+        updateStudent(studentId);
+      };
+      
+      // Change submit button text
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.innerHTML = '<span>Update Student</span>';
+    }
+
+    // Update student function
+    function updateStudent(studentId) {
+      // Validate date of birth
+      const dob = document.getElementById('dateOfBirth').value;
+      if (!dob) {
+        alert('Please enter Date of Birth');
+        return;
+      }
+      
+      const age = calculateAge(dob);
+      
+      // Collect form data
+      const formData = {
+        studentName: document.getElementById('studentName').value,
+        studentId: document.getElementById('studentId').value,
+        motherName: document.getElementById('motherName').value,
+        dateOfBirth: dob,
+        age: age,
+        studentClass: document.getElementById('studentClass').value,
+        studentMobile: document.getElementById('studentMobile').value,
+        parentMobile: document.getElementById('parentMobile').value,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Find and update student
+      const studentIndex = allStudents.findIndex(s => s.studentId === studentId);
+      if (studentIndex !== -1) {
+        allStudents[studentIndex] = formData;
+        
+        // Save to localStorage
+        localStorage.setItem('students', JSON.stringify(allStudents));
+        
+        // Update student credentials as well (INCLUDING MOTHER'S NAME)
+        updateStudentCredentials(
+          studentId, 
+          formData.studentName, 
+          formData.studentClass,
+          formData.motherName  // Include mother's name
+        );
+        
+        // Show success message
+        showSuccessMessage('Student updated successfully!', '✅');
+        
+        // Reset form
+        document.getElementById('addStudentForm').reset();
+        document.getElementById('ageDisplay').style.display = 'none';
+        
+        // Reload student list if visible
+        if (isStudentListVisible) {
+          loadStudents();
+        }
+        
+        // Reset form submission to add mode
+        const form = document.getElementById('addStudentForm');
+        form.onsubmit = function(e) {
+          e.preventDefault();
+          // Your original form submission code here
+        };
+        
+        // Reset submit button text
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<span>Add Student</span>';
+      }
+    }
+
+    // Update student credentials (UPDATED to include mother's name)
+    function updateStudentCredentials(studentId, studentName, studentClass, motherName) {
+      const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+      const studentIndex = studentCredentials.findIndex(cred => cred.studentId === studentId);
+      
+      if (studentIndex !== -1) {
+        studentCredentials[studentIndex].name = studentName;
+        studentCredentials[studentIndex].class = studentClass;
+        studentCredentials[studentIndex].motherName = motherName; // Update mother's name
+        localStorage.setItem('studentCredentials', JSON.stringify(studentCredentials));
+      }
+    }
+
+    // Delete student function
+    function deleteStudent(studentId) {
+      if (confirm(`Are you sure you want to delete student ${studentId}?`)) {
+        // Remove student from allStudents array
+        allStudents = allStudents.filter(student => student.studentId !== studentId);
+        
+        // Update localStorage
+        localStorage.setItem('students', JSON.stringify(allStudents));
+        
+        // Remove student credentials
+        removeStudentCredentials(studentId);
+        
+        // Update class statistics
+        updateClassStatisticsAfterDeletion(studentId);
+        
+        // Reload the student list
+        loadStudents();
+        
+        // Show success message
+        showSuccessMessage('Student deleted successfully!');
+      }
+    }
+
+    // Remove student credentials
+    function removeStudentCredentials(studentId) {
+      const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+      const updatedCredentials = studentCredentials.filter(cred => cred.studentId !== studentId);
+      localStorage.setItem('studentCredentials', JSON.stringify(updatedCredentials));
+    }
+
+    // Update class statistics after deletion
+    function updateClassStatisticsAfterDeletion(studentId) {
+      // Find the student to get their class
+      const student = allStudents.find(s => s.studentId === studentId);
+      if (!student) return;
+      
+      const classStats = JSON.parse(localStorage.getItem('classStats')) || {};
+      
+      if (classStats[student.studentClass]) {
+        classStats[student.studentClass].studentCount = Math.max(0, classStats[student.studentClass].studentCount - 1);
+        localStorage.setItem('classStats', JSON.stringify(classStats));
+      }
+    }
+
+    // Export student data function
+    function exportStudentData() {
+      if (filteredStudents.length === 0) {
+        alert('No student data to export.');
+        return;
+      }
+      
+      // Create CSV content
+      let csvContent = "Name,Student ID,Mother's Name,Date of Birth,Age,Class,Student Mobile,Parent Mobile\n";
+      
+      filteredStudents.forEach(student => {
+        const className = student.studentClass
+          .replace(/-/g, ' ')
+          .replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+        
+        const age = student.age || calculateAge(student.dateOfBirth);
+        const formattedDOB = formatDate(student.dateOfBirth);
+        
+        csvContent += `"${student.studentName}","${student.studentId}","${student.motherName || ''}","${formattedDOB}","${age}","${className}","${student.studentMobile}","${student.parentMobile}"\n`;
+      });
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `students_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showSuccessMessage('Student data exported successfully!');
+    }
+  </script>
+</body>
+</html>

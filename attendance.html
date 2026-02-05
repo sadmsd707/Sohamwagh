@@ -1,0 +1,3440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attendance Management - Soham</title>
+  <!-- Add Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Add jsPDF Library for PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Improved Hamburger Menu with Animation */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+      z-index: 1001;
+      position: relative;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: center;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Improved Side Navigation Panel with Animation */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: slideInRight 0.5s forwards;
+    }
+
+    .side-nav.active ul li {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .side-nav ul li:nth-child(1) { animation-delay: 0.1s; }
+    .side-nav ul li:nth-child(2) { animation-delay: 0.15s; }
+    .side-nav ul li:nth-child(3) { animation-delay: 0.2s; }
+    .side-nav ul li:nth-child(4) { animation-delay: 0.25s; }
+    .side-nav ul li:nth-child(5) { animation-delay: 0.3s; }
+    .side-nav ul li:nth-child(6) { animation-delay: 0.35s; }
+    .side-nav ul li:nth-child(7) { animation-delay: 0.4s; }
+    .side-nav ul li:nth-child(8) { animation-delay: 0.45s; }
+    .side-nav ul li:nth-child(9) { animation-delay: 0.5s; }
+    .side-nav ul li:nth-child(10) { animation-delay: 0.55s; }
+    .side-nav ul li:nth-child(11) { animation-delay: 0.6s; }
+    .side-nav ul li:nth-child(12) { animation-delay: 0.65s; }
+    .side-nav ul li:nth-child(13) { animation-delay: 0.7s; }
+    .side-nav ul li:nth-child(14) { animation-delay: 0.75s; }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 70px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      margin: 0;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+      transform: translateX(5px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Dashboard Styles with Enhanced Animations */
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    .dashboard-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .dashboard-section:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-section:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-section:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-section:nth-child(4) { animation-delay: 0.4s; }
+
+    .dashboard-section h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dashboard-section h3 .icon {
+      font-size: 1.5rem;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary {
+      background: #f59e0b;
+    }
+
+    .btn-secondary:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    /* Attendance-specific styles with Animations */
+    .attendance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .attendance-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .attendance-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #475569;
+    }
+
+    select, input[type="date"], input[type="month"] {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      background: white;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    select:focus, input[type="date"]:focus, input[type="month"]:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .attendance-table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .attendance-table th,
+    .attendance-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .attendance-table th {
+      background-color: #f8fafc;
+      color: #1e3a8a;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    .attendance-table tr {
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: fadeInLeft 0.5s ease forwards;
+    }
+
+    .attendance-table tr:nth-child(1) { animation-delay: 0.1s; }
+    .attendance-table tr:nth-child(2) { animation-delay: 0.2s; }
+    .attendance-table tr:nth-child(3) { animation-delay: 0.3s; }
+    .attendance-table tr:nth-child(4) { animation-delay: 0.4s; }
+    .attendance-table tr:nth-child(5) { animation-delay: 0.5s; }
+    .attendance-table tr:nth-child(6) { animation-delay: 0.6s; }
+    .attendance-table tr:nth-child(7) { animation-delay: 0.7s; }
+    .attendance-table tr:nth-child(8) { animation-delay: 0.8s; }
+    .attendance-table tr:nth-child(9) { animation-delay: 0.9s; }
+    .attendance-table tr:nth-child(10) { animation-delay: 1.0s; }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .attendance-table tr:hover {
+      background-color: #f8fafc;
+      transform: translateX(5px);
+      transition: transform 0.3s ease;
+    }
+
+    .attendance-status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .attendance-status:hover {
+      transform: scale(1.05);
+    }
+
+    .status-present {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-absent {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-late {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-not-marked {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .attendance-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .attendance-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      text-align: center;
+      border-top: 4px solid #2563eb;
+      animation: fadeInUp 0.5s ease;
+      animation-fill-mode: both;
+      transition: all 0.3s ease;
+    }
+
+    .summary-card:nth-child(1) { animation-delay: 0.1s; }
+    .summary-card:nth-child(2) { animation-delay: 0.2s; }
+    .summary-card:nth-child(3) { animation-delay: 0.3s; }
+    .summary-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .summary-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    }
+
+    .summary-card.present {
+      border-top-color: #10b981;
+    }
+
+    .summary-card.absent {
+      border-top-color: #ef4444;
+    }
+
+    .summary-card.late {
+      border-top-color: #f59e0b;
+    }
+
+    .summary-card.rate {
+      border-top-color: #8b5cf6;
+    }
+
+    .summary-card h4 {
+      font-size: 1.8rem;
+      color: #1e3a8a;
+      margin-bottom: 5px;
+    }
+
+    .summary-card p {
+      color: #555;
+      font-weight: 600;
+    }
+
+    .attendance-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 5px;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .calendar-day.empty {
+      background: transparent;
+      cursor: default;
+    }
+
+    .calendar-day.present {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .calendar-day.absent {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .calendar-day.late {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .calendar-day:hover:not(.empty) {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar-day .date {
+      font-size: 1rem;
+    }
+
+    .calendar-day .status {
+      font-size: 0.7rem;
+      margin-top: 2px;
+    }
+
+    .attendance-modal .student-list {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .attendance-modal .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+      animation: fadeInLeft 0.5s ease;
+    }
+
+    .attendance-modal .student-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .attendance-modal .student-info h4 {
+      color: #1e3a8a;
+      margin-bottom: 5px;
+    }
+
+    .attendance-modal .student-info p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .attendance-modal .status-selector {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Enhanced status option styles with animation */
+    .status-option {
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      opacity: 0.7;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .status-option:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .status-option.selected {
+      opacity: 1;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .status-option.present {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-option.present.selected {
+      border: 2px solid #10b981;
+      background-color: #a7f3d0;
+    }
+    
+    .status-option.absent {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .status-option.absent.selected {
+      border: 2px solid #ef4444;
+      background-color: #fecaca;
+    }
+    
+    .status-option.late {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-option.late.selected {
+      border: 2px solid #f59e0b;
+      background-color: #fde68a;
+    }
+
+    /* Attendance Charts Styles */
+    .attendance-chart-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .attendance-chart {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e2e8f0;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .chart-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .chart-stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      text-align: center;
+      border-top: 4px solid #2563eb;
+      transition: all 0.3s ease;
+    }
+
+    .chart-stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .chart-stat-card h4 {
+      font-size: 1.5rem;
+      color: #1e3a8a;
+      margin-bottom: 5px;
+    }
+
+    .chart-stat-card p {
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .chart-placeholder {
+      text-align: center;
+      color: #666;
+    }
+
+    .chart-placeholder .icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    /* Modal Styles with Animation */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: slideInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      background: #2563eb;
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px;
+      transition: transform 0.3s ease;
+    }
+
+    .close-modal:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 50px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    footer p {
+      font-size: 1rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .attendance-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .attendance-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .attendance-filter {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-group {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .attendance-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .attendance-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .attendance-modal .student-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .attendance-modal .status-selector {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .side-nav {
+        width: 280px;
+      }
+      
+      .attendance-chart {
+        height: 300px;
+        padding: 15px;
+      }
+      
+      .chart-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .empty-state .icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 9999;
+      animation: slideInRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
+      min-width: 300px;
+      max-width: 400px;
+    }
+
+    .notification-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notification-message {
+      margin-right: 20px;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notification-error {
+      background: #ef4444;
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+    }
+
+    /* Ripple animation for buttons */
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Pulse animation for important elements */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham - Attendance Management</h1>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Updated Side Navigation with Enhanced Animation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="teacher-dashboard.html" class="nav-active"><span class="nav-icon">📊</span>Dashboard</a></li>
+      <li><a href="teacher-classes.html"><span class="nav-icon">🏫</span>My Classes</a></li>
+      <li><a href="attendance.html"><span class="nav-icon">📅</span>Attendance</a></li>
+      <li><a href="announcements.html"><span class="nav-icon">📢</span>Announcements</a></li>
+      <li><a href="create-test.html"><span class="nav-icon">✏️</span>Create Test</a></li>
+      <li><a href="my-tests.html"><span class="nav-icon">📝</span>My Tests</a></li>
+      <li><a href="sitting-arrangement.html"><span class="nav-icon">💺</span>Sitting Arrangement</a></li>
+      <li><a href="omr-scanner.html"><span class="nav-icon">📸</span>OMR Scanner</a></li>
+      <li><a href="teacher-scores.html"><span class="nav-icon">📈</span>Student Scores</a></li>
+      <li><a href="add-student.html"><span class="nav-icon">👨‍🎓</span>Add Student</a></li>
+      <li><a href="teacher-parent.html"><span class="nav-icon">👪</span>Parent Section</a></li>
+      <li><a href="teacher-resources.html"><span class="nav-icon">📚</span>Resources</a></li>
+      <li><a href="my-account.html"><span class="nav-icon">👤</span>My Account</a></li>
+      <li><a href="role-selection.html" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Attendance Modal -->
+  <div class="modal attendance-modal" id="attendanceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Mark Attendance</h3>
+        <button class="close-modal" onclick="closeAttendanceModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="attendance-filter">
+          <div class="filter-group">
+            <label for="attendanceClass">Class:</label>
+            <select id="attendanceClass" class="btn btn-small">
+              <option value="all">All Classes</option>
+              <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+              <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+              <option value="11th-jee">11th JEE</option>
+              <option value="11th-neet">11th NEET</option>
+              <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+              <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+              <option value="12th-jee">12th JEE</option>
+              <option value="12th-neet">12th NEET</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="attendanceDate">Date:</label>
+            <input type="date" id="attendanceDate" class="btn btn-small" value="">
+          </div>
+          <button class="btn btn-success" onclick="saveAttendance()">Save Attendance</button>
+        </div>
+        <div class="student-list" id="attendanceStudentList">
+          <!-- Student list for attendance will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Options Modal -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Export Attendance Report</h3>
+        <button class="close-modal" onclick="closeExportModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-options">
+          <div class="export-option" onclick="exportAsPDF('daily')">
+            <div class="export-icon">📅</div>
+            <div class="export-text">
+              <h4>Daily Report</h4>
+              <p>Export today's attendance with student details</p>
+            </div>
+          </div>
+          
+          <div class="export-option" onclick="exportAsPDF('weekly')">
+            <div class="export-icon">📊</div>
+            <div class="export-text">
+              <h4>Weekly Summary</h4>
+              <p>Export weekly attendance summary with charts</p>
+            </div>
+          </div>
+          
+          <div class="export-option" onclick="exportAsPDF('monthly')">
+            <div class="export-icon">📈</div>
+            <div class="export-text">
+              <h4>Monthly Report</h4>
+              <p>Export comprehensive monthly attendance report</p>
+            </div>
+          </div>
+          
+          <div class="export-option" onclick="exportAsPDF('custom')">
+            <div class="export-icon">⚙️</div>
+            <div class="export-text">
+              <h4>Custom Report</h4>
+              <p>Export custom date range with advanced options</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="custom-export-options" id="customExportOptions" style="display: none; margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 10px;">
+          <h4>Custom Report Options</h4>
+          <div class="attendance-filter" style="margin-top: 15px;">
+            <div class="filter-group">
+              <label for="exportStartDate">From:</label>
+              <input type="date" id="exportStartDate" value="">
+            </div>
+            <div class="filter-group">
+              <label for="exportEndDate">To:</label>
+              <input type="date" id="exportEndDate" value="">
+            </div>
+            <div class="filter-group">
+              <label for="exportClass">Class:</label>
+              <select id="exportClass">
+                <option value="all">All Classes</option>
+                <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+                <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+                <option value="11th-jee">11th JEE</option>
+                <option value="11th-neet">11th NEET</option>
+                <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+                <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+                <option value="12th-jee">12th JEE</option>
+                <option value="12th-neet">12th NEET</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-success" onclick="generateCustomPDF()" style="margin-top: 15px;">Generate Custom PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard">
+    <section class="welcome-section">
+      <h2>Attendance Management</h2>
+      <p>Track and manage student attendance across all your classes.</p>
+    </section>
+
+    <section class="dashboard-section">
+      <div class="attendance-header">
+        <h3><span class="icon">📅</span> Attendance Overview</h3>
+        <div class="attendance-actions">
+          <button class="btn btn-success" onclick="markAttendance()">
+            <span class="icon">✓</span> Mark Attendance
+          </button>
+          <button class="btn btn-secondary" onclick="showExportOptions()">
+            <span class="icon">📥</span> Export PDF
+          </button>
+          <button class="btn" onclick="viewAttendanceAnalytics()">
+            <span class="icon">📊</span> Analytics
+          </button>
+        </div>
+      </div>
+
+      <div class="attendance-summary">
+        <div class="summary-card present">
+          <h4 id="presentCount">0</h4>
+          <p>Present Today</p>
+        </div>
+        <div class="summary-card absent">
+          <h4 id="absentCount">0</h4>
+          <p>Absent Today</p>
+        </div>
+        <div class="summary-card late">
+          <h4 id="lateCount">0</h4>
+          <p>Late Today</p>
+        </div>
+        <div class="summary-card rate">
+          <h4 id="attendanceRate">0%</h4>
+          <p>Overall Attendance Rate</p>
+        </div>
+      </div>
+
+      <div class="attendance-filter">
+        <div class="filter-group">
+          <label for="classFilter">Class:</label>
+          <select id="classFilter" onchange="filterAttendance()">
+            <option value="all">All Classes</option>
+            <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+            <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+            <option value="11th-jee">11th JEE</option>
+            <option value="11th-neet">11th NEET</option>
+            <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+            <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+            <option value="12th-jee">12th JEE</option>
+            <option value="12th-neet">12th NEET</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="dateFilter">Date:</label>
+          <input type="date" id="dateFilter" onchange="filterAttendance()" value="">
+        </div>
+        <div class="filter-group">
+          <label for="statusFilter">Status:</label>
+          <select id="statusFilter" onchange="filterAttendance()">
+            <option value="all">All Status</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+            <option value="not-marked">Not Marked</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="attendance-table-container">
+        <table class="attendance-table" id="attendanceTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Student ID</th>
+              <th>Class</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            <!-- Attendance data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="noAttendanceData" class="empty-state" style="display: none;">
+        <div class="icon">📅</div>
+        <h3>No Attendance Records</h3>
+        <p>Mark attendance for your students to see records here.</p>
+        <button class="btn btn-success" onclick="markAttendance()" style="margin-top: 15px;">
+          Mark Attendance
+        </button>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📊</span> Attendance Analytics</h3>
+      
+      <div class="attendance-filter" style="margin-bottom: 20px;">
+        <div class="filter-group">
+          <label for="chartType">Chart Type:</label>
+          <select id="chartType" onchange="updateChart()">
+            <option value="daily">Daily Attendance</option>
+            <option value="weekly">Weekly Trends</option>
+            <option value="monthly">Monthly Summary</option>
+            <option value="classWise">Class-wise Comparison</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="chartPeriod">Period:</label>
+          <select id="chartPeriod" onchange="updateChart()">
+            <option value="7">Last 7 Days</option>
+            <option value="14">Last 14 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="chartClass">Class:</label>
+          <select id="chartClass" onchange="updateChart()">
+            <option value="all">All Classes</option>
+            <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+            <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+            <option value="11th-jee">11th JEE</option>
+            <option value="11th-neet">11th NEET</option>
+            <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+            <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+            <option value="12th-jee">12th JEE</option>
+            <option value="12th-neet">12th NEET</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="attendance-chart-container">
+        <div class="attendance-chart">
+          <canvas id="attendanceChart" style="width: 100%; height: 300px;"></canvas>
+        </div>
+        
+        <div class="chart-stats">
+          <div class="chart-stat-card">
+            <h4 id="avgAttendance">0%</h4>
+            <p>Average Attendance</p>
+          </div>
+          <div class="chart-stat-card">
+            <h4 id="bestDay">-</h4>
+            <p>Best Attendance Day</p>
+          </div>
+          <div class="chart-stat-card">
+            <h4 id="worstDay">-</h4>
+            <p>Lowest Attendance Day</p>
+          </div>
+          <div class="chart-stat-card">
+            <h4 id="totalStudents">0</h4>
+            <p>Total Students</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📆</span> Monthly Calendar View</h3>
+      <div class="attendance-filter">
+        <div class="filter-group">
+          <label for="calendarMonth">Month:</label>
+          <input type="month" id="calendarMonth" onchange="loadCalendarView()" value="">
+        </div>
+        <div class="filter-group">
+          <label for="calendarClass">Class:</label>
+          <select id="calendarClass" onchange="loadCalendarView()">
+            <option value="all">All Classes</option>
+            <option value="11th-mhtcet-pcm">11th MHTCET (PCM)</option>
+            <option value="11th-mhtcet-pcb">11th MHTCET (PCB)</option>
+            <option value="11th-jee">11th JEE</option>
+            <option value="11th-neet">11th NEET</option>
+            <option value="12th-mhtcet-pcm">12th MHTCET (PCM)</option>
+            <option value="12th-mhtcet-pcb">12th MHTCET (PCB)</option>
+            <option value="12th-jee">12th JEE</option>
+            <option value="12th-neet">12th NEET</option>
+          </select>
+        </div>
+      </div>
+      <div class="calendar-header">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+      <div class="attendance-calendar" id="attendanceCalendar">
+        <!-- Calendar will be populated here -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Soham - Entrance Exam Practice. All rights reserved.</p>
+     <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+  </footer>
+
+  <script>
+    // Check if user is logged in and is a teacher
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("userRole") !== "teacher") {
+      window.location.href = "role-selection.html";
+    }
+
+    // Enhanced Hamburger menu functionality with animation
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        
+        // Remove active class from all links
+        navLinks.forEach(link => link.classList.remove('nav-active'));
+        // Add active class to clicked link
+        link.classList.add('nav-active');
+      });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Add ripple effect to buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          const x = e.clientX - e.target.getBoundingClientRect().left;
+          const y = e.clientY - e.target.getBoundingClientRect().top;
+          
+          const ripple = document.createElement('span');
+          ripple.style.cssText = `
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            width: 100px;
+            height: 100px;
+            top: ${y - 50}px;
+            left: ${x - 50}px;
+          `;
+          
+          this.style.position = 'relative';
+          this.style.overflow = 'hidden';
+          this.appendChild(ripple);
+          
+          setTimeout(() => ripple.remove(), 600);
+        });
+        
+        // Add hover effect
+        button.addEventListener('mouseenter', () => {
+          button.style.transform = 'translateY(-2px)';
+        });
+        button.addEventListener('mouseleave', () => {
+          button.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Style export options
+      const style = document.createElement('style');
+      style.textContent = `
+        .export-options {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin-top: 20px;
+        }
+        
+        .export-option {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 2px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+        
+        .export-option:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          border-color: #2563eb;
+        }
+        
+        .export-icon {
+          font-size: 2.5rem;
+        }
+        
+        .export-text h4 {
+          margin: 0 0 5px 0;
+          color: #1e3a8a;
+        }
+        
+        .export-text p {
+          margin: 0;
+          color: #666;
+          font-size: 0.9rem;
+        }
+      `;
+      document.head.appendChild(style);
+    });
+
+    // Logout function
+    function logout() {
+      // Show loading state
+      const logoutBtn = event.target;
+      const originalText = logoutBtn.innerHTML;
+      logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
+      logoutBtn.disabled = true;
+      
+      setTimeout(() => {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        window.location.href = "role-selection.html";
+      }, 1000);
+    }
+
+    // Initialize sample data if not exists
+    function initializeSampleData() {
+      // Initialize students array if it doesn't exist
+      if (!localStorage.getItem('students')) {
+        const sampleStudents = [
+          {
+            studentName: "Rahul Sharma",
+            studentId: "SOHA20231001",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543210",
+            parentMobile: "+91 9876543211",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Priya Patel",
+            studentId: "SOHA20231002",
+            studentClass: "11th-mhtcet-pcb",
+            studentMobile: "+91 9876543212",
+            parentMobile: "+91 9876543213",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Amit Kumar",
+            studentId: "SOHA20231003",
+            studentClass: "12th-jee",
+            studentMobile: "+91 9876543214",
+            parentMobile: "+91 9876543215",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Sneha Gupta",
+            studentId: "SOHA20231004",
+            studentClass: "12th-neet",
+            studentMobile: "+91 9876543216",
+            parentMobile: "+91 9876543217",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Vikram Singh",
+            studentId: "SOHA20231005",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543218",
+            parentMobile: "+91 9876543219",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Ananya Desai",
+            studentId: "SOHA20231006",
+            studentClass: "12th-mhtcet-pcb",
+            studentMobile: "+91 9876543220",
+            parentMobile: "+91 9876543221",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Rajesh Mehta",
+            studentId: "SOHA20231007",
+            studentClass: "11th-jee",
+            studentMobile: "+91 9876543222",
+            parentMobile: "+91 9876543223",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Pooja Reddy",
+            studentId: "SOHA20231008",
+            studentClass: "12th-neet",
+            studentMobile: "+91 9876543224",
+            parentMobile: "+91 9876543225",
+            timestamp: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('students', JSON.stringify(sampleStudents));
+      }
+
+      // Initialize attendance records if they don't exist
+      if (!localStorage.getItem('attendanceRecords')) {
+        const today = new Date();
+        const attendanceRecords = {};
+        
+        // Create sample attendance for the last 90 days
+        for (let i = 0; i < 90; i++) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          const dateString = date.toISOString().split('T')[0];
+          
+          attendanceRecords[dateString] = {};
+          const students = JSON.parse(localStorage.getItem('students'));
+          
+          students.forEach(student => {
+            // Randomly assign attendance status (80% present, 10% absent, 10% late)
+            const rand = Math.random();
+            let status = 'present';
+            if (rand < 0.1) status = 'absent';
+            else if (rand < 0.2) status = 'late';
+            
+            // Make weekends have more absences
+            const dayOfWeek = date.getDay();
+            if ((dayOfWeek === 0 || dayOfWeek === 6) && rand < 0.3) {
+              status = 'absent';
+            }
+            
+            attendanceRecords[dateString][student.studentId] = {
+              status: status,
+              timestamp: date.toISOString()
+            };
+          });
+        }
+        
+        localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+      }
+    }
+
+    // Load and display attendance data
+    function loadAttendanceData() {
+      // Initialize sample data if needed
+      initializeSampleData();
+      
+      // Set default date filter to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateFilter').value = today;
+      
+      // Set default calendar month to current month
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      document.getElementById('calendarMonth').value = currentMonth;
+      
+      // Set default export dates
+      document.getElementById('exportStartDate').value = today;
+      document.getElementById('exportEndDate').value = today;
+      
+      // Load attendance table
+      filterAttendance();
+      
+      // Load calendar view
+      loadCalendarView();
+      
+      // Load analytics chart
+      setTimeout(() => {
+        updateChart();
+      }, 500);
+    }
+
+    // Filter attendance records based on selected filters
+    function filterAttendance() {
+      const classFilter = document.getElementById('classFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+      const statusFilter = document.getElementById('statusFilter').value;
+      
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      const classTemplates = {
+        '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+        '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+        '11th-jee': '11th JEE',
+        '11th-neet': '11th NEET',
+        '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+        '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+        '12th-jee': '12th JEE',
+        '12th-neet': '12th NEET'
+      };
+      
+      // Count attendance statuses for summary
+      let presentCount = 0;
+      let absentCount = 0;
+      let lateCount = 0;
+      let totalStudents = 0;
+      
+      // Build attendance table
+      let attendanceHTML = '';
+      let hasRecords = false;
+      
+      // If date filter is set, show records for that date
+      if (dateFilter) {
+        const dateRecords = attendanceRecords[dateFilter] || {};
+        
+        students.forEach((student, index) => {
+          // Apply class filter
+          if (classFilter !== 'all' && student.studentClass !== classFilter) {
+            return;
+          }
+          
+          totalStudents++;
+          const attendance = dateRecords[student.studentId];
+          let status = 'Not Marked';
+          let statusClass = 'status-not-marked';
+          let time = '-';
+          
+          if (attendance) {
+            status = attendance.status.charAt(0).toUpperCase() + attendance.status.slice(1);
+            statusClass = `status-${attendance.status}`;
+            time = new Date(attendance.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Count statuses for summary
+            if (attendance.status === 'present') presentCount++;
+            else if (attendance.status === 'absent') absentCount++;
+            else if (attendance.status === 'late') lateCount++;
+          }
+          
+          // Apply status filter
+          if (statusFilter !== 'all') {
+            const studentStatus = attendance ? attendance.status : 'not-marked';
+            if (studentStatus !== statusFilter) {
+              return;
+            }
+          }
+          
+          hasRecords = true;
+          attendanceHTML += `
+            <tr style="animation-delay: ${0.1 * (index % 10)}s">
+              <td>${student.studentName}</td>
+              <td>${student.studentId}</td>
+              <td>${classTemplates[student.studentClass] || student.studentClass}</td>
+              <td>${new Date(dateFilter).toLocaleDateString()}</td>
+              <td><span class="attendance-status ${statusClass}">${status}</span></td>
+              <td>${time}</td>
+              <td>
+                <button class="btn btn-small" onclick="editAttendance('${student.studentId}', '${dateFilter}')">Edit</button>
+              </td>
+            </tr>
+          `;
+        });
+      } else {
+        // Show all records if no date filter
+        Object.keys(attendanceRecords).forEach((date, dateIndex) => {
+          const dateRecords = attendanceRecords[date];
+          
+          students.forEach((student, studentIndex) => {
+            // Apply class filter
+            if (classFilter !== 'all' && student.studentClass !== classFilter) {
+              return;
+            }
+            
+            const attendance = dateRecords[student.studentId];
+            if (!attendance) return;
+            
+            // Apply status filter
+            if (statusFilter !== 'all' && attendance.status !== statusFilter) {
+              return;
+            }
+            
+            hasRecords = true;
+            const status = attendance.status.charAt(0).toUpperCase() + attendance.status.slice(1);
+            const statusClass = `status-${attendance.status}`;
+            const time = new Date(attendance.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            attendanceHTML += `
+              <tr style="animation-delay: ${0.1 * ((dateIndex + studentIndex) % 10)}s">
+                <td>${student.studentName}</td>
+                <td>${student.studentId}</td>
+                <td>${classTemplates[student.studentClass] || student.studentClass}</td>
+                <td>${new Date(date).toLocaleDateString()}</td>
+                <td><span class="attendance-status ${statusClass}">${status}</span></td>
+                <td>${time}</td>
+                <td>
+                  <button class="btn btn-small" onclick="editAttendance('${student.studentId}', '${date}')">Edit</button>
+                </td>
+              </tr>
+            `;
+          });
+        });
+      }
+      
+      // Update attendance table
+      if (hasRecords) {
+        document.getElementById('attendanceTableBody').innerHTML = attendanceHTML;
+        document.getElementById('noAttendanceData').style.display = 'none';
+        document.getElementById('attendanceTable').style.display = 'table';
+      } else {
+        document.getElementById('attendanceTableBody').innerHTML = '';
+        document.getElementById('noAttendanceData').style.display = 'block';
+        document.getElementById('attendanceTable').style.display = 'none';
+      }
+      
+      // Update attendance summary
+      const attendanceRate = totalStudents > 0 ? Math.round((presentCount + lateCount) / totalStudents * 100) : 0;
+      
+      document.getElementById('presentCount').textContent = presentCount;
+      document.getElementById('absentCount').textContent = absentCount;
+      document.getElementById('lateCount').textContent = lateCount;
+      document.getElementById('attendanceRate').textContent = `${attendanceRate}%`;
+    }
+
+    // Load calendar view
+    function loadCalendarView() {
+      const monthInput = document.getElementById('calendarMonth').value;
+      const classFilter = document.getElementById('calendarClass').value;
+      
+      if (!monthInput) return;
+      
+      const [year, month] = monthInput.split('-');
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      const daysInMonth = lastDay.getDate();
+      
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // Filter students by class if needed
+      let filteredStudents = students;
+      if (classFilter !== 'all') {
+        filteredStudents = students.filter(student => student.studentClass === classFilter);
+      }
+      
+      // Calculate first day of the month (0 = Sunday, 1 = Monday, etc.)
+      const firstDayIndex = firstDay.getDay();
+      
+      let calendarHTML = '';
+      
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < firstDayIndex; i++) {
+        calendarHTML += `<div class="calendar-day empty"></div>`;
+      }
+      
+      // Add cells for each day of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateString = `${year}-${month.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const dateRecords = attendanceRecords[dateString];
+        const currentDate = new Date(dateString);
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Calculate attendance status for the day
+        let dayStatus = 'empty';
+        let dayStatusText = '';
+        
+        if (dateRecords && filteredStudents.length > 0) {
+          let presentCount = 0;
+          let absentCount = 0;
+          let lateCount = 0;
+          let markedCount = 0;
+          
+          filteredStudents.forEach(student => {
+            if (dateRecords[student.studentId]) {
+              markedCount++;
+              const status = dateRecords[student.studentId].status;
+              if (status === 'present') presentCount++;
+              else if (status === 'absent') absentCount++;
+              else if (status === 'late') lateCount++;
+            }
+          });
+          
+          // Determine overall status for the day
+          if (markedCount > 0) {
+            if (absentCount === 0 && lateCount === 0) {
+              dayStatus = 'present';
+              dayStatusText = `${presentCount}/${filteredStudents.length}`;
+            } else if (presentCount === 0 && lateCount === 0) {
+              dayStatus = 'absent';
+              dayStatusText = `${absentCount}/${filteredStudents.length}`;
+            } else {
+              dayStatus = 'late';
+              dayStatusText = `${presentCount}/${filteredStudents.length}`;
+            }
+          } else if (currentDate <= new Date()) {
+            // If it's today or past date with no records
+            dayStatus = 'empty';
+            dayStatusText = 'No Data';
+          }
+        } else if (currentDate <= new Date()) {
+          // If it's today or past date with no records
+          dayStatus = 'empty';
+          dayStatusText = 'No Data';
+        }
+        
+        // Add pulse animation for today
+        const todayClass = dateString === today ? 'pulse-animation' : '';
+        
+        calendarHTML += `
+          <div class="calendar-day ${dayStatus} ${todayClass}" onclick="viewDayAttendance('${dateString}')">
+            <div class="date">${day}</div>
+            <div class="status">${dayStatusText}</div>
+          </div>
+        `;
+      }
+      
+      document.getElementById('attendanceCalendar').innerHTML = calendarHTML;
+      
+      // Add pulse animation for today
+      const today = new Date().toISOString().split('T')[0];
+      const todayCell = document.querySelector(`[onclick*="${today}"]`);
+      if (todayCell) {
+        todayCell.style.animation = 'pulse 2s infinite';
+      }
+    }
+
+    // View attendance for a specific day
+    function viewDayAttendance(dateString) {
+      document.getElementById('dateFilter').value = dateString;
+      filterAttendance();
+      
+      // Scroll to the table section
+      document.querySelector('.attendance-table-container').scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+
+    // Mark attendance function
+    function markAttendance() {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const classTemplates = {
+        '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+        '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+        '11th-jee': '11th JEE',
+        '11th-neet': '11th NEET',
+        '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+        '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+        '12th-jee': '12th JEE',
+        '12th-neet': '12th NEET'
+      };
+      
+      // Set today's date as default
+      document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+      
+      // Build student list for attendance
+      let studentListHTML = '';
+      students.forEach((student, index) => {
+        studentListHTML += `
+          <div class="student-item" style="animation-delay: ${0.1 * (index % 10)}s">
+            <div class="student-info">
+              <h4>${student.studentName}</h4>
+              <p>${classTemplates[student.studentClass] || student.studentClass} • ${student.studentId}</p>
+            </div>
+            <div class="status-selector">
+              <div class="status-option present" onclick="selectAttendanceStatus(this, '${student.studentId}', 'present')">Present</div>
+              <div class="status-option absent" onclick="selectAttendanceStatus(this, '${student.studentId}', 'absent')">Absent</div>
+              <div class="status-option late" onclick="selectAttendanceStatus(this, '${student.studentId}', 'late')">Late</div>
+            </div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('attendanceStudentList').innerHTML = studentListHTML;
+      
+      // Initialize temporary attendance storage
+      window.tempAttendance = {};
+      
+      // Initialize attendance data for selected date
+      const date = document.getElementById('attendanceDate').value;
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      
+      if (attendanceRecords[date]) {
+        // Pre-select existing attendance statuses
+        students.forEach(student => {
+          if (attendanceRecords[date][student.studentId]) {
+            const status = attendanceRecords[date][student.studentId].status;
+            window.tempAttendance[student.studentId] = status;
+            
+            // Find and select the corresponding status option
+            setTimeout(() => {
+              const statusOptions = document.querySelectorAll(`[onclick*="${student.studentId}"].${status}`);
+              if (statusOptions.length > 0) {
+                selectAttendanceStatus(statusOptions[0], student.studentId, status, false);
+              }
+            }, 100);
+          }
+        });
+      }
+      
+      // Show the modal
+      document.getElementById('attendanceModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Select attendance status with enhanced visual feedback
+    function selectAttendanceStatus(element, studentId, status, storeSelection = true) {
+      // Remove selected class from all options for this student
+      const parent = element.parentElement;
+      const siblings = parent.querySelectorAll('.status-option');
+      siblings.forEach(sibling => {
+        sibling.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked option
+      element.classList.add('selected');
+      
+      // Add click animation
+      element.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        element.style.transform = 'scale(1.05)';
+      }, 100);
+      
+      // Store the selection
+      if (storeSelection) {
+        if (!window.tempAttendance) {
+          window.tempAttendance = {};
+        }
+        window.tempAttendance[studentId] = status;
+      }
+    }
+
+    // Save attendance
+    function saveAttendance() {
+      const date = document.getElementById('attendanceDate').value;
+      const classFilter = document.getElementById('attendanceClass').value;
+      
+      if (!window.tempAttendance || Object.keys(window.tempAttendance).length === 0) {
+        showNotification('Please mark attendance for at least one student.', 'warning');
+        return;
+      }
+      
+      // Get existing attendance records
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      
+      // Initialize date if not exists
+      if (!attendanceRecords[date]) {
+        attendanceRecords[date] = {};
+      }
+      
+      // Update attendance records
+      Object.keys(window.tempAttendance).forEach(studentId => {
+        // Apply class filter if set
+        if (classFilter !== 'all') {
+          const students = JSON.parse(localStorage.getItem('students')) || [];
+          const student = students.find(s => s.studentId === studentId);
+          if (student && student.studentClass !== classFilter) {
+            return;
+          }
+        }
+        
+        attendanceRecords[date][studentId] = {
+          status: window.tempAttendance[studentId],
+          timestamp: new Date().toISOString()
+        };
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+      
+      // Close modal
+      closeAttendanceModal();
+      
+      // Reload attendance data
+      filterAttendance();
+      loadCalendarView();
+      updateChart();
+      
+      // Show success message
+      showNotification('Attendance saved successfully!', 'success');
+    }
+
+    // Edit attendance for a specific student and date
+    function editAttendance(studentId, date) {
+      // Set the date in the modal
+      document.getElementById('attendanceDate').value = date;
+      
+      // Get the student
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const student = students.find(s => s.studentId === studentId);
+      
+      if (!student) return;
+      
+      const classTemplates = {
+        '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+        '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+        '11th-jee': '11th JEE',
+        '11th-neet': '11th NEET',
+        '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+        '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+        '12th-jee': '12th JEE',
+        '12th-neet': '12th NEET'
+      };
+      
+      // Build student list for attendance (only this student)
+      let studentListHTML = `
+        <div class="student-item" style="animation-delay: 0.1s">
+          <div class="student-info">
+            <h4>${student.studentName}</h4>
+            <p>${classTemplates[student.studentClass] || student.studentClass} • ${student.studentId}</p>
+          </div>
+          <div class="status-selector">
+            <div class="status-option present" onclick="selectAttendanceStatus(this, '${student.studentId}', 'present')">Present</div>
+            <div class="status-option absent" onclick="selectAttendanceStatus(this, '${student.studentId}', 'absent')">Absent</div>
+            <div class="status-option late" onclick="selectAttendanceStatus(this, '${student.studentId}', 'late')">Late</div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('attendanceStudentList').innerHTML = studentListHTML;
+      
+      // Initialize temporary attendance storage
+      window.tempAttendance = {};
+      
+      // Pre-select existing attendance status
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      if (attendanceRecords[date] && attendanceRecords[date][studentId]) {
+        const status = attendanceRecords[date][studentId].status;
+        window.tempAttendance[studentId] = status;
+        
+        // Select the corresponding status option after a short delay
+        setTimeout(() => {
+          const statusOptions = document.querySelectorAll(`[onclick*="${student.studentId}"]`);
+          statusOptions.forEach(option => {
+            if (option.classList.contains(status)) {
+              selectAttendanceStatus(option, student.studentId, status, false);
+            }
+          });
+        }, 100);
+      }
+      
+      // Show the modal
+      document.getElementById('attendanceModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close attendance modal
+    function closeAttendanceModal() {
+      document.getElementById('attendanceModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+      window.tempAttendance = null;
+    }
+
+    // Show export options modal
+    function showExportOptions() {
+      document.getElementById('exportModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close export modal
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.remove('active');
+      document.getElementById('customExportOptions').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Export as PDF function
+    function exportAsPDF(type) {
+      if (type === 'custom') {
+        document.getElementById('customExportOptions').style.display = 'block';
+        return;
+      }
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Show loading state
+      showNotification('Generating PDF report...', 'info');
+      
+      // Get current date and time
+      const now = new Date();
+      const dateTime = now.toLocaleString();
+      
+      // Add header with logo and title
+      doc.setFillColor(37, 99, 235); // Blue color
+      doc.rect(0, 0, 210, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SOHAM - Attendance Report', 105, 18, null, null, 'center');
+      
+      // Add subtitle
+      doc.setFontSize(12);
+      doc.text(`Generated on: ${dateTime}`, 105, 28, null, null, 'center');
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      let yPos = 40;
+      
+      // Add report type
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${type.charAt(0).toUpperCase() + type.slice(1)} Attendance Report`, 105, yPos, null, null, 'center');
+      yPos += 15;
+      
+      // Get attendance data
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const classTemplates = {
+        '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+        '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+        '11th-jee': '11th JEE',
+        '11th-neet': '11th NEET',
+        '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+        '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+        '12th-jee': '12th JEE',
+        '12th-neet': '12th NEET'
+      };
+      
+      if (type === 'daily') {
+        // Daily report
+        const today = new Date().toISOString().split('T')[0];
+        const dateRecords = attendanceRecords[today] || {};
+        
+        // Add date
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Date: ${new Date(today).toLocaleDateString()}`, 20, yPos);
+        yPos += 10;
+        
+        // Add summary statistics
+        let presentCount = 0;
+        let absentCount = 0;
+        let lateCount = 0;
+        let totalCount = 0;
+        
+        students.forEach(student => {
+          if (dateRecords[student.studentId]) {
+            totalCount++;
+            const status = dateRecords[student.studentId].status;
+            if (status === 'present') presentCount++;
+            else if (status === 'absent') absentCount++;
+            else if (status === 'late') lateCount++;
+          }
+        });
+        
+        const attendanceRate = totalCount > 0 ? Math.round((presentCount + lateCount) / totalCount * 100) : 0;
+        
+        doc.setFontSize(12);
+        doc.text(`Total Students: ${students.length}`, 20, yPos);
+        doc.text(`Present: ${presentCount}`, 70, yPos);
+        doc.text(`Absent: ${absentCount}`, 110, yPos);
+        doc.text(`Late: ${lateCount}`, 150, yPos);
+        doc.text(`Attendance Rate: ${attendanceRate}%`, 180, yPos);
+        yPos += 15;
+        
+        // Add table header
+        doc.setFillColor(241, 245, 249);
+        doc.rect(20, yPos, 170, 10, 'F');
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Student Name', 25, yPos + 7);
+        doc.text('Class', 90, yPos + 7);
+        doc.text('Status', 130, yPos + 7);
+        doc.text('Time', 160, yPos + 7);
+        yPos += 15;
+        
+        // Reset text color
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        // Add student data
+        students.forEach((student, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          const attendance = dateRecords[student.studentId];
+          const status = attendance ? attendance.status.charAt(0).toUpperCase() + attendance.status.slice(1) : 'Not Marked';
+          const time = attendance ? new Date(attendance.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
+          
+          // Add alternating row colors
+          if (index % 2 === 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+          }
+          
+          doc.text(student.studentName, 25, yPos);
+          doc.text(classTemplates[student.studentClass] || student.studentClass, 90, yPos);
+          
+          // Color code status
+          if (status === 'Present') doc.setTextColor(6, 95, 70);
+          else if (status === 'Absent') doc.setTextColor(153, 27, 27);
+          else if (status === 'Late') doc.setTextColor(146, 64, 14);
+          else doc.setTextColor(107, 114, 128);
+          
+          doc.text(status, 130, yPos);
+          doc.setTextColor(0, 0, 0);
+          doc.text(time, 160, yPos);
+          
+          yPos += 10;
+        });
+        
+      } else if (type === 'weekly') {
+        // Weekly report
+        const today = new Date();
+        const startDate = new Date();
+        startDate.setDate(today.getDate() - 6); // Last 7 days
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Period: ${startDate.toLocaleDateString()} to ${today.toLocaleDateString()}`, 20, yPos);
+        yPos += 10;
+        
+        // Calculate weekly statistics
+        const weeklyStats = [];
+        let totalPresent = 0;
+        let totalAbsent = 0;
+        let totalLate = 0;
+        let totalDays = 0;
+        
+        for (let i = 0; i < 7; i++) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          const dateString = date.toISOString().split('T')[0];
+          const dateRecords = attendanceRecords[dateString] || {};
+          
+          let dayPresent = 0;
+          let dayAbsent = 0;
+          let dayLate = 0;
+          let dayTotal = 0;
+          
+          students.forEach(student => {
+            if (dateRecords[student.studentId]) {
+              dayTotal++;
+              const status = dateRecords[student.studentId].status;
+              if (status === 'present') dayPresent++;
+              else if (status === 'absent') dayAbsent++;
+              else if (status === 'late') dayLate++;
+            }
+          });
+          
+          weeklyStats.push({
+            date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+            present: dayPresent,
+            absent: dayAbsent,
+            late: dayLate,
+            total: dayTotal,
+            rate: dayTotal > 0 ? Math.round((dayPresent + dayLate) / dayTotal * 100) : 0
+          });
+          
+          totalPresent += dayPresent;
+          totalAbsent += dayAbsent;
+          totalLate += dayLate;
+          totalDays++;
+        }
+        
+        // Add weekly summary
+        const avgRate = totalDays > 0 ? Math.round((totalPresent + totalLate) / (students.length * totalDays) * 100) : 0;
+        
+        doc.setFontSize(12);
+        doc.text(`Average Attendance Rate: ${avgRate}%`, 20, yPos);
+        doc.text(`Total Present Days: ${totalPresent}`, 100, yPos);
+        doc.text(`Total Absent Days: ${totalAbsent}`, 160, yPos);
+        yPos += 15;
+        
+        // Add weekly table
+        doc.setFillColor(241, 245, 249);
+        doc.rect(20, yPos, 170, 10, 'F');
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Date', 25, yPos + 7);
+        doc.text('Present', 70, yPos + 7);
+        doc.text('Absent', 100, yPos + 7);
+        doc.text('Late', 130, yPos + 7);
+        doc.text('Rate', 160, yPos + 7);
+        yPos += 15;
+        
+        // Reset text color
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        // Add weekly data
+        weeklyStats.forEach((stat, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          // Add alternating row colors
+          if (index % 2 === 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+          }
+          
+          doc.text(stat.date, 25, yPos);
+          doc.text(stat.present.toString(), 70, yPos);
+          doc.text(stat.absent.toString(), 100, yPos);
+          doc.text(stat.late.toString(), 130, yPos);
+          
+          // Color code attendance rate
+          if (stat.rate >= 90) doc.setTextColor(6, 95, 70);
+          else if (stat.rate >= 75) doc.setTextColor(146, 64, 14);
+          else doc.setTextColor(153, 27, 27);
+          
+          doc.text(`${stat.rate}%`, 160, yPos);
+          doc.setTextColor(0, 0, 0);
+          
+          yPos += 10;
+        });
+        
+      } else if (type === 'monthly') {
+        // Monthly report
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Month: ${monthNames[currentMonth]} ${currentYear}`, 20, yPos);
+        yPos += 10;
+        
+        // Calculate monthly statistics
+        const monthlyStats = {};
+        let monthPresent = 0;
+        let monthAbsent = 0;
+        let monthLate = 0;
+        let monthTotal = 0;
+        
+        Object.keys(attendanceRecords).forEach(dateString => {
+          const date = new Date(dateString);
+          if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+            const dateRecords = attendanceRecords[dateString];
+            
+            students.forEach(student => {
+              if (dateRecords && dateRecords[student.studentId]) {
+                monthTotal++;
+                const status = dateRecords[student.studentId].status;
+                if (status === 'present') monthPresent++;
+                else if (status === 'absent') monthAbsent++;
+                else if (status === 'late') monthLate++;
+              }
+            });
+            
+            const className = classTemplates[students[0]?.studentClass] || 'All Classes';
+            if (!monthlyStats[className]) {
+              monthlyStats[className] = { present: 0, absent: 0, late: 0, total: 0 };
+            }
+          }
+        });
+        
+        const monthRate = monthTotal > 0 ? Math.round((monthPresent + monthLate) / monthTotal * 100) : 0;
+        
+        // Add monthly summary
+        doc.setFontSize(12);
+        doc.text(`Monthly Attendance Rate: ${monthRate}%`, 20, yPos);
+        doc.text(`Total Present: ${monthPresent}`, 100, yPos);
+        doc.text(`Total Absent: ${monthAbsent}`, 160, yPos);
+        yPos += 15;
+        
+        // Add class-wise breakdown
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Class-wise Breakdown:', 20, yPos);
+        yPos += 10;
+        
+        doc.setFillColor(241, 245, 249);
+        doc.rect(20, yPos, 170, 10, 'F');
+        doc.setTextColor(30, 58, 138);
+        doc.setFontSize(10);
+        doc.text('Class', 25, yPos + 7);
+        doc.text('Students', 90, yPos + 7);
+        doc.text('Present %', 130, yPos + 7);
+        doc.text('Status', 160, yPos + 7);
+        yPos += 15;
+        
+        // Reset text color
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        // Group students by class
+        const classGroups = {};
+        students.forEach(student => {
+          const className = classTemplates[student.studentClass] || student.studentClass;
+          if (!classGroups[className]) {
+            classGroups[className] = [];
+          }
+          classGroups[className].push(student);
+        });
+        
+        // Calculate class statistics
+        Object.keys(classGroups).forEach((className, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          const classStudents = classGroups[className];
+          let classPresent = 0;
+          let classAbsent = 0;
+          let classLate = 0;
+          let classMarked = 0;
+          
+          // Calculate attendance for this class
+          Object.keys(attendanceRecords).forEach(dateString => {
+            const date = new Date(dateString);
+            if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+              const dateRecords = attendanceRecords[dateString];
+              
+              classStudents.forEach(student => {
+                if (dateRecords && dateRecords[student.studentId]) {
+                  classMarked++;
+                  const status = dateRecords[student.studentId].status;
+                  if (status === 'present') classPresent++;
+                  else if (status === 'absent') classAbsent++;
+                  else if (status === 'late') classLate++;
+                }
+              });
+            }
+          });
+          
+          const classRate = classMarked > 0 ? Math.round((classPresent + classLate) / classMarked * 100) : 0;
+          
+          // Add alternating row colors
+          if (index % 2 === 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+          }
+          
+          doc.text(className, 25, yPos);
+          doc.text(classStudents.length.toString(), 90, yPos);
+          
+          // Color code attendance rate
+          if (classRate >= 90) doc.setTextColor(6, 95, 70);
+          else if (classRate >= 75) doc.setTextColor(146, 64, 14);
+          else doc.setTextColor(153, 27, 27);
+          
+          doc.text(`${classRate}%`, 130, yPos);
+          
+          // Add status indicator
+          doc.setTextColor(0, 0, 0);
+          let statusText = 'Good';
+          if (classRate >= 90) statusText = 'Excellent';
+          else if (classRate >= 75) statusText = 'Good';
+          else if (classRate >= 60) statusText = 'Average';
+          else statusText = 'Needs Attention';
+          
+          doc.text(statusText, 160, yPos);
+          
+          yPos += 10;
+        });
+      }
+      
+      // Add footer
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Soham - Entrance Exam Practice System', 105, 285, null, null, 'center');
+      doc.text('Generated by Teacher Dashboard', 105, 290, null, null, 'center');
+      
+      // Save the PDF
+      const fileName = `attendance_report_${type}_${now.toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      // Show success notification
+      showNotification(`PDF report "${fileName}" downloaded successfully!`, 'success');
+    }
+
+    // Generate custom PDF report
+    function generateCustomPDF() {
+      const startDate = document.getElementById('exportStartDate').value;
+      const endDate = document.getElementById('exportEndDate').value;
+      const classFilter = document.getElementById('exportClass').value;
+      
+      if (!startDate || !endDate) {
+        showNotification('Please select both start and end dates.', 'warning');
+        return;
+      }
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Show loading state
+      showNotification('Generating custom PDF report...', 'info');
+      
+      // Get current date and time
+      const now = new Date();
+      const dateTime = now.toLocaleString();
+      
+      // Add header with logo and title
+      doc.setFillColor(37, 99, 235); // Blue color
+      doc.rect(0, 0, 210, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SOHAM - Custom Attendance Report', 105, 18, null, null, 'center');
+      
+      // Add subtitle
+      doc.setFontSize(12);
+      doc.text(`Generated on: ${dateTime}`, 105, 28, null, null, 'center');
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      let yPos = 40;
+      
+      // Add report period
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Custom Attendance Report', 105, yPos, null, null, 'center');
+      yPos += 10;
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Period: ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`, 20, yPos);
+      if (classFilter !== 'all') {
+        const classTemplates = {
+          '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+          '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+          '11th-jee': '11th JEE',
+          '11th-neet': '11th NEET',
+          '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+          '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+          '12th-jee': '12th JEE',
+          '12th-neet': '12th NEET'
+        };
+        doc.text(`Class: ${classTemplates[classFilter] || classFilter}`, 150, yPos);
+      }
+      yPos += 15;
+      
+      // Get attendance data
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // Filter students by class if needed
+      let filteredStudents = students;
+      if (classFilter !== 'all') {
+        filteredStudents = students.filter(student => student.studentClass === classFilter);
+      }
+      
+      // Calculate date range
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      // Collect attendance data for the date range
+      const dateRangeData = [];
+      let totalPresent = 0;
+      let totalAbsent = 0;
+      let totalLate = 0;
+      let totalDays = 0;
+      
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateString = d.toISOString().split('T')[0];
+        const dateRecords = attendanceRecords[dateString] || {};
+        
+        let dayPresent = 0;
+        let dayAbsent = 0;
+        let dayLate = 0;
+        let dayTotal = 0;
+        
+        filteredStudents.forEach(student => {
+          if (dateRecords[student.studentId]) {
+            dayTotal++;
+            const status = dateRecords[student.studentId].status;
+            if (status === 'present') dayPresent++;
+            else if (status === 'absent') dayAbsent++;
+            else if (status === 'late') dayLate++;
+          }
+        });
+        
+        if (dayTotal > 0) {
+          dateRangeData.push({
+            date: new Date(dateString).toLocaleDateString(),
+            present: dayPresent,
+            absent: dayAbsent,
+            late: dayLate,
+            total: dayTotal,
+            rate: Math.round((dayPresent + dayLate) / dayTotal * 100)
+          });
+          
+          totalPresent += dayPresent;
+          totalAbsent += dayAbsent;
+          totalLate += dayLate;
+          totalDays++;
+        }
+      }
+      
+      // Add summary statistics
+      const avgRate = totalDays > 0 ? Math.round((totalPresent + totalLate) / (filteredStudents.length * totalDays) * 100) : 0;
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Summary Statistics:', 20, yPos);
+      yPos += 10;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Students: ${filteredStudents.length}`, 20, yPos);
+      doc.text(`Days in Range: ${totalDays}`, 100, yPos);
+      doc.text(`Average Attendance Rate: ${avgRate}%`, 160, yPos);
+      yPos += 15;
+      
+      // Add detailed table
+      if (dateRangeData.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Daily Attendance Details:', 20, yPos);
+        yPos += 10;
+        
+        // Check if we need a new page
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        // Add table header
+        doc.setFillColor(241, 245, 249);
+        doc.rect(20, yPos, 170, 10, 'F');
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Date', 25, yPos + 7);
+        doc.text('Present', 70, yPos + 7);
+        doc.text('Absent', 100, yPos + 7);
+        doc.text('Late', 130, yPos + 7);
+        doc.text('Rate', 160, yPos + 7);
+        yPos += 15;
+        
+        // Reset text color
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        // Add table data
+        dateRangeData.forEach((data, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          // Add alternating row colors
+          if (index % 2 === 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+          }
+          
+          doc.text(data.date, 25, yPos);
+          doc.text(data.present.toString(), 70, yPos);
+          doc.text(data.absent.toString(), 100, yPos);
+          doc.text(data.late.toString(), 130, yPos);
+          
+          // Color code attendance rate
+          if (data.rate >= 90) doc.setTextColor(6, 95, 70);
+          else if (data.rate >= 75) doc.setTextColor(146, 64, 14);
+          else doc.setTextColor(153, 27, 27);
+          
+          doc.text(`${data.rate}%`, 160, yPos);
+          doc.setTextColor(0, 0, 0);
+          
+          yPos += 10;
+        });
+      } else {
+        doc.setFontSize(12);
+        doc.text('No attendance data found for the selected period.', 20, yPos);
+        yPos += 10;
+      }
+      
+      // Add student-wise summary if space permits
+      if (yPos < 200 && filteredStudents.length <= 20) {
+        yPos += 10;
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Student-wise Summary:', 20, yPos);
+        yPos += 10;
+        
+        // Add table header
+        doc.setFillColor(241, 245, 249);
+        doc.rect(20, yPos, 170, 10, 'F');
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Student Name', 25, yPos + 7);
+        doc.text('ID', 90, yPos + 7);
+        doc.text('Days Present', 130, yPos + 7);
+        doc.text('Rate', 160, yPos + 7);
+        yPos += 15;
+        
+        // Reset text color
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        
+        // Calculate student-wise attendance
+        filteredStudents.forEach((student, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          let studentPresent = 0;
+          let studentTotal = 0;
+          
+          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const dateString = d.toISOString().split('T')[0];
+            const dateRecords = attendanceRecords[dateString] || {};
+            
+            if (dateRecords[student.studentId]) {
+              studentTotal++;
+              const status = dateRecords[student.studentId].status;
+              if (status === 'present' || status === 'late') {
+                studentPresent++;
+              }
+            }
+          }
+          
+          const studentRate = studentTotal > 0 ? Math.round(studentPresent / studentTotal * 100) : 0;
+          
+          // Add alternating row colors
+          if (index % 2 === 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+          }
+          
+          doc.text(student.studentName, 25, yPos);
+          doc.text(student.studentId, 90, yPos);
+          doc.text(`${studentPresent}/${studentTotal}`, 130, yPos);
+          
+          // Color code student rate
+          if (studentRate >= 90) doc.setTextColor(6, 95, 70);
+          else if (studentRate >= 75) doc.setTextColor(146, 64, 14);
+          else doc.setTextColor(153, 27, 27);
+          
+          doc.text(`${studentRate}%`, 160, yPos);
+          doc.setTextColor(0, 0, 0);
+          
+          yPos += 10;
+        });
+      }
+      
+      // Add footer
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Soham - Entrance Exam Practice System', 105, 285, null, null, 'center');
+      doc.text('Generated by Teacher Dashboard', 105, 290, null, null, 'center');
+      
+      // Save the PDF
+      const fileName = `attendance_custom_${startDate}_to_${endDate}.pdf`;
+      doc.save(fileName);
+      
+      // Close modal and show success notification
+      closeExportModal();
+      showNotification(`Custom PDF report "${fileName}" downloaded successfully!`, 'success');
+    }
+
+    // View attendance analytics
+    function viewAttendanceAnalytics() {
+      // Scroll to analytics section
+      document.querySelector('.attendance-chart-container').scrollIntoView({
+        behavior: 'smooth'
+      });
+      showNotification('Viewing detailed attendance analytics...', 'info');
+    }
+
+    // Chart.js instance
+    let attendanceChart = null;
+
+    // Update chart based on selected filters
+    function updateChart() {
+      const chartType = document.getElementById('chartType').value;
+      const period = parseInt(document.getElementById('chartPeriod').value);
+      const classFilter = document.getElementById('chartClass').value;
+      
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (attendanceChart) {
+        attendanceChart.destroy();
+      }
+      
+      // Get attendance data
+      const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || {};
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // Filter students by class if needed
+      let filteredStudents = students;
+      if (classFilter !== 'all') {
+        filteredStudents = students.filter(student => student.studentClass === classFilter);
+      }
+      
+      // Prepare data based on chart type
+      let labels = [];
+      let presentData = [];
+      let absentData = [];
+      let lateData = [];
+      let totalData = [];
+      let attendanceRates = [];
+      
+      const today = new Date();
+      let bestDay = { date: '', rate: 0 };
+      let worstDay = { date: '', rate: 100 };
+      let totalAttendance = 0;
+      let totalPossible = 0;
+      
+      if (chartType === 'daily') {
+        // Daily attendance for selected period
+        for (let i = period - 1; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          const dateString = date.toISOString().split('T')[0];
+          const dateLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          
+          labels.push(dateLabel);
+          
+          const dateRecords = attendanceRecords[dateString] || {};
+          let presentCount = 0;
+          let absentCount = 0;
+          let lateCount = 0;
+          let totalCount = 0;
+          
+          filteredStudents.forEach(student => {
+            if (dateRecords[student.studentId]) {
+              totalCount++;
+              const status = dateRecords[student.studentId].status;
+              if (status === 'present') presentCount++;
+              else if (status === 'absent') absentCount++;
+              else if (status === 'late') lateCount++;
+            }
+          });
+          
+          presentData.push(presentCount);
+          absentData.push(absentCount);
+          lateData.push(lateCount);
+          totalData.push(totalCount);
+          
+          // Calculate attendance rate for this day
+          const attendanceRate = totalCount > 0 ? Math.round((presentCount + lateCount) / totalCount * 100) : 0;
+          attendanceRates.push(attendanceRate);
+          
+          totalAttendance += (presentCount + lateCount);
+          totalPossible += totalCount;
+          
+          // Track best and worst days
+          if (attendanceRate > bestDay.rate) {
+            bestDay = { date: dateLabel, rate: attendanceRate };
+          }
+          if (attendanceRate < worstDay.rate && attendanceRate > 0) {
+            worstDay = { date: dateLabel, rate: attendanceRate };
+          }
+        }
+        
+        // Create line chart for daily attendance
+        attendanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Present',
+                data: presentData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+              },
+              {
+                label: 'Absent',
+                data: absentData,
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+              },
+              {
+                label: 'Late',
+                data: lateData,
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: `Daily Attendance Trends (Last ${period} Days)`,
+                font: {
+                  size: 16
+                }
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Number of Students'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Date'
+                }
+              }
+            }
+          }
+        });
+        
+      } else if (chartType === 'weekly') {
+        // Weekly trends
+        const weeks = Math.ceil(period / 7);
+        for (let week = 1; week <= weeks; week++) {
+          labels.push(`Week ${week}`);
+          
+          let weekPresent = 0;
+          let weekAbsent = 0;
+          let weekLate = 0;
+          let weekTotal = 0;
+          
+          // Calculate for each day in the week
+          for (let day = (week - 1) * 7; day < Math.min(week * 7, period); day++) {
+            const date = new Date();
+            date.setDate(today.getDate() - (period - day - 1));
+            const dateString = date.toISOString().split('T')[0];
+            const dateRecords = attendanceRecords[dateString] || {};
+            
+            filteredStudents.forEach(student => {
+              if (dateRecords[student.studentId]) {
+                weekTotal++;
+                const status = dateRecords[student.studentId].status;
+                if (status === 'present') weekPresent++;
+                else if (status === 'absent') weekAbsent++;
+                else if (status === 'late') weekLate++;
+              }
+            });
+          }
+          
+          presentData.push(weekPresent);
+          absentData.push(weekAbsent);
+          lateData.push(weekLate);
+          
+          const attendanceRate = weekTotal > 0 ? Math.round((weekPresent + weekLate) / weekTotal * 100) : 0;
+          attendanceRates.push(attendanceRate);
+          
+          totalAttendance += (weekPresent + weekLate);
+          totalPossible += weekTotal;
+          
+          if (attendanceRate > bestDay.rate) {
+            bestDay = { date: `Week ${week}`, rate: attendanceRate };
+          }
+          if (attendanceRate < worstDay.rate && attendanceRate > 0) {
+            worstDay = { date: `Week ${week}`, rate: attendanceRate };
+          }
+        }
+        
+        // Create bar chart for weekly trends
+        attendanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Present',
+                data: presentData,
+                backgroundColor: '#10b981',
+                borderColor: '#10b981',
+                borderWidth: 1
+              },
+              {
+                label: 'Absent',
+                data: absentData,
+                backgroundColor: '#ef4444',
+                borderColor: '#ef4444',
+                borderWidth: 1
+              },
+              {
+                label: 'Late',
+                data: lateData,
+                backgroundColor: '#f59e0b',
+                borderColor: '#f59e0b',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: `Weekly Attendance Trends (Last ${weeks} Weeks)`,
+                font: {
+                  size: 16
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                stacked: false,
+                title: {
+                  display: true,
+                  text: 'Number of Students'
+                }
+              },
+              x: {
+                stacked: false,
+                title: {
+                  display: true,
+                  text: 'Week'
+                }
+              }
+            }
+          }
+        });
+        
+      } else if (chartType === 'monthly') {
+        // Monthly summary
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentMonth = today.getMonth();
+        
+        for (let i = 0; i < 6; i++) {
+          const monthIndex = (currentMonth - i + 12) % 12;
+          const monthYear = today.getFullYear() - Math.floor((currentMonth - i) / 12);
+          labels.unshift(`${months[monthIndex]} ${monthYear}`);
+          
+          // Calculate for the month
+          let monthPresent = 0;
+          let monthAbsent = 0;
+          let monthLate = 0;
+          let monthTotal = 0;
+          
+          // Get all dates in the month
+          Object.keys(attendanceRecords).forEach(dateString => {
+            const date = new Date(dateString);
+            if (date.getMonth() === monthIndex && date.getFullYear() === monthYear) {
+              const dateRecords = attendanceRecords[dateString];
+              
+              filteredStudents.forEach(student => {
+                if (dateRecords && dateRecords[student.studentId]) {
+                  monthTotal++;
+                  const status = dateRecords[student.studentId].status;
+                  if (status === 'present') monthPresent++;
+                  else if (status === 'absent') monthAbsent++;
+                  else if (status === 'late') monthLate++;
+                }
+              });
+            }
+          });
+          
+          presentData.unshift(monthPresent);
+          absentData.unshift(monthAbsent);
+          lateData.unshift(monthLate);
+          
+          const attendanceRate = monthTotal > 0 ? Math.round((monthPresent + monthLate) / monthTotal * 100) : 0;
+          attendanceRates.unshift(attendanceRate);
+          
+          totalAttendance += (monthPresent + monthLate);
+          totalPossible += monthTotal;
+          
+          if (attendanceRate > bestDay.rate) {
+            bestDay = { date: `${months[monthIndex]} ${monthYear}`, rate: attendanceRate };
+          }
+          if (attendanceRate < worstDay.rate && attendanceRate > 0) {
+            worstDay = { date: `${months[monthIndex]} ${monthYear}`, rate: attendanceRate };
+          }
+        }
+        
+        // Create bar chart for monthly summary
+        attendanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Attendance Rate',
+                data: attendanceRates,
+                backgroundColor: '#2563eb',
+                borderColor: '#1e3a8a',
+                borderWidth: 2,
+                type: 'line',
+                tension: 0.4,
+                yAxisID: 'y1'
+              },
+              {
+                label: 'Present',
+                data: presentData,
+                backgroundColor: '#10b981',
+                borderColor: '#10b981',
+                borderWidth: 1
+              },
+              {
+                label: 'Absent',
+                data: absentData,
+                backgroundColor: '#ef4444',
+                borderColor: '#ef4444',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Monthly Attendance Summary',
+                font: {
+                  size: 16
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Number of Students'
+                }
+              },
+              y1: {
+                position: 'right',
+                beginAtZero: true,
+                max: 100,
+                title: {
+                  display: true,
+                  text: 'Attendance Rate (%)'
+                },
+                grid: {
+                  drawOnChartArea: false
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Month'
+                }
+              }
+            }
+          }
+        });
+        
+      } else if (chartType === 'classWise') {
+        // Class-wise comparison
+        const classTemplates = {
+          '11th-mhtcet-pcm': '11th PCM',
+          '11th-mhtcet-pcb': '11th PCB',
+          '11th-jee': '11th JEE',
+          '11th-neet': '11th NEET',
+          '12th-mhtcet-pcm': '12th PCM',
+          '12th-mhtcet-pcb': '12th PCB',
+          '12th-jee': '12th JEE',
+          '12th-neet': '12th NEET'
+        };
+        
+        const classAttendance = {};
+        
+        // Initialize classes
+        Object.keys(classTemplates).forEach(className => {
+          classAttendance[className] = {
+            present: 0,
+            absent: 0,
+            late: 0,
+            total: 0
+          };
+        });
+        
+        // Calculate attendance for each class
+        Object.keys(attendanceRecords).forEach(dateString => {
+          const date = new Date(dateString);
+          const daysDiff = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+          
+          if (daysDiff <= period) {
+            const dateRecords = attendanceRecords[dateString];
+            
+            Object.keys(classTemplates).forEach(className => {
+              const classStudents = students.filter(student => student.studentClass === className);
+              
+              classStudents.forEach(student => {
+                if (dateRecords && dateRecords[student.studentId]) {
+                  classAttendance[className].total++;
+                  const status = dateRecords[student.studentId].status;
+                  if (status === 'present') classAttendance[className].present++;
+                  else if (status === 'absent') classAttendance[className].absent++;
+                  else if (status === 'late') classAttendance[className].late++;
+                }
+              });
+            });
+          }
+        });
+        
+        // Prepare data for chart
+        Object.keys(classTemplates).forEach(className => {
+          if (classAttendance[className].total > 0) {
+            labels.push(classTemplates[className]);
+            const attendanceRate = Math.round((classAttendance[className].present + classAttendance[className].late) / classAttendance[className].total * 100);
+            attendanceRates.push(attendanceRate);
+            
+            totalAttendance += (classAttendance[className].present + classAttendance[className].late);
+            totalPossible += classAttendance[className].total;
+            
+            if (attendanceRate > bestDay.rate) {
+              bestDay = { date: classTemplates[className], rate: attendanceRate };
+            }
+            if (attendanceRate < worstDay.rate && attendanceRate > 0) {
+              worstDay = { date: classTemplates[className], rate: attendanceRate };
+            }
+          }
+        });
+        
+        // Create radar chart for class comparison
+        attendanceChart = new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Attendance Rate (%)',
+                data: attendanceRates,
+                backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                borderColor: '#2563eb',
+                borderWidth: 2,
+                pointBackgroundColor: '#2563eb',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#2563eb'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Class-wise Attendance Comparison',
+                font: {
+                  size: 16
+                }
+              }
+            },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  stepSize: 20
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Update statistics
+      const avgAttendance = totalPossible > 0 ? Math.round(totalAttendance / totalPossible * 100) : 0;
+      document.getElementById('avgAttendance').textContent = `${avgAttendance}%`;
+      document.getElementById('bestDay').textContent = bestDay.date;
+      document.getElementById('worstDay').textContent = worstDay.date;
+      document.getElementById('totalStudents').textContent = filteredStudents.length;
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+      // Remove existing notification
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <span class="notification-message">${message}</span>
+          <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('attendanceModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAttendanceModal();
+      }
+    });
+
+    document.getElementById('exportModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeExportModal();
+      }
+    });
+
+    // Load attendance data when page loads
+    document.addEventListener('DOMContentLoaded', loadAttendanceData);
+  </script>
+</body>
+</html>

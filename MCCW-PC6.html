@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .diagram-placeholder {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      text-align: center;
+      color: #64748b;
+      font-style: italic;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Work Power and Energy</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "A stone of mass 'm' kg is tied to a string of length 'L' m and moved in a vertical circle of radius 49 cm in a vertical plane. If it completes 30 revolutions per minute, the tension in the string when it is at the lowermost point is nearly [Take π² = 10 and acceleration due to gravity, g = 10 m/s²]",
+        options: ["A) 2.45m N", "B) 3.45m N", "C) 4.45m N", "D) 5.45m N"],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "A constant force F = 3i - 2j - k newton has a displacement r = 2i - 3j - 3k metre in 2 second. The work done and the power are respectively",
+        options: ["A) 15 joule, 7.5 watt", "B) 13 joule, 6.5 watt", "C) 20 joule, 10 watt", "D) 10 joule, 5 watt"],
+        correct: "A"
+      },
+      {
+        number: "Question 03",
+        text: "A point mass 'm' attached at one end of a massless, inextensible string of length 'ℓ' performs a vertical circular motion. The increase in the centripetal acceleration of the point mass when it moves from highest point A to lowest point C is [g = acceleration due to gravity]",
+        options: ["A) 2g", "B) 4g", "C) 6g", "D) 8g"],
+        correct: "B"
+      },
+      {
+        number: "Question 04",
+        text: "A particle is displaced from point P(3 m, 4 m, 5 m) to a point Q(2 m, 3 m, 4 m) under a constant force F = (3i + 4j + 5k) N. The work done by the force in this process is",
+        options: ["A) 10 J", "B) 15 J", "C) 20 J", "D) 25 J"],
+        correct: "A"
+      },
+      {
+        number: "Question 05",
+        text: "A simple pendulum oscillates with an angular amplitude θ. If the maximum tension in the string is 4 times the minimum tension then the value of θ is",
+        options: ["A) 30°", "B) 45°", "C) 60°", "D) 90°"],
+        correct: "C"
+      },
+      {
+        number: "Question 06",
+        text: "A pendulum bob has a speed 4 m/s at its lowest position. The pendulum is 1 m long. When the length of the string makes an angle of 60° with the vertical, the speed of the bob at that position is (g = 10 m/s², cos 60° = 0.5)",
+        options: ["A) 2 m/s", "B) 2√2 m/s", "C) √6 m/s", "D) √8 m/s"],
+        correct: "C"
+      },
+      {
+        number: "Question 07",
+        text: "A stone is projected with kinetic energy E, making an angle θ with the horizontal. When it reaches a highest point, its kinetic energy is",
+        options: ["A) E cos²θ", "B) E sin²θ", "C) E tan²θ", "D) E cot²θ"],
+        correct: "A"
+      },
+      {
+        number: "Question 08",
+        text: "A weightless thread can bear tension up to 3.7 kg wt. A stone of mass 500 gram is tied to it and revolved in circular path of radius 4 m in vertical plane. Maximum angular velocity of the stone will be (g = 10 m/s²)",
+        options: ["A) 8 rad/s", "B) 4 rad/s", "C) 2 rad/s", "D) 16 rad/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 09",
+        text: "A stone of mass 1 kg tied to a light inextensible string of length L = 5/3 m is rotating in a circular path of radius L in a vertical plane. If the ratio of maximum tension in the string to the minimum tension in the string is 3, the speed of the stone at the highest point of the circle is (g = acceleration due to gravity)",
+        options: ["A) 2√(gL)", "B) 8√(gL)", "C) √(gL)", "D) 4√(gL)"],
+        correct: "C"
+      },
+      {
+        number: "Question 10",
+        text: "The bob of a pendulum of length 'l' is pulled aside from its equilibrium position through an angle 'θ' and then released. The bob will then pass through its equilibrium position with speed 'v', where 'v' equal to (g = acceleration due to gravity)",
+        options: ["A) √(2gl(1-cosθ))", "B) √(2gl(1+cosθ))", "C) √(2gl cosθ)", "D) √(2gl sinθ)"],
+        correct: "A"
+      },
+      {
+        number: "Question 11",
+        text: "If the work done in blowing a soap bubble of volume 'V' is 'W', then the work done in blowing a soap bubble of volume '2V' will be",
+        options: ["A) W", "B) 2W", "C) 2^(1/3)W", "D) 4^(1/3)W"],
+        correct: "D"
+      },
+      {
+        number: "Question 12",
+        text: "A particle is moving in a circle with uniform speed. It has constant",
+        options: ["A) kinetic energy", "B) acceleration", "C) displacement", "D) velocity"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "A body of mass 1 kg starts from rest and moves with uniform acceleration. In 2 seconds, its velocity is 10 m/s. The power exerted on the body in one second is",
+        options: ["A) 25 W", "B) 50 W", "C) 75 W", "D) 100 W"],
+        correct: "B"
+      },
+      {
+        number: "Question 14",
+        text: "A body moves along a circular path of radius 15 cm. It starts from a point on the circular path and reaches the end of diameter in 3 second. The angular speed of the body in rad/s is",
+        options: ["A) π/6", "B) π/3", "C) π/2", "D) π"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "The string of pendulum of length 'L' is displaced through 90° from the vertical and released. Then the maximum strength of the string in order to withstand the tension, as the pendulum passes through the mean position is (m = mass of pendulum, g = acceleration due to gravity)",
+        options: ["A) mg", "B) 2mg", "C) 3mg", "D) 4mg"],
+        correct: "C"
+      },
+      {
+        number: "Question 16",
+        text: "A particle at rest starts moving with a constant angular acceleration of 4 rad/s² in a circular path. The time at which magnitudes of its centripetal acceleration and tangential acceleration will be equal, is (in second)",
+        options: ["A) 0.5", "B) 1", "C) 1.5", "D) 2"],
+        correct: "A"
+      },
+      {
+        number: "Question 17",
+        text: "A body of mass 'm' attached at the end of a string is just completing the loop in a vertical circle. The apparent weight of the body at the lowest point in its path is (g = gravitational acceleration)",
+        options: ["A) mg", "B) 2mg", "C) 3mg", "D) 6mg"],
+        correct: "D"
+      },
+      {
+        number: "Question 18",
+        text: "A ball of mass 'm' is dropped from a height 's' on a horizontal platform fixed at the top of a vertical spring. The platform is depressed by a distance 'h'. The spring constant is (g = acceleration due to gravity)",
+        options: ["A) mg(s+h)/h²", "B) 2mg(s+h)/h²", "C) mg(s+h)/(2h²)", "D) 2mg(s+h)/h"],
+        correct: "B"
+      },
+      {
+        number: "Question 19",
+        text: "A stone is projected vertically upwards with speed 'v'. Another stone of same mass is projected at an angle of 60° with the vertical with the same speed 'v'. The ratio of their potential energies at the highest points of their journey is",
+        options: ["A) 1:1", "B) 1:2", "C) 1:3", "D) 1:4"],
+        correct: "D"
+      },
+      {
+        number: "Question 20",
+        text: "When a long spring of 4 cm is stretched by 1 cm, the potential energy stored in the spring is U. If it is stretched by 4 cm, the potential energy stored in it is",
+        options: ["A) 4U", "B) 8U", "C) 16U", "D) 32U"],
+        correct: "C"
+      },
+      {
+        number: "Question 21",
+        text: "A string of length L is fixed at one end and carries a mass M at the other end. The string makes π/2 revolutions per second around the vertical axis through the fixed end. The tension in the string is",
+        options: ["A) MLπ²", "B) MLπ²/4", "C) 4MLπ²", "D) 2MLπ²"],
+        correct: "C"
+      },
+      {
+        number: "Question 22",
+        text: "A weightless string can support a tension up to 30 N. A stone of mass 0.5 kg is tied to its one end and is revolved in a circular path of radius 2 m in a vertical plane. Then the maximum angular velocity of the stone will be (g = 10 m/s²)",
+        options: ["A) 5 rad/s", "B) √30 rad/s", "C) √50 rad/s", "D) √70 rad/s"],
+        correct: "A"
+      },
+      {
+        number: "Question 23",
+        text: "A gardener pushes a lawn roller through a distance 20 m. If he applies a force of 30 kg-wt in a direction inclined at 60° to the ground, the work done by the gardener in pushing the roller is [g = 9.8 m/s², sin 30° = cos 60° = 1/2, cos 30° = √3/2]",
+        options: ["A) 1470 J", "B) 2940 J", "C) 2548 J", "D) 2940√3 J"],
+        correct: "B"
+      },
+      {
+        number: "Question 24",
+        text: "A 4 kg mass and a 1 kg mass are moving with equal energies. The ratio of the magnitude of their linear momenta is",
+        options: ["A) 1:2", "B) 2:1", "C) 4:1", "D) 1:4"],
+        correct: "B"
+      },
+      {
+        number: "Question 25",
+        text: "The work done by a force on body of mass 5 kg to accelerate it in the direction of force from rest to 20 m/s in 10 second is",
+        options: ["A) 500 J", "B) 1000 J", "C) 1500 J", "D) 2000 J"],
+        correct: "B"
+      },
+      {
+        number: "Question 26",
+        text: "A car of mass 'm' moving with velocity 'u' on a straight road in a straight line, doubles its velocity in time t. The power delivered by the engine of a car for doubling the velocity is",
+        options: ["A) mu²/t", "B) 3mu²/t", "C) 2mu²/t", "D) mu²/2t"],
+        correct: "B"
+      },
+      {
+        number: "Question 27",
+        text: "A sphere of mass 25 gram is placed on a vertical spring. Spring is compressed by 0.2 m using a force 5 N. When the spring is relaxed, mass is reaching a height of (g = 10 m/s²)",
+        options: ["A) 6 cm", "B) 2 m", "C) 8 cm", "D) 10 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 28",
+        text: "The kinetic energy of a light body and a heavy body is same. Which one of the following statements is CORRECT?",
+        options: ["A) Body having high velocity has greater momentum", "B) The light body has greater momentum", "C) Both bodies have same momentum", "D) The heavy body has greater momentum"],
+        correct: "A"
+      },
+      {
+        number: "Question 29",
+        text: "A simple pendulum has length 2 m and a bob of mass 100 gram. It is whirled in a horizontal plane. If the string breaks under a tension of 10 N, the angle made by the string with vertical is (g = 10 m/s²)",
+        options: ["A) 30°", "B) 45°", "C) 60°", "D) 90°"],
+        correct: "C"
+      },
+      {
+        number: "Question 30",
+        text: "A rod of length 'L' is hung from its one end and a mass 'm' is attached to its free end. What tangential velocity must be imparted to 'm', so that it reaches the top of the vertical circle? (g = acceleration due to gravity)",
+        options: ["A) √(2gL)", "B) √(3gL)", "C) √(4gL)", "D) √(5gL)"],
+        correct: "C"
+      },
+      {
+        number: "Question 31",
+        text: "A body slides down a smooth inclined plane having angle 'θ' and reaches the bottom with velocity 'v'. If a body is a sphere then its linear velocity at the bottom of the plane is",
+        options: ["A) v", "B) √(5/7)v", "C) √(7/5)v", "D) √(10/7)v"],
+        correct: "D"
+      },
+      {
+        number: "Question 32",
+        text: "A force (5i - 2j + 3k) N acts on a body of mass 2 kg and displaces it from (3i + 2j - k) m to (6i - j + 4k) m. The work done is",
+        options: ["A) 10 J", "B) 20 J", "C) 30 J", "D) 40 J"],
+        correct: "C"
+      },
+      {
+        number: "Question 33",
+        text: "Two masses of 1 gram and 4 gram are moving with equal kinetic energy. The ratio of the magnitudes of their momenta is",
+        options: ["A) 1:2", "B) 2:1", "C) 1:4", "D) 1:√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 34",
+        text: "The kinetic energy acquired by a body of mass 'M' in travelling a certain distance 'd' starting from rest, under the action of constant force is",
+        options: ["A) independent of M", "B) directly proportional to M", "C) inversely proportional to √M", "D) directly proportional to √M"],
+        correct: "B"
+      },
+      {
+        number: "Question 35",
+        text: "A block of mass 'm', kept on a horizontal surface, is moved through a distance 's' by applying a horizontal force (F) to it. What is the work done by the normal reaction?",
+        options: ["A) Fs", "B) mgs", "C) zero", "D) (F - mg)s"],
+        correct: "C"
+      },
+      {
+        number: "Question 36",
+        text: "Two springs of spring constants 'K' and '2K' are stretched by same force. If 'w₁' and 'w₂' are the energies stored in them respectively then",
+        options: ["A) w₁ = w₂", "B) w₂ = 2w₁", "C) w₂ = w₁/2", "D) w₂ = 4w₁"],
+        correct: "C"
+      },
+      {
+        number: "Question 37",
+        text: "A sphere is suspended by a thread of length l. What minimum horizontal velocity has to be imparted to the ball for it to reach the height of the suspension?",
+        options: ["A) √(gl)", "B) √(2gl)", "C) √(3gl)", "D) √(5gl)"],
+        correct: "B"
+      },
+      {
+        number: "Question 38",
+        text: "A long spring is stretched by 2 cm and its potential energy is U. If the spring is stretched by 10 cm; its potential energy will be",
+        options: ["A) 5U", "B) 10U", "C) 25U", "D) 50U"],
+        correct: "C"
+      },
+      {
+        number: "Question 39",
+        text: "A string of length L is fixed at one end and carries a mass M at the other end. The string makes 3/π r.p.s. around the vertical axis through fixed end. The tension in the string is",
+        options: ["A) 9Mg/π²", "B) 36Mg/π²", "C) 18Mg/π", "D) 36Mg"],
+        correct: "B"
+      },
+      {
+        number: "Question 40",
+        text: "In an electric field due to charge Q, a charge q moves from point A to B as shown in the figure. The work done is (ε₀ = permittivity of free space)",
+        options: ["A) qQ/(4πε₀r₁)", "B) qQ/(4πε₀r₂)", "C) qQ/(4πε₀)(1/r₁ - 1/r₂)", "D) qQ/(4πε₀)(1/r₂ - 1/r₁)"],
+        correct: "C"
+      },
+      {
+        number: "Question 41",
+        text: "A force (5i - 2j + 3k) N acts on a body of mass 2 kg and displaces it from (3i + 2j - k) m to (6i - j + 4k) m. The work done is",
+        options: ["A) 10 J", "B) 20 J", "C) 30 J", "D) 40 J"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      
+      // Create diagram placeholder if needed
+      const diagramHTML = q.diagram 
+        ? `<div class="diagram-placeholder">[Diagram: ${q.diagram}]</div>` 
+        : '';
+      
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}${diagramHTML}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC6.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

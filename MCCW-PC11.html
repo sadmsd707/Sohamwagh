@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    .question-item {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    .save-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #3b82f6;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Mechanical Properties of Fluids</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions (1-226)</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <div class="save-notification" id="saveNotification">
+    <span>Results saved successfully!</span>
+    <button onclick="hideNotification()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 1",
+        text: "The liquid (mercury) meniscus in capillary tube will be convex if the angle of contact is",
+        options: ["0°", "90°", "> 90°", "< 90°"],
+        correct: "C"
+      },
+      {
+        number: "Question 2",
+        text: "A vessel completely filled with water has two holes 'P' and 'Q' at depths '2h' and '8h' from the top respectively. Hole 'P' is square of side 'a' and hole 'Q' is a circle of radius 'r'. The water flowing out per second from both the holes is same, then side 'a' of hole 'P' is",
+        options: ["r√π", "2r√π", "r√(2π)", "2r√(2π)"],
+        correct: "C"
+      },
+      {
+        number: "Question 3",
+        text: "A spherical liquid drop splits into 729 identical spherical drops. If E is the surface energy of the original drop and U is the total surface energy of resulting drops, then E/U = 1/x. The value of x is",
+        options: ["9", "27", "81", "243"],
+        correct: "A"
+      },
+      {
+        number: "Question 4",
+        text: "A paper disc of radius 'R' from which a circular hole of radius 'r' is cut out, is floating in a liquid of surface tension 'T'. The force on the disc due to surface tension will be",
+        options: ["2πRT", "2πrT", "2π(R + r)T", "2π(R - r)T"],
+        correct: "C"
+      },
+      {
+        number: "Question 5",
+        text: "Two spheres of different material are falling through liquid of density 2×10³ kg/m³ with same uniform speed. The density of sphere 1 and that of sphere 2 is 8×10³ kg/m³ and 11×10³ kg/m³ respectively. The ratio of their radii is (first to second sphere)",
+        options: ["3:2", "2:3", "√3:√2", "√2:√3"],
+        correct: "C"
+      },
+      {
+        number: "Question 6",
+        text: "Water (of density 'ρ') flows steadily through a horizontal pipe of variable cross-section. If the pressure of water is 'P' at a point where the flow speed is 'V', then the pressure at another point where the flow speed becomes 3V is",
+        options: ["P - 4ρV²", "P - 8ρV²", "P - 3ρV²", "P - 5ρV²"],
+        correct: "A"
+      },
+      {
+        number: "Question 7",
+        text: "The work done in splitting a water drop of radius R into 64 droplets is (T = surface tension of water)",
+        options: ["4πR²T", "8πR²T", "12πR²T", "16πR²T"],
+        correct: "C"
+      },
+      {
+        number: "Question 8",
+        text: "Under isothermal conditions, two soap bubbles of radii r₁ and r₂ coalesce to form a big drop. The radius of the big drop is",
+        options: ["(r₁ + r₂)³", "(r₁ + r₂)²", "(r₁² + r₂²)^(1/2)", "(r₁ + r₂)^(1/2)"],
+        correct: "C"
+      },
+      {
+        number: "Question 9",
+        text: "When one end of the capillary is dipped in water, the height of water column is 'h'. The upward force of 108 dyne due to surface tension is balanced by the force due to the weight of water column. The inner circumference of the capillary is (surface tension of water = 7.2×10⁻² N/m)",
+        options: ["1.5 cm", "3.0 cm", "4.5 cm", "6.0 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 10",
+        text: "A capillary tube when immersed vertically in water, the rise of water column is upto height h₁ on earth's surface. When this arrangement is taken into a mine of depth 'd', below earth's surface, the height of the water column is h₂. If R is the radius of the earth, the ratio h₂/h₁ is",
+        options: ["(R - d)/R", "R/(R - d)", "(R + d)/R", "R/(R + d)"],
+        correct: "B"
+      },
+      {
+        number: "Question 11",
+        text: "125 small water drops of same size fall through air with constant velocity 4 cm/s. They coalesce to form a big drop. The terminal velocity of the big drop is",
+        options: ["20 cm/s", "25 cm/s", "30 cm/s", "35 cm/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 12",
+        text: "Let R₁, R₂ and R₃ be the radii of three mercury drops. A big mercury drop is formed from them under isothermal conditions. The radius of the resultant drop is",
+        options: ["(R₁ + R₂ + R₃)³", "(R₁³ + R₂³ + R₃³)^(1/3)", "(R₁² + R₂³ - R₃³)^(1/3)", "(R₁³ + R₂³ + R₃³)"],
+        correct: "B"
+      },
+      {
+        number: "Question 13",
+        text: "A horizontal pipeline carries water in a streamline flow. At a point along the pipe, where the cross-sectional area is 10 cm², the velocity of water is 1 m/s and pressure is 2000 Pa. The pressure of water at another point where the cross-sectional area 5 cm² is [Given → density of water = 1000 kg/m³]",
+        options: ["500 Pa", "1000 Pa", "1500 Pa", "2000 Pa"],
+        correct: "A"
+      },
+      {
+        number: "Question 14",
+        text: "The amount of work done in blowing a soap bubble such that its diameter increases from 'd' to 'D' is (T = surface tension of solution)",
+        options: ["2πT(D² - d²)", "4πT(D² - d²)", "8πT(D² - d²)", "πT(D² - d²)"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "When one end of a capillary tube is dipped in water, the height of water column is 'h'. The upward force of 105 dyne due to surface tension is balanced by the force due to the weight of water column. The inner circumference of the capillary tube is (Surface tension of water = 7×10⁻² N/m)",
+        options: ["1.5 cm", "2.0 cm", "2.5 cm", "3.0 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 16",
+        text: "In a capillary tube of area of cross-section 'a' water rises to height 'h'. To what height will water rise in a capillary tube of area of cross-section 4a?",
+        options: ["h/2", "h", "2h", "h/4"],
+        correct: "A"
+      },
+      {
+        number: "Question 17",
+        text: "The velocity of small spherical ball of mass 'm' and density 'd₁', when dropped in a container filled with glycerine becomes constant after some time. The viscous force acting on the ball if density of glycerine is 'd₂' is",
+        options: ["mg(d₁ - d₂)/d₁", "mg(d₂ - d₁)/d₁", "mg(d₁ - d₂)/d₂", "mg"],
+        correct: "A"
+      },
+      {
+        number: "Question 18",
+        text: "A solid cylinder of length ℓ and cross-sectional area a/b is immersed such that it floats with its axis vertical at the liquid-liquid interface with length ℓ/4 in the denser liquid as shown in figure. The lower density liquid (ρ) is open to atmosphere having pressure P₀. The density d of solid cylinder is",
+        options: ["(ρ + 3σ)/4", "(3ρ + σ)/4", "(ρ + σ)/2", "(2ρ + σ)/3"],
+        correct: "B"
+      },
+      {
+        number: "Question 19",
+        text: "The amount of work done in blowing a soap bubble such that its diameter increases from d₁ to d₂ is (T = surface tension of soap solution)",
+        options: ["2πT(d₂² - d₁²)", "4πT(d₂² - d₁²)", "8πT(d₂² - d₁²)", "πT(d₂² - d₁²)"],
+        correct: "B"
+      },
+      {
+        number: "Question 20",
+        text: "The energy needed for breaking a liquid drop of radius 'R' into 216 droplets, each of radius 'r' is 'x' times TR². The value of 'x' is [T = surface tension of the liquid]",
+        options: ["4π", "8π", "12π", "16π"],
+        correct: "C"
+      },
+      {
+        number: "Question 21",
+        text: "The excess pressure inside first soap bubble is three times that of a second soap bubble. The ratio of volumes of the first to second bubble",
+        options: ["1:27", "1:9", "1:3", "1:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 22",
+        text: "A disc of paper of radius 'R' has a hole of radius 'r'. It is floating on a liquid of surface tension 'T'. The force of surface tension on the disc is",
+        options: ["2πRT", "2πrT", "2π(R + r)T", "2π(R - r)T"],
+        correct: "C"
+      },
+      {
+        number: "Question 23",
+        text: "A wind with speed 50 m/s blows parallel to the roof of a house. The area of the roof is 300 m². Assume that the pressure inside the house is atmospheric pressure. Density of air is 1.2 kg/m³. The magnitude of the force exerted by the wind on the roof will be",
+        options: ["450 N", "900 N", "1800 N", "3600 N"],
+        correct: "B"
+      },
+      {
+        number: "Question 24",
+        text: "The energy needed for breaking a liquid drop of radius 'R' into 'n' droplets each of radius 'r' is [T = surface tension of the liquid]",
+        options: [
+          "4πTr²[R/r - 1]",
+          "4πTR²[R/r + 1]",
+          "4πTR²[r/R + 1]",
+          "4πTR²[R/r - 1]"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 25",
+        text: "The excess pressure inside a soap bubble is 1.5 times the excess pressure inside a second soap bubble. The volume of the second bubble is 'x' times the volume of the first bubble. The value of 'x' is",
+        options: ["0.296", "3.375", "0.125", "8"],
+        correct: "A"
+      },
+      {
+        number: "Question 26",
+        text: "Water rises in a capillary tube of radius r upto a height h. The mass of water in a capillary is m. The mass of water that will rise in capillary of radius r/5 will be",
+        options: ["m/5", "m/25", "5m", "25m"],
+        correct: "B"
+      },
+      {
+        number: "Question 27",
+        text: "A rectangular film of liquid is expanded from (5 cm × 4 cm) to (7 cm × 8 cm). If the work done is 3×10⁻⁴ J, the surface tension of the liquid is (nearly)",
+        options: ["0.01 N/m", "0.02 N/m", "0.03 N/m", "0.04 N/m"],
+        correct: "C"
+      },
+      {
+        number: "Question 28",
+        text: "A capillary tube is taken from earth's surface to moon's surface. The rise of liquid column on the moon's surface is (acceleration due to gravity on the earth's surface is six times that of moon's surface)",
+        options: ["6 times", "1/6 times", "36 times", "1/36 times"],
+        correct: "A"
+      },
+      {
+        number: "Question 29",
+        text: "There are two identical small holes on the opposite side of a tank containing full of a liquid. The tank is open at the top. The difference in height between the two holes is 'h'. As the liquid comes out of the two holes, the tank will experience a net horizontal force proportional to",
+        options: ["√h", "h", "h^(3/2)", "h²"],
+        correct: "A"
+      },
+      {
+        number: "Question 30",
+        text: "In air, a charged soap bubble of radius R breaks into 64 small soap bubbles of equal radius r. The ratio of mechanical force per unit area of big soap bubble to that of a small bubble is",
+        options: ["1:4", "1:16", "4:1", "16:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 31",
+        text: "Two capillary tubes of same diameter are kept vertically in two liquids whose densities are in the ratio 4:3. If their surface tensions are in the ratio 6:5, the ratio of heights (h₁/h₂) of liquids in the two capillary tubes is (Their angle of contacts are same)",
+        options: ["10:9", "9:10", "8:5", "5:8"],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "Water flows through a horizontal pipe of varying cross-section at the rate of π×10⁻¹ m/s. The velocity of water at a point where the radius of the pipe is 10 cm is (π = 3.14)",
+        options: ["0.1 m/s", "0.5 m/s", "1.0 m/s", "2.0 m/s"],
+        correct: "C"
+      },
+      {
+        number: "Question 33",
+        text: "A liquid drop of volume V is placed on the surface of glass plate. Then another glass plate is placed on it such that liquid forms a thin layer of area A between the surfaces of two plates. To separate the plates a force F has to be applied normal to the surfaces. The surface tension of the liquid is",
+        options: ["F/2A", "F/A", "2F/A", "F/4A"],
+        correct: "A"
+      },
+      {
+        number: "Question 34",
+        text: "Water rises up to height 'x' in a capillary tube immersed vertically in water. When the whole arrangement is taken to a depth 'd' in a mine, the water level rises up to height Y. If R is the radius of the earth then the ratio Y:x is",
+        options: ["(R-d)/R", "R/(R-d)", "(R+d)/R", "R/(R+d)"],
+        correct: "B"
+      },
+      {
+        number: "Question 35",
+        text: "An incompressible fluid flows steadily through a cylindrical pipe having radius R at point A and (R/3) at point B further along the direction of flow of liquid. If the velocity at point A is 'V' then that at point B is",
+        options: ["V/9", "V/3", "3V", "9V"],
+        correct: "D"
+      },
+      {
+        number: "Question 36",
+        text: "Two raindrops reach the earth with different terminal velocities having the ratio 9:4. The ratio of their volumes is",
+        options: ["3:2", "9:4", "27:8", "81:16"],
+        correct: "C"
+      },
+      {
+        number: "Question 37",
+        text: "The temperature of an air bubble while rising from bottom to surface of a lake remains constant but diameter is doubled. If pressure on the surface is h meter of mercury column and relative density of mercury is 'ρ' then the depth of the lake is",
+        options: ["8hρ", "7hρ", "hρ", "2hρ"],
+        correct: "B"
+      },
+      {
+        number: "Question 38",
+        text: "A liquid drop having surface energy E is sprayed into 512 droplets of same size. The final surface energy is",
+        options: ["2E", "4E", "8E", "16E"],
+        correct: "C"
+      },
+      {
+        number: "Question 39",
+        text: "Pure water rises through a height h in a capillary tube of internal radius r. Surface tension of water is T. The pressure difference between the water level in the container and the lowest point of the concave meniscus is",
+        options: ["2T/r", "2T/r + ρgh", "2T/r - ρgh", "ρgh"],
+        correct: "B"
+      },
+      {
+        number: "Question 40",
+        text: "The surface energy of a liquid drop is 'V'. It is sprayed into 1000 equal droplets. The surface energy of all the droplets is",
+        options: ["V", "10V", "100V", "1000V"],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "A liquid drop having surface energy E is spread into 729 droplets of same size. The final surface energy of the droplets is",
+        options: ["3E", "9E", "27E", "81E"],
+        correct: "B"
+      },
+      {
+        number: "Question 42",
+        text: "A water drop of 0.01 cm³ is squeezed between two glass plates and spreads into area of 10 cm². If surface tension of water is 70 dyne/cm then the normal force required to separate glass plates from each other will be",
+        options: ["70 N", "700 N", "1400 N", "2800 N"],
+        correct: "C"
+      },
+      {
+        number: "Question 43",
+        text: "'n' small water drops of same size (radius r) fall through air with constant velocity V. They coalesce to form a big drop of radius R. The terminal velocity of the big drop is",
+        options: ["n^(1/3)V", "n^(2/3)V", "nV", "n²V"],
+        correct: "B"
+      },
+      {
+        number: "Question 44",
+        text: "A small metal sphere of density ρ is dropped from height h into a jar containing liquid of density σ (σ > ρ). The maximum depth up to which the sphere sinks is (Neglect damping forces)",
+        options: ["hρ/(σ-ρ)", "hσ/(σ-ρ)", "h(σ-ρ)/ρ", "h(σ-ρ)/σ"],
+        correct: "A"
+      },
+      {
+        number: "Question 45",
+        text: "Water is flowing steadily in a river. A and B are the two layers of water at heights 40 cm and 90 cm from the bottom. The velocity of the layer A is 12 cm/s. The velocity of the layer B is",
+        options: ["6 cm/s", "8 cm/s", "9 cm/s", "10.8 cm/s"],
+        correct: "D"
+      },
+      {
+        number: "Question 46",
+        text: "A liquid rises to a height of 2.4 cm in a glass capillary P. Another glass capillary Q having diameter 80% of capillary P is immersed in the same liquid. The rise of liquid in capillary Q is",
+        options: ["1.92 cm", "2.0 cm", "3.0 cm", "4.8 cm"],
+        correct: "C"
+      },
+      {
+        number: "Question 47",
+        text: "One end of a capillary tube is dipped in water, the rise of water column is 'h'. The upward force of 98 dyne due to surface tension is balanced by the force due to the weight of the water column. The inner circumference of the capillary is (surface tension of water = 7×10⁻² Nm⁻¹)",
+        options: ["1.4 cm", "2.8 cm", "4.2 cm", "5.6 cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 48",
+        text: "When a big drop of water is formed from 'n' small drops of water, the energy loss is '3E' where 'E' is the energy of the bigger drop. The radius of the bigger drop is 'R' and that of smaller drop is 'r' then the value of 'n' is",
+        options: ["4", "8", "16", "32"],
+        correct: "B"
+      },
+      {
+        number: "Question 49",
+        text: "On the surface of the liquid in equilibrium, molecules of the liquid possess",
+        options: [
+          "maximum potential energy",
+          "minimum potential energy",
+          "maximum kinetic energy",
+          "minimum kinetic energy"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 50",
+        text: "A water drop is divided into 8 equal droplets. The pressure difference between the inner and outer side of the big drop will be",
+        options: ["same as before", "half of before", "twice of before", "four times of before"],
+        correct: "C"
+      },
+      {
+        number: "Question 51",
+        text: "A liquid drop having surface energy 'E' is spread into 512 droplets of same size. The final surface energy of the droplets is",
+        options: ["2E", "4E", "8E", "16E"],
+        correct: "C"
+      },
+      {
+        number: "Question 52",
+        text: "In most liquids, with rise in temperature, surface tension of a liquid",
+        options: ["increases", "decreases", "remains constant", "first increases then decreases"],
+        correct: "B"
+      },
+      {
+        number: "Question 53",
+        text: "A cylinder contains water upto a height 'H'. It has three orifices O₁, O₂, O₃ as shown in the figure. Let V₁, V₂, V₃ be the speed of efflux of water from the three orifices. Then",
+        options: [
+          "V₁ = V₂ = V₃",
+          "V₁ > V₂ > V₃",
+          "V₁ < V₂ < V₃",
+          "V₂ > V₁ = V₃"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 54",
+        text: "When capillary is dipped vertically in water, rise of water in capillary is 'h'. The angle of contact is zero. Now the tube is depressed so that its length above the water surface is h/3. The new apparent angle of contact is (cos 0° = 1)",
+        options: ["0°", "60°", "90°", "120°"],
+        correct: "B"
+      },
+      {
+        number: "Question 55",
+        text: "The viscous force between two liquid layers is",
+        options: [
+          "normal to the liquid surface",
+          "radial",
+          "neither purely tangential nor purely normal",
+          "tangential to the liquid surface"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 56",
+        text: "A ball rises to surface at a constant velocity in liquid whose density is 3 times greater than that of the material of the ball. The ratio of force of friction acting on the rising ball to its weight is",
+        options: ["1:2", "2:1", "3:1", "1:3"],
+        correct: "B"
+      },
+      {
+        number: "Question 57",
+        text: "When a mercury drop of radius 'R' splits up into 1000 droplets of radius 'r', the change in surface energy is (T = surface tension of mercury)",
+        options: ["36πR²T", "72πR²T", "108πR²T", "144πR²T"],
+        correct: "A"
+      },
+      {
+        number: "Question 58",
+        text: "The angle of contact between glass and water is 0° and water rises in a glass capillary upto 6 cm (Surface tension of water is T). Another liquid of surface tension '2T', angle of contact 60° and relative density 2 will rise in the same capillary up to (cos 0° = 1, cos 60° = 0.5)",
+        options: ["1.5 cm", "3.0 cm", "6.0 cm", "12.0 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 59",
+        text: "Two capillary tubes A and B of the same internal diameter are kept vertically in two different liquids whose densities are in the ratio 4:3. If the surface tensions of these two liquids are in the ratio 6:5, then the ratio of rise of liquid in capillary A to that in B is (assume their angles of contact are nearly equal)",
+        options: ["10:9", "9:10", "8:5", "5:8"],
+        correct: "B"
+      },
+      {
+        number: "Question 60",
+        text: "Two rain drops of same radius are falling through air each with a steady speed of 5 cm/s. If the drops coalesce, the new steady velocity of big drop will be",
+        options: ["5×2^(1/3) cm/s", "5×2^(2/3) cm/s", "10 cm/s", "5√2 cm/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 61",
+        text: "A capillary tube stands with its lower end dipped into liquid for which the angle of contact is 90°. The liquid will",
+        options: ["rise", "fall", "neither rise nor fall", "oscillate"],
+        correct: "C"
+      },
+      {
+        number: "Question 62",
+        text: "A lead sphere of mass 'm' falls in viscous liquid with terminal velocity V₀. Another lead sphere of mass '8m' but of same material will fall through the same liquid with terminal velocity",
+        options: ["V₀", "2V₀", "4V₀", "8V₀"],
+        correct: "C"
+      },
+      {
+        number: "Question 63",
+        text: "A big water drop is formed by the combination of 'n' small water droplets of equal radii. The ratio of the surface energy of 'n' droplets to the surface energy of the big drop is",
+        options: ["n^(1/3):1", "n^(2/3):1", "n:1", "1:n^(1/3)"],
+        correct: "B"
+      },
+      {
+        number: "Question 64",
+        text: "Water rises in a capillary tube of radius 'r' up to height 'h'. The mass of water in capillary is 'm'. The mass of water that will rise in capillary of radius r/3 will be",
+        options: ["m/3", "m/9", "3m", "9m"],
+        correct: "B"
+      },
+      {
+        number: "Question 65",
+        text: "The work done in blowing a soap bubble of radius R is W₁ at room temperature. Now the soap solution is heated. From the heated solution another soap bubble of radius 2R is blown and the work done is W₂. Then",
+        options: ["W₂ = 2W₁", "W₂ = 4W₁", "W₂ = 8W₁", "W₂ = 16W₁"],
+        correct: "B"
+      },
+      {
+        number: "Question 66",
+        text: "Two soap bubbles having radii 'r₁' and 'r₂' has inside pressure 'P₁' and 'P₂' respectively. If P₀ is external pressure then ratio of their volume is",
+        options: [
+          "(P₁ - P₀)/(P₂ - P₀)",
+          "(P₂ - P₀)/(P₁ - P₀)",
+          "[(P₁ - P₀)/(P₂ - P₀)]^(3/2)",
+          "[(P₂ - P₀)/(P₁ - P₀)]^(3/2)"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 67",
+        text: "Two metal spheres are falling through a liquid of density 2.5×10³ kg/m³ with the same uniform speed. The density of material of first sphere and second sphere is 11.5×10³ kg/m³ and 8.5×10³ kg/m³ respectively. The ratio of the radius of first sphere to that of second sphere is",
+        options: ["√(17/12)", "√(12/17)", "17/12", "12/17"],
+        correct: "A"
+      },
+      {
+        number: "Question 68",
+        text: "A glass capillary of radius 0.35 mm is inclined at 60° with the vertical in water. The height of the water column in the capillary is (surface tension of water = 7×10⁻² N/m, acceleration due to gravity, g = 10 m/s², cos 0° = 1, cos 60° = 0.5)",
+        options: ["2 cm", "4 cm", "6 cm", "8 cm"],
+        correct: "B"
+      },
+      {
+        number: "Question 69",
+        text: "A closed pipe containing a liquid showed a pressure P₁ by gauge. When the valve was opened, pressure was reduced to P₂. The speed of water flowing out of the pipe is (ρ = density of water)",
+        options: ["√[2(P₁ - P₂)/ρ]", "√[(P₁ - P₂)/ρ]", "√[2(P₁ + P₂)/ρ]", "√[(P₁ + P₂)/ρ]"],
+        correct: "A"
+      },
+      {
+        number: "Question 70",
+        text: "A completely filled water tank of height 'h' has a hole at the bottom. The total pressure of the bottom is 4H and atmospheric pressure is H. The velocity of water flowing out of the hole is (ρ = density of water)",
+        options: ["√(2gh)", "√(3gh)", "√(4gh)", "√(6gh)"],
+        correct: "D"
+      },
+      {
+        number: "Question 71",
+        text: "A metal sphere of radius R, density ρ₁ moves with terminal velocity V₁ through a liquid of density σ. Another sphere of same radius but density ρ₂ moves through same liquid. Its terminal velocity is V₂. The ratio V₁:V₂ is",
+        options: ["(ρ₁ - σ):(ρ₂ - σ)", "(ρ₂ - σ):(ρ₁ - σ)", "ρ₁:ρ₂", "ρ₂:ρ₁"],
+        correct: "A"
+      },
+      {
+        number: "Question 72",
+        text: "Three liquids of densities ρ₁, ρ₂ and ρ₃ (with ρ₁ > ρ₂ > ρ₃) having same value of surface tension T, rise to the same height in three identical capillaries. Angle of contact θ₁, θ₂ and θ₃ respectively obey",
+        options: ["θ₁ > θ₂ > θ₃", "θ₁ < θ₂ < θ₃", "θ₁ = θ₂ = θ₃", "θ₁ > θ₂ = θ₃"],
+        correct: "B"
+      },
+      {
+        number: "Question 73",
+        text: "Let 'n' is the number of liquid drops, each with surface energy 'E'. These drops join to form single drop. In this process",
+        options: [
+          "energy is released",
+          "energy is absorbed",
+          "energy neither released nor absorbed",
+          "mass is converted into energy"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 74",
+        text: "The work done in splitting a water drop of radius R into 64 droplets is (T = Surface tension of water)",
+        options: ["4πR²T", "8πR²T", "12πR²T", "16πR²T"],
+        correct: "C"
+      },
+      {
+        number: "Question 75",
+        text: "Two identical drops of water are falling through air with steady velocity 'V'. If the two drops come together to form a single drop. The new velocity of the single drop is",
+        options: ["2^(1/3)V", "2^(2/3)V", "2V", "4V"],
+        correct: "B"
+      },
+      {
+        number: "Question 76",
+        text: "When an air bubble rises from the bottom of lake to the surface, its radius is doubled. The atmospheric pressure is equal to that of a column of water of height 'H'. The depth of the lake is",
+        options: ["H", "3H", "7H", "8H"],
+        correct: "C"
+      },
+      {
+        number: "Question 77",
+        text: "Water is flowing in a conical tube as shown in figure. Velocity of water at area 'A₂' is 60 cm/s. The value of 'A₁' and 'A₂' is 10 cm² and 5 cm² respectively. The pressure difference at both the cross-section is",
+        options: ["1.35 Pa", "13.5 Pa", "135 Pa", "1350 Pa"],
+        correct: "B"
+      },
+      {
+        number: "Question 78",
+        text: "A hemispherical portion of radius 'R' is removed from the bottom of a cylinder of radius 'R'. The volume of the remaining cylinder is 'V' and its mass is 'M'. It is suspended by a string in a liquid of density 'ρ' where it stays vertical. The upper surface of the cylinder is at a depth 'h' below the liquid surface. The force on the bottom of the liquid is",
+        options: ["ρgV", "Mg", "ρg(h + R)", "ρg(h + R) + Mg"],
+        correct: "A"
+      },
+      {
+        number: "Question 79",
+        text: "A water film is formed between two parallel wires of 10 cm length. The distance of 0.5 cm between the wires is increased by 1 mm. The work done in the process is (surface tension of water = 72 N/m)",
+        options: [
+          "2.88 × 10⁻² J",
+          "1.44 × 10⁻² J",
+          "7.2 × 10⁻² J",
+          "3.6 × 10⁻² J"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 80",
+        text: "Identify the correct figure which shows the relation between the height of water column in a capillary tube and the capillary radius.",
+        options: ["h ∝ r", "h ∝ 1/r", "h ∝ r²", "h ∝ 1/r²"],
+        correct: "B"
+      },
+      {
+        number: "Question 81",
+        text: "Water rises up to height 'X' in a capillary tube immersed vertically in water. When the whole arrangement is taken to a depth 'd' in a mine, the water level rises up to height 'Y'. If 'R' is the radius of earth then the ratio Y/X is",
+        options: ["(R-d)/R", "R/(R-d)", "(R+d)/R", "R/(R+d)"],
+        correct: "B"
+      },
+      {
+        number: "Question 82",
+        text: "The surface of water in a water tank of cross section area 750 cm² on the top of a house is 'h' m above the tap level. The speed of water coming out through the tap of cross section area 500 mm² is 30 cm/s. At that instant dh/dt is x × 10⁻³ m/s. The value of 'x' will be",
+        options: ["1", "2", "3", "4"],
+        correct: "B"
+      },
+      {
+        number: "Question 83",
+        text: "The excess pressure inside a spherical drop of water A is four times that of another drop B. Then the ratio of mass of drop A to that of drop B is",
+        options: ["1:4", "1:16", "1:64", "4:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 84",
+        text: "A steel ball of radius 6 mm has a terminal speed of 12 cm/s in a viscous liquid. What will be the terminal speed of a steel ball of radius 3 mm in the same liquid?",
+        options: ["3 cm/s", "6 cm/s", "12 cm/s", "24 cm/s"],
+        correct: "A"
+      },
+      {
+        number: "Question 85",
+        text: "The pressure inside a soap bubble A is 1.01 atmosphere and that in a soap bubble B is 1.02 atmosphere. The ratio of volume of bubble A to that of B is [Surrounding pressure = 1 atmosphere]",
+        options: ["2:1", "4:1", "8:1", "64:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 86",
+        text: "A liquid drop of density 'ρ' is floating half immersed in a liquid of density 'd'. If 'T' is the surface tension then the diameter of the liquid drop is (g = acceleration due to gravity)",
+        options: [
+          "[6T/g(ρ-d)]^(1/2)",
+          "[3T/g(2ρ-d)]^(1/2)",
+          "[12T/g(2ρ-d)]^(1/2)",
+          "[9T/g(ρ-d)]^(1/2)"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 87",
+        text: "A gardening pipe having an internal radius 'R' is connected to a water sprinkler having 'n' holes each of radius 'r'. The water in the pipe has a speed 'v'. The speed of water leaving the sprinkler is",
+        options: ["vR²/(nr²)", "vR²/(n²r²)", "vnr²/R²", "vR/(nr)"],
+        correct: "A"
+      },
+      {
+        number: "Question 88",
+        text: "The pressure inside two soap bubbles, (A) is 1.01 and that of (B) is 1.02 atmosphere respectively. The ratio of their respective radii (A to B) is (outside pressure = 1 atm.)",
+        options: ["1:2", "2:1", "1:4", "4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 89",
+        text: "A metal ball of radius 9×10⁻⁴ m and density 10⁴ kg/m³ falls freely under gravity through a distance 'h' and enters a tank of water. Considering that the metal ball has constant velocity, the value of h is [coefficient of viscosity of water = 8.1 × 10⁻⁴ Pa-s, g = 10 m/s² density of water = 10³ kg/m³]",
+        options: ["1 m", "10 m", "100 m", "1000 m"],
+        correct: "C"
+      },
+      {
+        number: "Question 90",
+        text: "Liquid drops are falling slowly one by one from vertical glass tube. The relation between the weight of a drop 'w', the surface tension 'T' and the radius 'r' of the bore of the tube is (Angle of contact is zero)",
+        options: ["w = 2πrT", "w = πrT", "w = 4πrT", "w = (2/3)πrT"],
+        correct: "A"
+      },
+      {
+        number: "Question 91",
+        text: "A ball rises to surface at a constant velocity in liquid whose density is 4 times greater than that of the material of the ball. The ratio of the force of friction acting on the rising ball and its weight is",
+        options: ["1:3", "3:1", "1:4", "4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 92",
+        text: "A drum of radius 'R' full of liquid of density 'd' is rotated at angular velocity 'ω' rad/s. The increase in pressure at the centre of the drum will be",
+        options: ["(1/2)dω²R²", "dω²R²", "2dω²R²", "4dω²R²"],
+        correct: "A"
+      },
+      {
+        number: "Question 93",
+        text: "(Question text missing - placeholder)",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "A"
+      },
+      {
+        number: "Question 94",
+        text: "The pressure inside a soap bubble A is 1.01 atmosphere and that in a soap bubble B is 1.02 atmosphere. The ratio of volume of A to that of B is",
+        options: ["2:1", "4:1", "8:1", "64:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 95",
+        text: "Glycerine of density 1.25×10³ kg/m³ is flowing in conical shaped horizontal pipe. Cross-sectional area of the pipe at its both ends is 10 cm² and 5 cm² respectively. Pressure difference at both the ends is 3 N/m². Rate of flow of liquid in the pipe is",
+        options: ["2×10⁻⁴ m³/s", "4×10⁻⁴ m³/s", "6×10⁻⁴ m³/s", "8×10⁻⁴ m³/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 96",
+        text: "Two spherical soap bubbles of radii 'a' and 'b' in vacuum coalesce under isothermal conditions. The resulting bubble has a radius equal to",
+        options: ["√(a² + b²)", "(a + b)/2", "ab/(a+b)", "a + b"],
+        correct: "A"
+      },
+      {
+        number: "Question 97",
+        text: "1000 small water drops of equal size combine to form a big drop. The ratio of final surface energy to the total initial surface energy is",
+        options: ["1:10", "1:100", "1:1000", "10:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 98",
+        text: "It is easier to spray water to which soap is added because addition of soap to water",
+        options: [
+          "increases surface tension",
+          "decreases surface tension",
+          "increases viscosity",
+          "decreases viscosity"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 99",
+        text: "By adding soluble impurity in a liquid, angle of contact",
+        options: [
+          "increases",
+          "decreases",
+          "remains unchanged",
+          "first increases then decreases"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 100",
+        text: "The potential energy of a molecule on the surface of a liquid compared to the molecules inside the liquid is",
+        options: ["greater", "smaller", "same", "zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 101",
+        text: "Water rises in a capillary tube of radius 'r' upto a height 'h'. The mass of water in a capillary is 'm'. The mass of water that will rise in a capillary tube of radius r/3 will be",
+        options: ["m/3", "m/9", "3m", "9m"],
+        correct: "B"
+      },
+      {
+        number: "Question 102",
+        text: "If work done in blowing a soap bubble of volume 'V' is W then the work done in blowing the bubble of volume 2V from same soap solution is",
+        options: ["W", "2^(1/3)W", "2^(2/3)W", "2W"],
+        correct: "C"
+      },
+      {
+        number: "Question 103",
+        text: "There is hole of area 'A' at the bottom of a cylindrical vessel. Water is filled to a height 'h' and water flows out in 't' second. If water is filled to a height '4h', it will flow out in time (in second)",
+        options: ["t", "2t", "4t", "8t"],
+        correct: "B"
+      },
+      {
+        number: "Question 104",
+        text: "A large number of water droplets each of radius 'r' combine to form a large drop of Radius 'R'. If the surface tension of water is 'T' & mechanical equivalent of heat is 'J' then the rise in temperature due to this is",
+        options: ["3T/Jρ(1/r - 1/R)", "2T/Jρ(1/r - 1/R)", "T/Jρ(1/r - 1/R)", "4T/Jρ(1/r - 1/R)"],
+        correct: "A"
+      },
+      {
+        number: "Question 105",
+        text: "Twenty seven droplets of water each of radius 0.1 mm merge to form a single drop then the energy released is",
+        options: ["2.7×10⁻⁶ J", "5.4×10⁻⁶ J", "8.1×10⁻⁶ J", "10.8×10⁻⁶ J"],
+        correct: "B"
+      },
+      {
+        number: "Question 106",
+        text: "Venturimeter is used to",
+        options: [
+          "measure rate of flow of liquids",
+          "measure surface tension",
+          "measure liquid density",
+          "measure liquid pressure"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 107",
+        text: "Eight small drops of mercury each of radius 'r', coalesce to form a large single drop. The ratio of total surface energy before and after the change is",
+        options: ["1:2", "2:1", "1:4", "4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 108",
+        text: "A spherical metal ball of radius 'r' falls through viscous liquid with velocity 'V'. Another metal ball of same material but of radius (r/3) falls through same liquid, then its terminal velocity will be",
+        options: ["V/9", "V/3", "3V", "9V"],
+        correct: "A"
+      },
+      {
+        number: "Question 109",
+        text: "Select the WRONG statement from the following. In a streamline flow",
+        options: [
+          "layers are always parallel",
+          "velocity of a fluid at a given point is never constant",
+          "the particles do not move in random direction",
+          "velocity is smaller than critical velocity"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 110",
+        text: "Consider a soap film on a rectangular frame of wire of area 3×3 cm². If the area of the soap film is increased to 5×5 cm², the work done in the process will be (surface tension of soap solution is 2.5×10⁻² N/m)",
+        options: ["1.2×10⁻⁴ J", "2.4×10⁻⁴ J", "3.6×10⁻⁴ J", "4.8×10⁻⁴ J"],
+        correct: "A"
+      },
+      {
+        number: "Question 111",
+        text: "A spherical drop of liquid splits into 1000 identical spherical drops. If 'E₁' is the surface energy of the original drop and 'E₂' is the total surface energy of the resulting drops, then E₁/E₂ = x/10. Then value of 'x' is",
+        options: ["1", "2", "3", "4"],
+        correct: "A"
+      },
+      {
+        number: "Question 112",
+        text: "The excess pressure inside a first spherical drop of water is three times that of second spherical drop of water. Then the ratio of mass of first spherical drop to that of second spherical drop is",
+        options: ["1:27", "1:9", "1:3", "3:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 113",
+        text: "A liquid drop of radius 'R' is broken into 'n' identical small droplets. The work done is [T = surface tension of the liquid]",
+        options: [
+          "4πR²(1 - n^(1/3))T",
+          "4πR²(n^(2/3) - 1)T",
+          "4πR²(1 - n^(2/3))T",
+          "4πR²(n^(1/3) - 1)T"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 114",
+        text: "A fluid of density 'ρ' is flowing through a uniform tube of diameter 'd'. The coefficient of viscosity of the fluid is 'η', then critical velocity of the fluid is",
+        options: ["Kη/(ρd)", "Kρ/(ηd)", "Kηρ/d", "Kd/(ηρ)"],
+        correct: "A"
+      },
+      {
+        number: "Question 115",
+        text: "What should be the diameter of a soap bubble, in order that the excess pressure inside it is 25.6 Nm⁻²? [surface tension of soap solution = 3.2×10⁻² Nm⁻²]",
+        options: ["5 mm", "10 mm", "15 mm", "20 mm"],
+        correct: "B"
+      },
+      {
+        number: "Question 116",
+        text: "Two capillary tubes of the same diameter are kept vertically in two different liquids whose densities are in the ratio 4:3. The rise of liquid in two capillaries is 'h₁' and 'h₂' respectively. If the surface tensions of liquids are in the ratio 6:5, the ratio of heights (h₁/h₂) is (Assume that their angles of contact are same)",
+        options: ["10:9", "9:10", "8:5", "5:8"],
+        correct: "B"
+      },
+      {
+        number: "Question 117",
+        text: "A spherical liquid drop of radius R is divided into 8 equal droplets. If surface tension is S, then the work done in this process will be",
+        options: ["2πR²S", "4πR²S", "6πR²S", "8πR²S"],
+        correct: "B"
+      },
+      {
+        number: "Question 118",
+        text: "A body of density 'ρ' is dropped from rest at a height 'h' into a lake of density 'σ' (σ > ρ). The maximum depth to which the body sinks before returning to float on the surface is (neglect air dissipative forces)",
+        options: ["hρ/(σ-ρ)", "hσ/(σ-ρ)", "h(σ-ρ)/ρ", "h(σ-ρ)/σ"],
+        correct: "A"
+      },
+      {
+        number: "Question 119",
+        text: "At critical temperature, the surface tension of liquid is",
+        options: ["zero", "maximum", "minimum", "infinite"],
+        correct: "A"
+      },
+      {
+        number: "Question 120",
+        text: "A metal sphere of mass 'm' and density 'σ₁' falls with terminal velocity through a container containing liquid. The density of liquid is 'σ₂'. The viscous force acting on the sphere is",
+        options: ["mg(σ₁ - σ₂)/σ₁", "mg(σ₂ - σ₁)/σ₁", "mg(σ₁ - σ₂)/σ₂", "mg"],
+        correct: "A"
+      },
+      {
+        number: "Question 121",
+        text: "Water flows through a horizontal pipe at a speed 'V'. Internal diameter of the pipe is 'd'. If the water is coming out at a speed 'V₁' then the diameter of the nozzle is",
+        options: ["d√(V/V₁)", "d√(V₁/V)", "d(V/V₁)", "d(V₁/V)"],
+        correct: "A"
+      },
+      {
+        number: "Question 122",
+        text: "Three liquids have same surface tension and densities ρ₁, ρ₂, and ρ₃ (ρ₁ > ρ₂ > ρ₃). In three identical capillaries rise of liquid is same. The corresponding angles of contact θ₁, θ₂ and θ₃ are related as",
+        options: ["θ₁ > θ₂ > θ₃", "θ₁ < θ₂ < θ₃", "θ₁ = θ₂ = θ₃", "θ₁ > θ₂ = θ₃"],
+        correct: "B"
+      },
+      {
+        number: "Question 123",
+        text: "A film of soap solution is formed between two straight parallel wires of length 10 cm each separated by 0.5 cm. If their separation is increased by 1 mm while still maintaining their parallelism. How much work will have to be done? (surface tension of solution = 65×10⁻² N/m)",
+        options: ["1.3×10⁻⁴ J", "2.6×10⁻⁴ J", "3.9×10⁻⁴ J", "5.2×10⁻⁴ J"],
+        correct: "A"
+      },
+      {
+        number: "Question 124",
+        text: "A fluid of density 'ρ' and viscosity 'η' is flowing through a pipe of diameter 'd', with a velocity 'v'. Reynold number is",
+        options: ["ρvd/η", "ηv/(ρd)", "ρd/(ηv)", "ηρ/(vd)"],
+        correct: "A"
+      },
+      {
+        number: "Question 125",
+        text: "Water is flowing through a horizontal pipe in streamline flow. At the narrowest part of the pipe",
+        options: [
+          "velocity is maximum and pressure is minimum",
+          "velocity is minimum and pressure is maximum",
+          "both velocity and pressure are maximum",
+          "both velocity and pressure are minimum"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 126",
+        text: "The excess of pressure in a first soap bubble is three times that of other soap bubble. Then the ratio of the volume of first bubble to other is",
+        options: ["1:27", "1:9", "1:3", "3:1"],
+        correct: "A"
+      },
+      {
+        number: "Question 127",
+        text: "The work done in blowing a soap bubble of radius R is W₁ and that of radius 2R is W₂. The ratio of W₁ to W₂ is",
+        options: ["1:2", "1:4", "1:8", "1:16"],
+        correct: "B"
+      },
+      {
+        number: "Question 128",
+        text: "A can filled with water is revolved in a vertical circle of radius r with constant speed and water just does not fall down. The time period of revolution is (g = acceleration due to gravity)",
+        options: ["2π√(r/g)", "2π√(g/r)", "π√(r/g)", "π√(g/r)"],
+        correct: "A"
+      },
+      {
+        number: "Question 129",
+        text: "The radii of two mercury drops are R₁ and R₂. Under isothermal conditions, a single drop of radius R is formed from them. The relations between R, R₁ and R₂ is",
+        options: ["R = R₁ + R₂", "R² = R₁² + R₂²", "R³ = R₁³ + R₂³", "R = √(R₁R₂)"],
+        correct: "C"
+      },
+      {
+        number: "Question 130",
+        text: "A steel coin of thickness d and density ρ is floating on water of surface tension T. The radius of the coin R is [g = acceleration due to gravity]",
+        options: ["√(2T/(ρdg))", "√(T/(ρdg))", "√(4T/(ρdg))", "√(T/(2ρdg))"],
+        correct: "A"
+      },
+      {
+        number: "Question 131",
+        text: "A bucket containing water is revolved in a vertical circle of radius r. To prevent the water from falling down, the minimum frequency of revolution required is (g = acceleration due to gravity)",
+        options: ["(1/2π)√(g/r)", "(1/2π)√(r/g)", "2π√(g/r)", "2π√(r/g)"],
+        correct: "A"
+      },
+      {
+        number: "Question 132",
+        text: "The excess pressure inside a soap bubble of radius 2 cm is 50 dyne/cm². The surface tension is",
+        options: ["25 dyne/cm", "50 dyne/cm", "100 dyne/cm", "200 dyne/cm"],
+        correct: "A"
+      },
+      {
+        number: "Question 133",
+        text: "The work done in blowing a soap bubble of radius R is W₁ at room temperature. Now the soap solution is heated. From the heated solution another soap bubble of radius 2R is blown and the work done is W₂. Then",
+        options: ["W₂ = 2W₁", "W₂ = 4W₁", "W₂ = 8W₁", "W₂ = 16W₁"],
+        correct: "B"
+      },
+      {
+        number: "Question 134",
+        text: "Water rises up to a height h in a capillary tube immersed vertically in water. When this whole arrangement is taken to a depth d in a mine, the water level rises up to a height h'. If R is the radius of the earth, then the ratio h/h' is",
+        options: ["(R-d)/R", "R/(R-d)", "(R+d)/R", "R/(R+d)"],
+        correct: "A"
+      },
+      {
+        number: "Question 135",
+        text: "A square wire frame of each side L is dipped in soap solution. On taking out, a membrane is formed. If the surface tension of solution is T, the force acting on the frame will be",
+        options: ["4LT", "8LT", "2LT", "LT"],
+        correct: "B"
+      },
+      {
+        number: "Question 136",
+        text: "A spherical solid ball of volume V is made up of material of density ρ. It is falling through a liquid of density σ (σ < ρ). Assume that the liquid applies a viscous force on the ball that is proportional to square of the terminal speed v_T, F = -Kv_T², (K > 0), then the terminal speed of the ball is (g = acceleration due to gravity)",
+        options: ["√[Vg(ρ-σ)/K]", "√[Vg(σ-ρ)/K]", "Vg(ρ-σ)/K", "Vg(σ-ρ)/K"],
+        correct: "A"
+      },
+      {
+        number: "Question 137",
+        text: "Two glass plates of area 10⁻² m² have 10 cm thick water film between them. The surface tension of water is 70×10⁻³ N/m. The force required to separate two glass plates from each other is",
+        options: ["70 N", "140 N", "280 N", "560 N"],
+        correct: "B"
+      },
+      {
+        number: "Question 138",
+        text: "When a liquid of density 'ρ' flows through a tube of diameter 'd' with critical velocity 'V' then the Reynolds number is (η = coefficient of viscosity of liquid)",
+        options: ["ρVd/η", "ηV/(ρd)", "ρd/(ηV)", "ηρ/(Vd)"],
+        correct: "A"
+      },
+      {
+        number: "Question 139",
+        text: "Due to surface tension, the excess pressure inside a smaller drop is 9 units. If 27 smaller drops of same liquid combine then the excess pressure inside the bigger drop is",
+        options: ["1 unit", "3 units", "9 units", "27 units"],
+        correct: "B"
+      },
+      {
+        number: "Question 140",
+        text: "In a streamlined flow, the velocity of a fluid at a given point",
+        options: [
+          "changes with time",
+          "remains constant with time",
+          "is zero",
+          "is infinite"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 141",
+        text: "A certain number of spherical liquid drops of radius r coalesce to form a single drop of radius R and volume V. If T is the surface tension of the liquid, which one of the following statements is true for the energy (E) in the process?",
+        options: [
+          "E = 4VT[1/r - 1/R] is absorbed",
+          "E = 4VT[1/r - 1/R] is released",
+          "E = 3VT[1/r - 1/R] is absorbed",
+          "E = 3VT[1/r - 1/R] is released"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 142",
+        text: "Two rain drops of same radius r falling with terminal velocity V merge and form bigger drop with radius R, terminal velocity is",
+        options: ["2^(2/3)V", "2^(1/3)V", "2V", "4V"],
+        correct: "A"
+      },
+      {
+        number: "Question 143",
+        text: "Water rises in a capillary tube of radius 'r' upto height 'h'. The mass of water in the capillary is 'm'. The mass of water will rise in a capillary of radius r/4 will be",
+        options: ["m/4", "m/16", "4m", "16m"],
+        correct: "B"
+      },
+      {
+        number: "Question 144",
+        text: "A lead sphere of mass 'm' falls in a viscous liquid with terminal velocity 'V'. Another lead sphere of mass '8m' will fall through the same liquid with terminal velocity",
+        options: ["V", "2V", "4V", "8V"],
+        correct: "C"
+      },
+      {
+        number: "Question 145",
+        text: "The amount of work done in blowing a soap bubble such that its diameter increases from 'd' to D' is (T = surface tension of solution)",
+        options: ["2πT(D² - d²)", "4πT(D² - d²)", "8πT(D² - d²)", "πT(D² - d²)"],
+        correct: "B"
+      },
+      {
+        number: "Question 146",
+        text: "A water drop of radius 'r' and volume 'V' is kept in between the two identical glass plates such that it forms a thin layer of area 'A' between the plates. A force 'F' is applied such that the two plates separate from each other. The surface tension 'T' of the liquid is",
+        options: ["F/2A", "F/A", "2F/A", "F/4A"],
+        correct: "A"
+      },
+      {
+        number: "Question 147",
+        text: "A square frame of each side 'L' is dipped in a soap solution and taken out. The force acting on the film formed is (T = surface tension of soap solution)",
+        options: ["4LT", "8LT", "2LT", "LT"],
+        correct: "B"
+      },
+      {
+        number: "Question 148",
+        text: "In capillary tube having area of cross-section 'A', water rises to a height 'h'. If cross sectional area is reduced to A/9, the rise of water in the capillary tube is",
+        options: ["h/3", "3h", "h", "9h"],
+        correct: "B"
+      },
+      {
+        number: "Question 149",
+        text: "Eight identical small drops of water are falling down vertically through a medium, each with terminal velocity v. If they combine to form a single drop, then its terminal velocity will be",
+        options: ["4v", "2v", "8v", "16v"],
+        correct: "A"
+      },
+      {
+        number: "Question 150",
+        text: "When a liquid flows through a tube, the Reynolds number is 900, the flow of a liquid is",
+        options: ["streamline", "turbulent", "unsteady", "critical"],
+        correct: "A"
+      },
+      {
+        number: "Question 151",
+        text: "Two narrow tube of diameters d₁ and d₂ are joined together to form a U-tube open at both ends. If U-tube contains water, the difference in water levels in the limbs is (T is the surface tension of water, angle of contact is zero and density of water is ρ, g is the acceleration due to gravity)",
+        options: ["2T/ρg(1/d₁ - 1/d₂)", "4T/ρg(1/d₁ - 1/d₂)", "T/ρg(1/d₁ - 1/d₂)", "8T/ρg(1/d₁ - 1/d₂)"],
+        correct: "B"
+      },
+      {
+        number: "Question 152",
+        text: "If the excess pressure inside a soap bubble of radius 3 mm is equal to the pressure of a water column of height 0.8 cm, then the surface tension of the soap solution is (ρ_water = 1000 kg/m³, g = 9.8 m/s²)",
+        options: [
+          "5.88 × 10⁻³ N/m",
+          "588 × 10⁻³ N/m",
+          "0.588 × 10⁻³ N/m",
+          "58.8 × 10⁻³ N/m"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 153",
+        text: "Two soap bubbles of radii r₁ and r₂ in vacuum coalesce under isothermal conditions. The resulting bubble has a radius equal to",
+        options: ["√(r₁² + r₂²)", "(r₁ + r₂)/2", "r₁r₂/(r₁ + r₂)", "r₁ + r₂"],
+        correct: "A"
+      },
+      {
+        number: "Question 154",
+        text: "A liquid drop of density 'ρ' is floating half immersed in a liquid of density 'd'. Diameter of the liquid drop is (ρ > d, g = acceleration due to gravity, T = surface tension)",
+        options: [
+          "[6T/g(ρ-d)]^(1/2)",
+          "[3T/g(2ρ-d)]^(1/2)",
+          "[12T/g(2ρ-d)]^(1/2)",
+          "[9T/g(ρ-d)]^(1/2)"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 155",
+        text: "The surface tension of a soap solution is 'T'. Work done in blowing a soap bubble of diameter 2d is",
+        options: ["4πd²T", "8πd²T", "16πd²T", "32πd²T"],
+        correct: "C"
+      },
+      {
+        number: "Question 156",
+        text: "If a capillary tube of radius 1 mm is immersed in water, the mass of water rising in the capillary tube is m. If the radius of the capillary tube is doubled, then the mass of water that rises in the same capillary tube will be",
+        options: ["m", "2m", "m/2", "4m"],
+        correct: "B"
+      },
+      {
+        number: "Question 157",
+        text: "A metal wire of density 'ρ' floats on water surface horizontally. If it is NOT to sink in water, then maximum radius of wire is (T = surface tension of water, g = gravitational acceleration)",
+        options: ["√(T/ρg)", "√(2T/ρg)", "√(T/2ρg)", "√(4T/ρg)"],
+        correct: "B"
+      },
+      {
+        number: "Question 158",
+        text: "Which one of the following statements is 'NOT' True about the angle of contact of a liquid?",
+        options: [
+          "At a given temperature, the angle of contact is constant for a solid-liquid surface",
+          "Any increase in the temperature of the liquid does not decrease its angle of contact",
+          "If an impurity is added in the liquid then its angle of contact changes",
+          "Angle of contact depends upon the nature of liquid and solid"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 159",
+        text: "A liquid drop having surface energy 'E' is spread into 216 droplets of the same size. The final surface energy of the droplets is",
+        options: ["6E", "12E", "18E", "36E"],
+        correct: "A"
+      },
+      {
+        number: "Question 160",
+        text: "'n' small drops of same size fall through air with constant velocity 5 cm/s. They coalesce to form a big drop. The terminal velocity of the big drop is",
+        options: ["5n^(1/3) cm/s", "5n^(2/3) cm/s", "5n cm/s", "5n² cm/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 161",
+        text: "Pressure inside two soap bubbles is 1.01 atm and 1.03 atm. The ratio between their volumes is (Pressure outside the soap bubble is 1 atm)",
+        options: ["1:27", "27:1", "1:9", "9:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 162",
+        text: "If the work done in blowing a soap bubble of volume 'V' is 'W', then the work done in blowing a soap bubble of volume '2V' will be",
+        options: ["W", "2^(1/3)W", "2^(2/3)W", "2W"],
+        correct: "C"
+      },
+      {
+        number: "Question 163",
+        text: "Water rises up to a height of 4 cm in a capillary tube. The lower end of the capillary tube is at a depth of 8 cm below the water level. The mouth pressure required to blow an air bubble at the lower end of the capillary will be 'X' cm of water, where X is equal to",
+        options: ["4", "8", "12", "16"],
+        correct: "C"
+      },
+      {
+        number: "Question 164",
+        text: "A glass rod of radius 'r' is inserted symmetrically into a vertical capillary tube of radius 'r₂' (r₁ < r₂) such that their lower ends are at same level. The arrangement is dipped in water. The height to which water will rise into the tube will be (ρ = density of water, T = surface tension in water, g = acceleration due to gravity)",
+        options: ["2T/ρg(r₂ - r₁)", "2T/ρg(r₂ + r₁)", "T/ρg(r₂ - r₁)", "T/ρg(r₂ + r₁)"],
+        correct: "A"
+      },
+      {
+        number: "Question 165",
+        text: "An ice cube of edge 1 cm melts in a gravity free container. The approximate surface area of water formed is (water is in the form of spherical drop)",
+        options: ["1 cm²", "2 cm²", "3 cm²", "4 cm²"],
+        correct: "D"
+      },
+      {
+        number: "Question 166",
+        text: "Water rises to a height of 2 cm in a capillary tube. If cross-sectional area of the tube is reduced to 1/16 of initial area, then water will rise to a height of",
+        options: ["1 cm", "2 cm", "4 cm", "8 cm"],
+        correct: "D"
+      },
+      {
+        number: "Question 167",
+        text: "The speed of a ball of radius 2 cm in a viscous liquid is 20 cm/s. What will be the speed of a ball of radius 1 cm in same liquid?",
+        options: ["5 cm/s", "10 cm/s", "20 cm/s", "40 cm/s"],
+        correct: "A"
+      },
+      {
+        number: "Question 168",
+        text: "Work done in increasing the size of a soap bubble from radius of 3 cm to 5 cm in millijoule is nearly (surface tension of soap solution = 0.03 Nm⁻¹)",
+        options: ["0.2 mJ", "0.4 mJ", "0.6 mJ", "0.8 mJ"],
+        correct: "C"
+      },
+      {
+        number: "Question 169",
+        text: "The work done in blowing a soap bubble of volume 'V' is 'W'. The work required to blow a soap bubble of volume '2V' is [T = surface tension of soap solution]",
+        options: ["W", "2^(1/3)W", "2^(2/3)W", "2W"],
+        correct: "C"
+      },
+      {
+        number: "Question 170",
+        text: "A thin metal disc of radius 'r' floats on water surface and bends the surface downwards along the perimeter making an angle 'θ' with the vertical edge of the disc. If the weight of water displaced by the disc is W, the weight of the metal disc is [T = surface tension of water]",
+        options: ["W + 2πrT cosθ", "W - 2πrT cosθ", "W + πrT cosθ", "W - πrT cosθ"],
+        correct: "A"
+      },
+      {
+        number: "Question 171",
+        text: "A glass tube of uniform cross-section is connected to a tap with a rubber tube. The tap is opened slowly. Initially the flow of water in the tube is streamline. The speed of flow of water to convert it into a turbulent flow is [radius of tube = 1 cm, η = 1×10⁻³ Ns/m², R_n = 2500 and density of water = 10³ kg/m³]",
+        options: ["0.25 m/s", "0.50 m/s", "1.00 m/s", "2.00 m/s"],
+        correct: "A"
+      },
+      {
+        number: "Question 172",
+        text: "A ball rises to the surface of a liquid with constant velocity. The density of the liquid is four times the density of the material of the ball. The viscous force of the liquid on the rising ball is greater than the weight of the ball by a factor of",
+        options: ["3", "4", "5", "6"],
+        correct: "A"
+      },
+      {
+        number: "Question 173",
+        text: "If the terminal speed of a sphere A [density ρ_A = 7.5 kg m⁻³] is 0.4 ms⁻¹, in a viscous liquid [density ρ_L = 1.5 kg m⁻³], the terminal speed of sphere B [density ρ_B = 3 kg m⁻³] of the same size in the same liquid is",
+        options: ["0.1 ms⁻¹", "0.2 ms⁻¹", "0.3 ms⁻¹", "0.5 ms⁻¹"],
+        correct: "B"
+      },
+      {
+        number: "Question 174",
+        text: "A needle is 7 cm long. Assuming that the needle is not wetted by water, what is the weight of the needle, so that floats on water? [T = surface tension of water = 70 dyne/cm, g = 980 cm/s²]",
+        options: ["0.1 gf", "0.2 gf", "0.3 gf", "0.4 gf"],
+        correct: "B"
+      },
+      {
+        number: "Question 175",
+        text: "Water rises in a capillary tube of radius 'r' to a height 'h'. The mass of water in a capillary is 'm'. The mass of water will rise in a capillary tube of radius r/3 will be",
+        options: ["m/3", "m/9", "3m", "9m"],
+        correct: "B"
+      },
+      {
+        number: "Question 176",
+        text: "A drop of liquid of density 'ρ' is floating half immersed in a liquid of density 'd'. If 'T' is the surface tension, then the diameter of the drop of the liquids is",
+        options: [
+          "[6T/g(ρ-d)]^(1/2)",
+          "[3T/g(2ρ-d)]^(1/2)",
+          "[12T/g(2ρ-d)]^(1/2)",
+          "[9T/g(ρ-d)]^(1/2)"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 177",
+        text: "Let 'W₁' be the work done in blowing a soap bubble of radius 'r' from soap solution at room temperature. The soap solution is now heated and second soap bubble of radius '2r' is blown from the heated soap solution. If 'W₂' is the work done in forming this bubble then",
+        options: ["W₂ = 2W₁", "W₂ = 4W₁", "W₂ = 8W₁", "W₂ = 16W₁"],
+        correct: "B"
+      },
+      {
+        number: "Question 178",
+        text: "Under isothermal conditions, two soap bubbles of radii 'r₁' and 'r₂' combine to forms a single soap bubble of radius 'R'. The surface tension of soap solution is (P = outside pressure)",
+        options: ["P(R³ - r₁³ - r₂³)/4(r₁² + r₂² - R²)", "P(R³ - r₁³ - r₂³)/2(r₁² + r₂² - R²)", "P(R³ - r₁³ - r₂³)/(r₁² + r₂² - R²)", "P(r₁³ + r₂³ - R³)/4(R² - r₁² - r₂²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 179",
+        text: "Water rises to a height 10 cm in a capillary tube. It will rise to a height which is much more than 10 cm in a very long capillary tube if the apparatus is kept",
+        options: ["at the north pole", "on the surface of moon", "in a lift moving up with an acceleration", "on the equator"],
+        correct: "B"
+      },
+      {
+        number: "Question 180",
+        text: "A big water drop is divided into 8 equal droplets. ΔP_S and ΔP_B be the excess pressure inside a smaller and bigger drop respectively. The relation between ΔP_S and ΔP_B is",
+        options: ["ΔP_S = 2ΔP_B", "ΔP_S = 4ΔP_B", "ΔP_B = 2ΔP_S", "ΔP_B = 4ΔP_S"],
+        correct: "A"
+      },
+      {
+        number: "Question 181",
+        text: "In capillary tube having area of cross-section 'A', water rises to a height 'h'. If cross sectional area is reduced to A/9, the rise of water in the capillary tube is",
+        options: ["h/3", "3h", "h", "9h"],
+        correct: "B"
+      },
+      {
+        number: "Question 182",
+        text: "The surface tension of most of the liquid decreases with rise in",
+        options: ["pressure", "temperature", "viscosity", "density"],
+        correct: "B"
+      },
+      {
+        number: "Question 183",
+        text: "The velocity of a small ball of mass 'M' and density 'd₁' when dropped in a container filled with glycerin becomes constant after some time. If the density of glycerin is 'd₂', the viscous force acting on the ball is (g = acceleration due to gravity)",
+        options: ["Mg(d₁ - d₂)/d₁", "Mg(d₂ - d₁)/d₁", "Mg(d₁ - d₂)/d₂", "Mg"],
+        correct: "A"
+      },
+      {
+        number: "Question 184",
+        text: "Two small drops of mercury each of radius 'R' coalesce to from a large single drop. The ratio of the total surface energies before and after the change is",
+        options: ["1:2^(1/3)", "2^(1/3):1", "1:2", "2:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 185",
+        text: "Air is pushed in a soap bubble to increase its radius from 'R' to '2R'. In this case, the pressure inside the bubble",
+        options: ["becomes half", "becomes double", "becomes four times", "remains same"],
+        correct: "A"
+      },
+      {
+        number: "Question 186",
+        text: "The force required to take away a flat circular plate of radius 2 cm from the surface of water is [Surface tension of water = 70×10⁻³ Nm⁻¹, π = 22/7]",
+        options: [
+          "4.4 × 10⁻⁴ N",
+          "8.8 × 10⁻³ N",
+          "6.6 × 10⁻⁴ N",
+          "11 × 10⁻³ N"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 187",
+        text: "Let 'R₁' and 'R₂' are radii of two mercury drops. A big mercury drop is formed from then under isothermal conditions. The radius of the resultant drop is",
+        options: ["R₁ + R₂", "√(R₁² + R₂²)", "∛(R₁³ + R₂³)", "√(R₁R₂)"],
+        correct: "C"
+      },
+      {
+        number: "Question 188",
+        text: "The surface energy of a liquid drop is 'U'. It splits up into 512 equal droplets. The surface energy becomes",
+        options: ["U", "2U", "4U", "8U"],
+        correct: "D"
+      },
+      {
+        number: "Question 189",
+        text: "What should be the radius of water drop so that excess pressure inside it is 72 Nm⁻²? (The surface tension of water 7.2×10⁻² Nm⁻¹)",
+        options: ["1 mm", "2 mm", "3 mm", "4 mm"],
+        correct: "B"
+      },
+      {
+        number: "Question 190",
+        text: "A body of density ρ is dropped from (at rest) height 'h' into a lake of density 'δ' (δ > ρ). The maximum depth to which the body sinks before returning to float on the surface is [Neglect all dissipative forces]",
+        options: ["hρ/(δ-ρ)", "hδ/(δ-ρ)", "h(δ-ρ)/ρ", "h(δ-ρ)/δ"],
+        correct: "A"
+      },
+      {
+        number: "Question 191",
+        text: "What would be the absolute pressure at depth 1 km below the ocean? [Given: density of water = 10³ kg/m³, g = 10 m/s², 1 atmospheric pressure = 1.01×10⁵ N/m²]",
+        options: [
+          "10.101 × 10⁶ N/m²",
+          "10.101 × 10⁷ dyne/cm²",
+          "10.101 × 10⁷ N/m²",
+          "10.101 × 10⁶ dyne/cm²"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 192",
+        text: "Three liquids have same surface tension and densities ρ₁, ρ₂, and ρ₃ (ρ₁ > ρ₂ > ρ₃). In three identical capillaries, rise of liquid is same. The corresponding angles of contact θ₁, θ₂ and θ₃ are related as",
+        options: ["θ₁ > θ₂ > θ₃", "θ₁ < θ₂ < θ₃", "θ₁ = θ₂ = θ₃", "θ₁ > θ₂ = θ₃"],
+        correct: "B"
+      },
+      {
+        number: "Question 193",
+        text: "When a capillary tube is immersed in water vertically, water rises to a height 'h' inside the tube. If the radius of another capillary tube is 1/3 that of the previous, the height to which water will rise in this tube, is",
+        options: ["h/3", "3h", "h/9", "9h"],
+        correct: "B"
+      },
+      {
+        number: "Question 194",
+        text: "If 'T' is the surface tension of a soap solution, then the work done in blowing a soap bubble from diameter 'D' to diameter '2D' is",
+        options: ["2πTD²", "4πTD²", "6πTD²", "8πTD²"],
+        correct: "D"
+      },
+      {
+        number: "Question 195",
+        text: "A metal sphere of radius 'R', density 'ρ₁' moves with terminal velocity 'v₁' through a liquid of density 'σ'. Another sphere of same radius but of density 'ρ₂' moves through same liquid. Its terminal velocity will be",
+        options: ["v₁(ρ₂ - σ)/(ρ₁ - σ)", "v₁(ρ₁ - σ)/(ρ₂ - σ)", "v₁ρ₂/ρ₁", "v₁ρ₁/ρ₂"],
+        correct: "A"
+      },
+      {
+        number: "Question 196",
+        text: "The compressibility of water is 5×10⁻¹⁰ m²/N. Pressure of 15×10⁶ Pa is applied on 100 ml volume of water. The change in the volume of water is",
+        options: ["0.75 ml", "1.5 ml", "2.25 ml", "3.0 ml"],
+        correct: "A"
+      },
+      {
+        number: "Question 197",
+        text: "Water rises upto a height 'h' in a capillary tube on the surface of the earth. The value of 'h' will increase if the experimental setup is kept in [g = acceleration due to gravity]",
+        options: ["a lift going up with acceleration", "a lift going down with acceleration", "a satellite", "all of these"],
+        correct: "B"
+      },
+      {
+        number: "Question 198",
+        text: "If the surface tension of a soap solution is 3×10⁻² N/m, then the work done in forming a soap film of 20 cm × 5 cm will be",
+        options: ["1.2×10⁻⁴ J", "2.4×10⁻⁴ J", "3.6×10⁻⁴ J", "4.8×10⁻⁴ J"],
+        correct: "A"
+      },
+      {
+        number: "Question 199",
+        text: "A closed pipe containing liquid showed a pressure 'P₁' by gauge. When the valve is opened, pressure was reduced to 'P₂'. The speed of water flowing out of the pipe is [ρ = density of water]",
+        options: ["√[2(P₁ - P₂)/ρ]", "√[(P₁ - P₂)/ρ]", "√[2(P₁ + P₂)/ρ]", "√[(P₁ + P₂)/ρ]"],
+        correct: "A"
+      },
+      {
+        number: "Question 200",
+        text: "Soap solution is used for cleaning dirty clothes because",
+        options: [
+          "it increases surface tension",
+          "it decreases surface tension",
+          "it increases viscosity",
+          "it decreases viscosity"
+        ],
+        correct: "B"
+      }
+      // Questions 201-226 are placeholders as the PDF ends at question 200
+    ];
+
+    // Add placeholder questions for 201-226
+    for (let i = 201; i <= 226; i++) {
+      questions.push({
+        number: `Question ${i}`,
+        text: `Mechanical Properties of Fluids Question ${i} (Placeholder)`,
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correct: "A"
+      });
+    }
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      
+      const now = new Date();
+      const testName = `MHT-CET Fluids Test ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      const resultData = {
+        testName: testName,
+        total: questions.length,
+        correct: correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        timestamp: now.toISOString(),
+        details: results
+      };
+
+      try {
+        let scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+        scores.push(resultData);
+        localStorage.setItem("quizScores", JSON.stringify(scores));
+        localStorage.setItem("quizResults", JSON.stringify(resultData));
+        
+        showNotification();
+        
+        setTimeout(() => {
+          window.location.href = "MCCW-PRC11.html";
+        }, 1500);
+      } catch (e) {
+        console.error("Error saving results:", e);
+        alert("Error saving results. Please try again.");
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "flex";
+    }
+
+    function hideNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "none";
+    }
+
+    renderQuestion(current);
+
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

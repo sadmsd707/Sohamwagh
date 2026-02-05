@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Announcements - Soham</title>
+  <style>
+    /* Clean, professional styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Clean Hamburger Menu */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+      z-index: 1001;
+      position: relative;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      transform-origin: center;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Clean Side Navigation */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+      padding-top: 20px;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 50px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 16px 30px;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: transparent;
+      margin: 0;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 35px;
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-active {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      border-left: 4px solid white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Dashboard Styles */
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease;
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      border-left: 4px solid #f59e0b;
+      transition: transform 0.2s ease;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card:nth-child(1) { border-left-color: #2563eb; }
+    .stat-card:nth-child(2) { border-left-color: #10b981; }
+    .stat-card:nth-child(3) { border-left-color: #f59e0b; }
+    .stat-card:nth-child(4) { border-left-color: #ef4444; }
+
+    .stat-card h3 {
+      font-size: 2.5rem;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
+
+    .stat-card p {
+      color: #555;
+      font-weight: 600;
+    }
+
+    .dashboard-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      animation: fadeIn 0.5s ease;
+    }
+
+    .dashboard-section h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dashboard-section h3 .icon {
+      font-size: 1.5rem;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary {
+      background: #f59e0b;
+    }
+
+    .btn-secondary:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 50px;
+    }
+
+    footer p {
+      font-size: 1rem;
+    }
+
+    /* Announcements Specific Styles */
+    .announcement-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .announcement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .announcement-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      border-left: 4px solid #2563eb;
+      transition: transform 0.2s ease;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .announcement-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .announcement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .announcement-title {
+      color: #1e3a8a;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    .announcement-date {
+      color: #666;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    
+    .announcement-content {
+      color: #444;
+      margin-bottom: 15px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+    
+    .announcement-classes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    
+    .class-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .announcement-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .announcement-recipients {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .recipient-tag {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .recipient-tag.parents {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .announcement-actions-small {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    
+    .empty-state .icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    /* Announcement Form */
+    .announcement-form-container {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+      background: white;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+    
+    .form-group textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .checkbox-item label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .recipient-options {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    
+    .recipient-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+      background: #2563eb;
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px;
+      transition: transform 0.2s ease;
+    }
+
+    .close-modal:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .announcement-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .announcement-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+      
+      .announcement-actions-small {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .side-nav {
+        width: 280px;
+      }
+      
+      .recipient-options {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    /* Minimal Animation Keyframes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 9999;
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 3s forwards;
+      min-width: 300px;
+      max-width: 400px;
+    }
+
+    .notification.notification-error {
+      background: #ef4444;
+    }
+
+    .notification.notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification.notification-info {
+      background: #3b82f6;
+    }
+
+    .notification-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notification-message {
+      margin-right: 20px;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .notification-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham - Announcements</h1>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="teacher-dashboard.html" class="nav-active"><span class="nav-icon">📊</span>Dashboard</a></li>
+      <li><a href="teacher-classes.html"><span class="nav-icon">🏫</span>My Classes</a></li>
+      <li><a href="attendance.html"><span class="nav-icon">📅</span>Attendance</a></li>
+      <li><a href="announcements.html"><span class="nav-icon">📢</span>Announcements</a></li>
+      <li><a href="create-test.html"><span class="nav-icon">✏️</span>Create Test</a></li>
+      <li><a href="my-tests.html"><span class="nav-icon">📝</span>My Tests</a></li>
+      <li><a href="sitting-arrangement.html"><span class="nav-icon">💺</span>Sitting Arrangement</a></li>
+      <li><a href="omr-scanner.html"><span class="nav-icon">📸</span>OMR Scanner</a></li>
+      <li><a href="teacher-scores.html"><span class="nav-icon">📈</span>Student Scores</a></li>
+      <li><a href="add-student.html"><span class="nav-icon">👨‍🎓</span>Add Student</a></li>
+      <li><a href="teacher-parent.html"><span class="nav-icon">👪</span>Parent Section</a></li>
+      <li><a href="teacher-resources.html"><span class="nav-icon">📚</span>Resources</a></li>
+      <li><a href="my-account.html"><span class="nav-icon">👤</span>My Account</a></li>
+      <li><a href="role-selection.html" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Edit Announcement Modal -->
+  <div class="modal" id="editAnnouncementModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Announcement</h3>
+        <button class="close-modal" onclick="closeEditModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editTitle">Title</label>
+          <input type="text" id="editTitle" placeholder="Enter announcement title">
+        </div>
+        
+        <div class="form-group">
+          <label for="editContent">Content</label>
+          <textarea id="editContent" rows="6" placeholder="Enter announcement details"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Send To</label>
+          <div class="recipient-options">
+            <div class="recipient-option">
+              <input type="checkbox" id="editToStudents" checked>
+              <label for="editToStudents">Students</label>
+            </div>
+            <div class="recipient-option">
+              <input type="checkbox" id="editToParents">
+              <label for="editToParents">Parents</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="announcement-actions-small" style="margin-top: 20px;">
+          <button class="btn btn-success" onclick="updateAnnouncement()">Update Announcement</button>
+          <button class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard">
+    <section class="welcome-section">
+      <h2>Announcements Management</h2>
+      <p>Create and manage announcements for your students and their parents</p>
+    </section>
+
+    <div class="stats-container">
+      <div class="stat-card">
+        <h3 id="totalAnnouncements">0</h3>
+        <p>Total Announcements</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="todayAnnouncements">0</h3>
+        <p>Today's Announcements</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="studentAnnouncements">0</h3>
+        <p>To Students</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="parentAnnouncements">0</h3>
+        <p>To Parents</p>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="announcement-actions">
+        <button class="btn btn-success" onclick="toggleAnnouncementForm()">
+          <span id="formToggleIcon">➕</span> <span id="formToggleText">Create New Announcement</span>
+        </button>
+        <button class="btn btn-secondary" onclick="loadAnnouncements()">Refresh List</button>
+      </div>
+
+      <!-- Announcement Form -->
+      <div class="announcement-form-container" id="announcementForm" style="display: none;">
+        <h3>Create New Announcement</h3>
+        <div class="form-group">
+          <label for="announcementTitle">Title</label>
+          <input type="text" id="announcementTitle" placeholder="Enter announcement title">
+        </div>
+        
+        <div class="form-group">
+          <label for="announcementContent">Content</label>
+          <textarea id="announcementContent" placeholder="Enter announcement details"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Send To</label>
+          <div class="recipient-options">
+            <div class="recipient-option">
+              <input type="checkbox" id="toStudents" checked>
+              <label for="toStudents">Students</label>
+            </div>
+            <div class="recipient-option">
+              <input type="checkbox" id="toParents">
+              <label for="toParents">Parents</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Select Classes</label>
+          <div class="checkbox-group" id="classCheckboxes">
+            <!-- Class checkboxes will be populated by JavaScript -->
+          </div>
+        </div>
+        
+        <div class="announcement-actions-small">
+          <button class="btn btn-success" onclick="sendAnnouncement()">Send Announcement</button>
+          <button class="btn btn-danger" onclick="toggleAnnouncementForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📢</span> Recent Announcements</h3>
+      <div class="announcement-list" id="announcementList">
+        <!-- Announcements will be populated by JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Soham - Entrance Exam Practice. All rights reserved.</p>
+    <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+  </footer>
+
+  <script>
+    // Check if user is logged in and is a teacher
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("userRole") !== "teacher") {
+      window.location.href = "role-selection.html";
+    }
+
+    // Logout function
+    function logout() {
+      // Show loading state
+      const logoutBtn = event.target;
+      const originalText = logoutBtn.innerHTML;
+      logoutBtn.innerHTML = '<span style="display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s ease-in-out infinite;margin-right:8px;"></span> Logging out...';
+      logoutBtn.disabled = true;
+      
+      setTimeout(() => {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        window.location.href = "role-selection.html";
+      }, 1000);
+    }
+
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Announcement functions
+    let editingAnnouncementId = null;
+    const classTemplates = {
+      '11th-mhtcet-pcm': '11th MHTCET (PCM)',
+      '11th-mhtcet-pcb': '11th MHTCET (PCB)',
+      '11th-jee': '11th JEE',
+      '11th-neet': '11th NEET',
+      '12th-mhtcet-pcm': '12th MHTCET (PCM)',
+      '12th-mhtcet-pcb': '12th MHTCET (PCB)',
+      '12th-jee': '12th JEE',
+      '12th-neet': '12th NEET'
+    };
+
+    function toggleAnnouncementForm() {
+      const form = document.getElementById('announcementForm');
+      const toggleIcon = document.getElementById('formToggleIcon');
+      const toggleText = document.getElementById('formToggleText');
+      
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+        toggleIcon.textContent = '➖';
+        toggleText.textContent = 'Hide Form';
+        populateClassCheckboxes();
+      } else {
+        form.style.display = 'none';
+        toggleIcon.textContent = '➕';
+        toggleText.textContent = 'Create New Announcement';
+        clearForm();
+      }
+    }
+
+    function populateClassCheckboxes() {
+      const checkboxGroup = document.getElementById('classCheckboxes');
+      checkboxGroup.innerHTML = '';
+      
+      Object.keys(classTemplates).forEach(classKey => {
+        checkboxGroup.innerHTML += `
+          <div class="checkbox-item">
+            <input type="checkbox" id="class_${classKey}" checked>
+            <label for="class_${classKey}">${classTemplates[classKey]}</label>
+          </div>
+        `;
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('announcementTitle').value = '';
+      document.getElementById('announcementContent').value = '';
+      document.getElementById('toStudents').checked = true;
+      document.getElementById('toParents').checked = false;
+      
+      const checkboxes = document.querySelectorAll('#classCheckboxes input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+      });
+    }
+
+    function sendAnnouncement() {
+      const title = document.getElementById('announcementTitle').value.trim();
+      const content = document.getElementById('announcementContent').value.trim();
+      const toStudents = document.getElementById('toStudents').checked;
+      const toParents = document.getElementById('toParents').checked;
+      
+      if (!title || !content) {
+        showNotification('Please fill in both title and content', 'warning');
+        return;
+      }
+      
+      if (!toStudents && !toParents) {
+        showNotification('Please select at least one recipient type (Students or Parents)', 'warning');
+        return;
+      }
+      
+      // Get selected classes
+      const selectedClasses = [];
+      const checkboxes = document.querySelectorAll('#classCheckboxes input[type="checkbox"]:checked');
+      checkboxes.forEach(checkbox => {
+        const classKey = checkbox.id.replace('class_', '');
+        selectedClasses.push(classKey);
+      });
+      
+      if (selectedClasses.length === 0) {
+        showNotification('Please select at least one class', 'warning');
+        return;
+      }
+      
+      // Save announcement to localStorage
+      const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+      const newAnnouncement = {
+        id: Date.now(),
+        title,
+        content,
+        classes: selectedClasses,
+        toStudents,
+        toParents,
+        date: new Date().toISOString(),
+        sentBy: 'Dr. Sharma'
+      };
+      
+      announcements.unshift(newAnnouncement);
+      localStorage.setItem('announcements', JSON.stringify(announcements));
+      
+      // Hide form, clear form, and reload
+      toggleAnnouncementForm();
+      loadAnnouncements();
+      updateStats();
+      
+      // Show success message
+      showNotification('Announcement sent successfully!', 'success');
+    }
+
+    function loadAnnouncements() {
+      const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+      const announcementList = document.getElementById('announcementList');
+      
+      if (announcements.length === 0) {
+        announcementList.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📢</div>
+            <h3>No Announcements Yet</h3>
+            <p>Create your first announcement to communicate with students and parents</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let announcementsHTML = '';
+      announcements.forEach((announcement) => {
+        const date = new Date(announcement.date);
+        const formattedDate = date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        let classesHTML = '';
+        announcement.classes.forEach(classKey => {
+          classesHTML += `<span class="class-tag">${classTemplates[classKey] || classKey}</span>`;
+        });
+        
+        let recipientsHTML = '';
+        if (announcement.toStudents) {
+          recipientsHTML += '<span class="recipient-tag">Students</span>';
+        }
+        if (announcement.toParents) {
+          recipientsHTML += '<span class="recipient-tag parents">Parents</span>';
+        }
+        
+        announcementsHTML += `
+          <div class="announcement-card">
+            <div class="announcement-header">
+              <h3 class="announcement-title">${announcement.title}</h3>
+              <span class="announcement-date">${formattedDate}</span>
+            </div>
+            <div class="announcement-content">
+              ${announcement.content.replace(/\n/g, '<br>')}
+            </div>
+            <div class="announcement-classes">
+              ${classesHTML}
+            </div>
+            <div class="announcement-footer">
+              <div class="announcement-recipients">
+                ${recipientsHTML}
+              </div>
+              <div class="announcement-actions-small">
+                <button class="btn btn-small" onclick="editAnnouncement(${announcement.id})">Edit</button>
+                <button class="btn btn-small btn-danger" onclick="deleteAnnouncement(${announcement.id})">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      announcementList.innerHTML = announcementsHTML;
+    }
+
+    function editAnnouncement(id) {
+      const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+      const announcement = announcements.find(a => a.id === id);
+      
+      if (!announcement) return;
+      
+      editingAnnouncementId = id;
+      document.getElementById('editTitle').value = announcement.title;
+      document.getElementById('editContent').value = announcement.content;
+      document.getElementById('editToStudents').checked = announcement.toStudents;
+      document.getElementById('editToParents').checked = announcement.toParents;
+      
+      document.getElementById('editAnnouncementModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editAnnouncementModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+      editingAnnouncementId = null;
+    }
+
+    function updateAnnouncement() {
+      if (!editingAnnouncementId) return;
+      
+      const title = document.getElementById('editTitle').value.trim();
+      const content = document.getElementById('editContent').value.trim();
+      const toStudents = document.getElementById('editToStudents').checked;
+      const toParents = document.getElementById('editToParents').checked;
+      
+      if (!title || !content) {
+        showNotification('Please fill in both title and content', 'warning');
+        return;
+      }
+      
+      if (!toStudents && !toParents) {
+        showNotification('Please select at least one recipient type (Students or Parents)', 'warning');
+        return;
+      }
+      
+      const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+      const index = announcements.findIndex(a => a.id === editingAnnouncementId);
+      
+      if (index !== -1) {
+        announcements[index].title = title;
+        announcements[index].content = content;
+        announcements[index].toStudents = toStudents;
+        announcements[index].toParents = toParents;
+        
+        localStorage.setItem('announcements', JSON.stringify(announcements));
+        loadAnnouncements();
+        updateStats();
+        closeEditModal();
+        
+        showNotification('Announcement updated successfully!', 'success');
+      }
+    }
+
+    function deleteAnnouncement(id) {
+      if (confirm('Are you sure you want to delete this announcement?')) {
+        const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+        const filtered = announcements.filter(a => a.id !== id);
+        localStorage.setItem('announcements', JSON.stringify(filtered));
+        loadAnnouncements();
+        updateStats();
+        
+        showNotification('Announcement deleted successfully!', 'success');
+      }
+    }
+
+    function updateStats() {
+      const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+      const today = new Date().toISOString().split('T')[0];
+      
+      const total = announcements.length;
+      const todayCount = announcements.filter(a => a.date.split('T')[0] === today).length;
+      const studentCount = announcements.filter(a => a.toStudents).length;
+      const parentCount = announcements.filter(a => a.toParents).length;
+      
+      document.getElementById('totalAnnouncements').textContent = total;
+      document.getElementById('todayAnnouncements').textContent = todayCount;
+      document.getElementById('studentAnnouncements').textContent = studentCount;
+      document.getElementById('parentAnnouncements').textContent = parentCount;
+    }
+
+    function showNotification(message, type = 'info') {
+      // Remove existing notification
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <span class="notification-message">${message}</span>
+          <button class="notification-close">×</button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Add click handler for close button
+      notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+      });
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }
+
+    // Initialize sample data if not exists
+    function initializeSampleData() {
+      if (!localStorage.getItem('announcements')) {
+        const sampleAnnouncements = [
+          {
+            id: 1,
+            title: "Physics Test Schedule Update",
+            content: "The Physics test scheduled for tomorrow has been postponed to next Monday. Please prepare accordingly.\n\nTopics to be covered:\n- Thermodynamics\n- Laws of Motion\n- Gravitation",
+            classes: ['11th-mhtcet-pcm', '12th-mhtcet-pcm', '12th-jee'],
+            toStudents: true,
+            toParents: true,
+            date: new Date().toISOString(),
+            sentBy: "Dr. Sharma"
+          },
+          {
+            id: 2,
+            title: "Parent-Teacher Meeting",
+            content: "Quarterly Parent-Teacher Meeting will be held on 25th December. Please confirm your attendance by 20th December.",
+            classes: ['11th-mhtcet-pcm', '11th-mhtcet-pcb', '12th-mhtcet-pcm', '12th-mhtcet-pcb'],
+            toStudents: false,
+            toParents: true,
+            date: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+            sentBy: "Dr. Sharma"
+          },
+          {
+            id: 3,
+            title: "Chemistry Lab Safety Guidelines",
+            content: "Important safety guidelines for Chemistry lab sessions starting next week. All students must read and follow these instructions carefully.",
+            classes: ['11th-mhtcet-pcb', '12th-mhtcet-pcb', '11th-neet', '12th-neet'],
+            toStudents: true,
+            toParents: false,
+            date: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+            sentBy: "Dr. Sharma"
+          }
+        ];
+        localStorage.setItem('announcements', JSON.stringify(sampleAnnouncements));
+      }
+    }
+
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeSampleData();
+      loadAnnouncements();
+      updateStats();
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('editAnnouncementModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeEditModal();
+      }
+    });
+  </script>
+</body>
+</html>

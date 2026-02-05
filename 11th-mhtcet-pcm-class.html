@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>11th MHTCET (PCM) - Soham Teacher Dashboard</title>
+  <style>
+    /* Previous CSS remains the same */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Enhanced Hamburger Menu with Animation */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+      z-index: 1001;
+      position: relative;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: center;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Side Navigation Panel - IMPROVED WITH ANIMATION */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: slideInRight 0.5s forwards;
+    }
+
+    .side-nav.active ul li {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Animation delays for 13 items (since logout is last) */
+    .side-nav ul li:nth-child(1) { animation-delay: 0.05s; }
+    .side-nav ul li:nth-child(2) { animation-delay: 0.1s; }
+    .side-nav ul li:nth-child(3) { animation-delay: 0.15s; }
+    .side-nav ul li:nth-child(4) { animation-delay: 0.2s; }
+    .side-nav ul li:nth-child(5) { animation-delay: 0.25s; }
+    .side-nav ul li:nth-child(6) { animation-delay: 0.3s; }
+    .side-nav ul li:nth-child(7) { animation-delay: 0.35s; }
+    .side-nav ul li:nth-child(8) { animation-delay: 0.4s; }
+    .side-nav ul li:nth-child(9) { animation-delay: 0.45s; }
+    .side-nav ul li:nth-child(10) { animation-delay: 0.5s; }
+    .side-nav ul li:nth-child(11) { animation-delay: 0.55s; }
+    .side-nav ul li:nth-child(12) { animation-delay: 0.6s; }
+    .side-nav ul li:nth-child(13) { animation-delay: 0.65s; }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 70px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      margin: 0;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+      transform: translateX(5px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Dashboard Styles */
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: auto;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Back Button */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .back-button:hover {
+      background: #e2e8f0;
+      transform: translateX(-5px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      border-left: 4px solid #3b82f6;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-card h3 {
+      font-size: 2.5rem;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
+
+    .stat-card p {
+      color: #555;
+      font-weight: 600;
+    }
+
+    .dashboard-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .dashboard-section:nth-child(1) { animation-delay: 0.1s; }
+
+    .dashboard-section h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dashboard-section h3 .icon {
+      font-size: 1.5rem;
+    }
+
+    /* Class Info Grid */
+    .class-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      border-left: 4px solid #3b82f6;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .info-card h4 {
+      font-size: 2.2rem;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
+
+    .info-card p {
+      color: #555;
+      font-weight: 600;
+    }
+
+    /* Action Buttons - REMOVED SECTION */
+    /* .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    } */
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      min-height: 44px;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: #f59e0b;
+    }
+
+    .btn-secondary:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Students Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .students-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    .students-table thead {
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .students-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .students-table tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: background 0.3s ease;
+    }
+
+    .students-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .students-table td {
+      padding: 15px;
+      color: #475569;
+    }
+
+    .students-table td:first-child {
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 5px;
+      min-height: auto;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      color: #475569;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: auto;
+      animation: fadeInUp 0.6s ease;
+      width: 100%;
+    }
+
+    footer p {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: white;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: slideInUp 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      color: #1e3a8a;
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #64748b;
+      padding: 5px;
+    }
+
+    .modal-content {
+      margin-bottom: 25px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .class-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .students-table {
+        font-size: 0.9rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      .side-nav {
+        width: 280px;
+      }
+      
+      .modal {
+        width: 95%;
+        padding: 20px;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>11th MHTCET (PCM) - Class Details</h1>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="teacher-dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+      <li><a href="teacher-classes.html" class="nav-active"><span class="nav-icon">🏫</span>My Classes</a></li>
+      <li><a href="attendance.html"><span class="nav-icon">📅</span>Attendance</a></li>
+      <li><a href="announcements.html"><span class="nav-icon">📢</span>Announcements</a></li>
+      <li><a href="create-test.html"><span class="nav-icon">✏️</span>Create Test</a></li>
+      <li><a href="my-tests.html"><span class="nav-icon">📝</span>My Tests</a></li>
+      <li><a href="sitting-arrangement.html"><span class="nav-icon">💺</span>Sitting Arrangement</a></li>
+      <li><a href="omr-scanner.html"><span class="nav-icon">📸</span>OMR Scanner</a></li>
+      <li><a href="teacher-scores.html"><span class="nav-icon">📈</span>Student Scores</a></li>
+      <li><a href="add-student.html"><span class="nav-icon">👨‍🎓</span>Add Student</a></li>
+      <li><a href="teacher-parent.html"><span class="nav-icon">👪</span>Parent Section</a></li>
+      <li><a href="teacher-resources.html"><span class="nav-icon">📚</span>Resources</a></li>
+      <li><a href="my-account.html"><span class="nav-icon">👤</span>My Account</a></li>
+      <li><a href="role-selection.html" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Modal for confirmation -->
+  <div class="modal-overlay" id="confirmationModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-content" id="modalContent">
+        Are you sure you want to perform this action?
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard">
+    <!-- Back to All Classes Button -->
+    <a href="teacher-classes.html" class="back-button">
+      ← Back to All Classes
+    </a>
+
+    <section class="welcome-section">
+      <h2>11th MHTCET (PCM) Class</h2>
+      <p>Physics, Chemistry, Mathematics - Class Management Dashboard</p>
+    </section>
+
+    <div class="class-info-grid" id="classInfo">
+      <!-- Class info cards will be populated by JavaScript -->
+    </div>
+
+    <!-- REMOVED: Action Buttons Section -->
+    <!-- All action buttons (Take Attendance, Create Test, Seating Plan, Remove All Students, Add New Student) have been removed -->
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📊</span> Class Statistics</h3>
+      <div class="stats-container" id="statsContainer">
+        <!-- Stats will be populated by JavaScript -->
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">👨‍🎓</span> Students List</h3>
+      <div class="table-container">
+        <table class="students-table" id="studentsTable">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Mobile Number</th>
+              <th>Parent Mobile</th>
+              <th>Join Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsBody">
+            <!-- Students will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="icon">👨‍🎓</div>
+        <h3>No Students Found</h3>
+        <p>This class currently has no students.</p>
+      </div>
+    </section>
+    
+    <!-- REMOVED: Class Resources Section -->
+    <!-- The entire resources section has been removed as requested -->
+    
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Soham - Entrance Exam Practice. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-of-service.html">Terms of Service</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="about.html">About Soham</a>
+    </div>
+    <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+  </footer>
+
+  <script>
+    // Check if user is logged in and is a teacher
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("userRole") !== "teacher") {
+      window.location.href = "role-selection.html";
+    }
+
+    // Current class info
+    const currentClass = '11th-mhtcet-pcm';
+    const className = '11th MHTCET (PCM)';
+    const classDescription = 'Physics, Chemistry, Mathematics';
+    const classColor = '#3b82f6';
+    const subjects = ['Physics', 'Chemistry', 'Mathematics'];
+
+    // Modal elements
+    const confirmationModal = document.getElementById('confirmationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    const confirmActionBtn = document.getElementById('confirmActionBtn');
+
+    // Logout function
+    function logout() {
+      const logoutBtn = event.target;
+      const originalText = logoutBtn.innerHTML;
+      logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
+      logoutBtn.disabled = true;
+      
+      setTimeout(() => {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("selectedClass");
+        window.location.href = "role-selection.html";
+      }, 1000);
+    }
+
+    // Enhanced Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Modal functions
+    function showModal() {
+      confirmationModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      confirmationModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      confirmActionBtn.onclick = null;
+    }
+
+    // Close modal when clicking outside
+    confirmationModal.addEventListener('click', (e) => {
+      if (e.target === confirmationModal) {
+        closeModal();
+      }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && confirmationModal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    // Initialize sample data if not exists
+    function initializeSampleData() {
+      if (!localStorage.getItem('students')) {
+        const sampleStudents = [
+          {
+            studentName: "Rahul Sharma",
+            studentId: "SOHA20231001",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543210",
+            parentMobile: "+91 9876543211",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Priya Verma",
+            studentId: "SOHA20231006",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543220",
+            parentMobile: "+91 9876543221",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Suresh Kumar",
+            studentId: "SOHA20231007",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543222",
+            parentMobile: "+91 9876543223",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Anjali Desai",
+            studentId: "SOHA20231008",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543224",
+            parentMobile: "+91 9876543225",
+            timestamp: new Date().toISOString()
+          },
+          {
+            studentName: "Vikram Singh",
+            studentId: "SOHA20231009",
+            studentClass: "11th-mhtcet-pcm",
+            studentMobile: "+91 9876543226",
+            parentMobile: "+91 9876543227",
+            timestamp: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('students', JSON.stringify(sampleStudents));
+      }
+
+      if (!localStorage.getItem('classStats')) {
+        const students = JSON.parse(localStorage.getItem('students'));
+        const classStats = {};
+        
+        students.forEach(student => {
+          if (!classStats[student.studentClass]) {
+            classStats[student.studentClass] = {
+              studentCount: 0,
+              testsCount: Math.floor(Math.random() * 5) + 1,
+              assignmentsCount: Math.floor(Math.random() * 10) + 5,
+              avgScore: Math.floor(Math.random() * 20) + 70,
+              attendance: Math.floor(Math.random() * 20) + 80
+            };
+          }
+          classStats[student.studentClass].studentCount += 1;
+        });
+        
+        localStorage.setItem('classStats', JSON.stringify(classStats));
+      }
+    }
+
+    // Load class data
+    function loadClassData() {
+      // Initialize sample data
+      initializeSampleData();
+      
+      // Get data from localStorage
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const classStats = JSON.parse(localStorage.getItem('classStats')) || {};
+      
+      // Filter students for current class
+      const classStudents = students.filter(student => student.studentClass === currentClass);
+      const stats = classStats[currentClass] || {
+        studentCount: 0,
+        testsCount: 0,
+        assignmentsCount: 0,
+        avgScore: 0,
+        attendance: 0
+      };
+
+      // Update class info
+      const classInfoElement = document.getElementById('classInfo');
+      classInfoElement.innerHTML = `
+        <div class="info-card">
+          <h4>${classStudents.length}</h4>
+          <p>Total Students</p>
+        </div>
+        <div class="info-card">
+          <h4>${subjects.length}</h4>
+          <p>Subjects</p>
+        </div>
+        <div class="info-card">
+          <h4>${stats.testsCount || 0}</h4>
+          <p>Tests Conducted</p>
+        </div>
+        <div class="info-card">
+          <h4>${stats.assignmentsCount || 0}</h4>
+          <p>Assignments</p>
+        </div>
+      `;
+
+      // Update stats container
+      const statsContainer = document.getElementById('statsContainer');
+      statsContainer.innerHTML = `
+        <div class="stat-card">
+          <h3>${stats.avgScore || 0}%</h3>
+          <p>Average Score</p>
+        </div>
+        <div class="stat-card">
+          <h3>${stats.attendance || 0}%</h3>
+          <p>Attendance Rate</p>
+        </div>
+        <div class="stat-card">
+          <h3>${stats.testsCount || 0}</h3>
+          <p>Tests This Month</p>
+        </div>
+        <div class="stat-card">
+          <h3>${classStudents.filter(s => s.studentId.includes('2023')).length}</h3>
+          <p>New Students</p>
+        </div>
+      `;
+
+      // Update students table
+      const studentsBody = document.getElementById('studentsBody');
+      const emptyState = document.getElementById('emptyState');
+
+      if (classStudents.length === 0) {
+        studentsBody.innerHTML = '';
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        studentsBody.innerHTML = classStudents.map((student, index) => `
+          <tr style="animation-delay: ${index * 0.05}s">
+            <td>${student.studentId}</td>
+            <td>${student.studentName}</td>
+            <td>${student.studentMobile}</td>
+            <td>${student.parentMobile}</td>
+            <td>${new Date(student.timestamp).toLocaleDateString()}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-small btn-secondary" onclick="viewStudent('${student.studentId}')">
+                  View
+                </button>
+                <button class="btn btn-small btn-danger" onclick="showRemoveStudentConfirm('${student.studentId}', '${student.studentName}')">
+                  Remove
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Show remove student confirmation
+    function showRemoveStudentConfirm(studentId, studentName) {
+      modalTitle.textContent = 'Remove Student';
+      modalContent.innerHTML = `
+        <p>Are you sure you want to remove <strong>${studentName}</strong> (${studentId}) from this class?</p>
+        <p style="color: #ef4444; font-weight: 600; margin-top: 10px;">⚠️ This action cannot be undone!</p>
+        <p style="font-size: 0.9rem; color: #64748b; margin-top: 10px;">
+          All student data, scores, and attendance records will be permanently removed.
+        </p>
+      `;
+      
+      confirmActionBtn.innerHTML = '<span>🗑️</span> Remove Student';
+      confirmActionBtn.onclick = () => removeStudent(studentId);
+      
+      showModal();
+    }
+
+    // Remove student from class
+    function removeStudent(studentId) {
+      let students = JSON.parse(localStorage.getItem('students')) || [];
+      const studentToRemove = students.find(student => student.studentId === studentId);
+      
+      if (studentToRemove) {
+        students = students.filter(student => student.studentId !== studentId);
+        localStorage.setItem('students', JSON.stringify(students));
+        
+        // Update class stats
+        let classStats = JSON.parse(localStorage.getItem('classStats')) || {};
+        if (classStats[currentClass]) {
+          classStats[currentClass].studentCount = Math.max(0, classStats[currentClass].studentCount - 1);
+          localStorage.setItem('classStats', JSON.stringify(classStats));
+        }
+        
+        closeModal();
+        loadClassData();
+        showNotification(`Student ${studentToRemove.studentName} removed successfully!`, 'success');
+      } else {
+        showNotification('Student not found!', 'error');
+      }
+    }
+
+    // View student details
+    function viewStudent(studentId) {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const student = students.find(s => s.studentId === studentId);
+      
+      if (student) {
+        modalTitle.textContent = 'Student Details';
+        modalContent.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div style="grid-column: span 2;">
+              <div style="font-size: 0.9rem; color: #64748b;">Student Name</div>
+              <div style="font-weight: 600; font-size: 1.2rem;">${student.studentName}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: #64748b;">Student ID</div>
+              <div style="font-weight: 600;">${student.studentId}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: #64748b;">Class</div>
+              <div style="font-weight: 600;">${className}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: #64748b;">Student Mobile</div>
+              <div style="font-weight: 600;">${student.studentMobile}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: #64748b;">Parent Mobile</div>
+              <div style="font-weight: 600;">${student.parentMobile}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: #64748b;">Joined On</div>
+              <div style="font-weight: 600;">${new Date(student.timestamp).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-small" onclick="viewStudentScores('${studentId}')">View Scores</button>
+            <button class="btn btn-small btn-secondary" onclick="sendMessage('${studentId}')">Send Message</button>
+            <button class="btn btn-small btn-success" onclick="callParent('${student.parentMobile}')">Call Parent</button>
+          </div>
+        `;
+        
+        confirmActionBtn.innerHTML = '<span>✏️</span> Edit Student';
+        confirmActionBtn.onclick = () => {
+          closeModal();
+          editStudent(studentId);
+        };
+        
+        showModal();
+      }
+    }
+
+    // View student scores
+    function viewStudentScores(studentId) {
+      localStorage.setItem('viewScoresStudent', studentId);
+      window.location.href = 'teacher-scores.html';
+    }
+
+    // Send message to student
+    function sendMessage(studentId) {
+      showNotification(`Message feature for ${studentId} would open here`, 'info');
+    }
+
+    // Call parent
+    function callParent(phoneNumber) {
+      showNotification(`Calling parent at ${phoneNumber}...`, 'info');
+    }
+
+    // Edit student (placeholder)
+    function editStudent(studentId) {
+      showNotification(`Edit student ${studentId} - Feature coming soon!`, 'info');
+    }
+
+    // Show notification
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 400px;
+      `;
+      notification.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
+        <div>${message}</div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Add fadeOut animation
+    const fadeOutStyle = document.createElement('style');
+    fadeOutStyle.textContent = `
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100px); }
+      }
+    `;
+    document.head.appendChild(fadeOutStyle);
+
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', loadClassData);
+
+    // Add ripple effect to buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          if (this.disabled || this.getAttribute('href')) return;
+          
+          const x = e.clientX - e.target.getBoundingClientRect().left;
+          const y = e.clientY - e.target.getBoundingClientRect().top;
+          
+          const ripple = document.createElement('span');
+          ripple.style.cssText = `
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            width: 100px;
+            height: 100px;
+            top: ${y - 50}px;
+            left: ${x - 50}px;
+          `;
+          
+          this.style.position = 'relative';
+          this.style.overflow = 'hidden';
+          this.appendChild(ripple);
+          
+          setTimeout(() => ripple.remove(), 600);
+        });
+      });
+      
+      // Add ripple animation
+      const rippleStyle = document.createElement('style');
+      rippleStyle.textContent = `
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(rippleStyle);
+    });
+
+    // Add hover effect to buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => {
+          button.style.transform = 'translateY(-2px)';
+        });
+        button.addEventListener('mouseleave', () => {
+          button.style.transform = 'translateY(0)';
+        });
+      });
+    });
+
+    // Add animations to table rows
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.querySelectorAll('.stat-card, .info-card, .students-table tbody tr').forEach(el => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+          el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          observer.observe(el);
+        });
+      }, 100);
+    });
+  </script>
+</body>
+</html>

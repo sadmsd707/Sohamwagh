@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Save notification */
+    .save-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #3b82f6;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Units & Measurements</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <!-- Save notification -->
+  <div class="save-notification" id="saveNotification">
+    <span>Results saved successfully!</span>
+    <button onclick="hideNotification()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+
+  <script>
+       const questions = [
+      {
+        number: "Question 01",
+        text: "A photosensitive surface has work function φ. If photon of energy 3φ falls on this surface, the electron comes out with maximum velocity of 4 × 10⁶ m/s. When photon energy is increased to 7φ then maximum velocity of photoelectron will be",
+        options: ["A) 6 × 10⁶ m/s", "B) 8 × 10⁶ m/s", "C) 10 × 10⁶ m/s", "D) 12 × 10⁶ m/s"],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "Energy of the incident photons on the metal surface is initially 4W and then 6W where W is the work function of that metal. The ratio of velocities of emitted photoelectrons is",
+        options: ["A) 1:√3", "B) √3:1", "C) √3:√2", "D) √2:√3"],
+        correct: "C"
+      },
+      {
+        number: "Question 03",
+        text: "The work functions of Caesium (Cs), Potassium (K) and sodium (Na) are 2.14eV, 2.30eV, and 2.75eV respectively. If incident electromagnetic radiation has an incident energy of 2.41eV, which of these photosensitive surfaces may emit photoelectrons?",
+        options: ["A) Cs only", "B) Cs and K only", "C) Cs, K and Na", "D) K and Na only"],
+        correct: "B"
+      },
+      {
+        number: "Question 04",
+        text: "If E_p and E_e represent kinetic energy of photon and electron respectively. If de-Broglie wavelength λ_p of a photon is twice the de-Broglie wavelength λ_e of electron, then E_e/E_p is (Speed of electron = C/100, where 'C' is the velocity of light)",
+        options: ["A) 10⁻⁴", "B) 10⁻²", "C) 10²", "D) 10⁴"],
+        correct: "D"
+      },
+      {
+        number: "Question 05",
+        text: "Let E_e and E_p represents kinetic energy of electron and photon respectively. If de-Broglie wavelength of a photon is twice the de-Broglie wavelength of an electron then E_p/E_e is (speed of electron = C/100 where C is the velocity of light)",
+        options: ["A) 10²", "B) 10⁴", "C) 10⁻²", "D) 10⁻⁴"],
+        correct: "C"
+      },
+      {
+        number: "Question 06",
+        text: "The graph shows the variation of photocurrent with anode potential for four different radiations. Let I_a, I_b, I_c and I_d are intensities and f_a, f_b, f_c and f_d be the frequencies for the curves a, b, c and d respectively, then",
+        options: ["A) f_b < f_a, f_b < f_c, I_c < I_d", "B) f_b ≤ f_a, f_b > f_c, I_c = I_d", "C) f_b = f_a, f_b > f_c, I_c > I_d", "D) f_b > f_a, f_b = f_c, I_c = I_d"],
+        correct: "B"
+      },
+      {
+        number: "Question 07",
+        text: "Light of incident frequency 3 times the threshold frequency is incident on a photosensitive material. If the incident frequency is made (1/4)th and intensity is tripled then the photoelectric current will",
+        options: ["A) increase", "B) decrease", "C) become zero", "D) remain same"],
+        correct: "C"
+      },
+      {
+        number: "Question 08",
+        text: "The wavelength 'λ' of a photon and the de-Broglie wavelength of an electron have same value. the ratio of kinetic energy of the electron to the energy of a photon is (m = mass of electron, c = velocity of light, h = Planck's constant)",
+        options: ["A) 2mc/h", "B) 2mh/c", "C) 4mc/h", "D) 2mc/h"],
+        correct: "A"
+      },
+      {
+        number: "Question 09",
+        text: "If the frequency of incident light in a photoelectric experiment is doubled, then stopping potential will",
+        options: ["A) be doubled", "B) become more than double", "C) become less than double", "D) be halved"],
+        correct: "B"
+      },
+      {
+        number: "Question 10",
+        text: "An electron of mass 'm' and charge 'e' initially at rest gets accelerated by a constant electric field 'E'. The rate of change of de-Broglie wavelength of the electron at time 't' is (Ignore relativistic effect) (h = Planck's constant)",
+        options: ["A) -h/(eEt²)", "B) -h/(2eEt²)", "C) h/(eEt²)", "D) h/(2eEt²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 11",
+        text: "When a metal surface is illuminated by light of wavelength λ₁ and λ₂, the maximum velocities of photoelectrons ejected are V and 2V respectively. The work function of the metal is (h = Planck's constant, c = velocity of light, λ₁ > λ₂)",
+        options: ["A) (hc/λ₁λ₂)(4λ₂ - λ₁)/3", "B) (hc/λ₁λ₂)(4λ₁ - λ₂)/3", "C) (hc/λ₁λ₂)(λ₁ - 4λ₂)/3", "D) (hc/λ₁λ₂)(λ₂ - 4λ₁)/3"],
+        correct: "A"
+      },
+      {
+        number: "Question 12",
+        text: "Sodium and copper have work functions 2.3 eV and 4.5 eV respectively. The ratio of threshold wavelength of sodium to that of copper is nearest to",
+        options: ["A) 1:2", "B) 2:1", "C) 1:4", "D) 4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 13",
+        text: "Graph shows variation of stopping potential with frequency of incident radiation on a metal plate. The value of Planck's constant is [e = charge on photoelectron]",
+        options: ["A) (slope)/e", "B) e × (slope)", "C) e/(slope)", "D) 1/(e × slope)"],
+        correct: "B"
+      },
+      {
+        number: "Question 14",
+        text: "Electron beam when accelerated by a voltage of 10 kV, has a de-Broglie wavelength 'λ'. If the voltage is increased to 20 kV then the de-Broglie wavelength associated with the electron beam would be",
+        options: ["A) λ/√2", "B) λ/2", "C) √2λ", "D) 2λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 15",
+        text: "For two different photosensitive materials having work function φ and 2φ respectively, are illuminated with light of sufficient energy to emit electrons. If the graph of stopping potential versus frequency is drawn, for these two different photosensitive materials, the ratio of slope of graph for these two materials is",
+        options: ["A) 1:1", "B) 1:2", "C) 2:1", "D) 1:4"],
+        correct: "A"
+      },
+      {
+        number: "Question 16",
+        text: "The energy that should be added to an electron to reduce its de-Broglie wavelength from λ to λ/2 is n times the initial energy. The value of 'n' is",
+        options: ["A) 1", "B) 2", "C) 3", "D) 4"],
+        correct: "C"
+      },
+      {
+        number: "Question 17",
+        text: "Photoelectric emission takes place from a certain metal at threshold frequency v. If the radiation of frequency 4v is incident on the metal plate, the maximum velocity of the emitted photoelectrons will be (m = mass of photoelectron, h = Planck's constant)",
+        options: ["A) √(3hv/m)", "B) √(4hv/m)", "C) √(6hv/m)", "D) √(8hv/m)"],
+        correct: "C"
+      },
+      {
+        number: "Question 18",
+        text: "When a photosensitive metal surface is illuminated with radiation of wavelength 'λ₁' the stopping potential is 'V₁'. If the same surface is illuminated with radiation of wavelength '3λ₁', the stopping potential is V₁/6. The threshold wavelength for the photosensitive metal surface is",
+        options: ["A) 2λ₁", "B) 3λ₁", "C) 4λ₁", "D) 5λ₁"],
+        correct: "D"
+      },
+      {
+        number: "Question 19",
+        text: "From photoelectric effect experiment, select the correct statement.",
+        options: [
+          "A) The maximum kinetic energy of a photoelectron depends on the intensity of incident light",
+          "B) The saturation current increases as the intensity of incident light increases",
+          "C) Photoelectric effect can be explained using wave theory of light",
+          "D) The stopping potential depends only on the work function of the metal"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 20",
+        text: "When photons of energies twice and thrice the work function of a metal are incident on the metal surface one after other, the maximum velocities of the photoelectrons emitted in the two cases are V₁ and V₂ respectively. The ratio V₁:V₂ is",
+        options: ["A) 1:√2", "B) 1:√3", "C) √2:√3", "D) √3:√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 21",
+        text: "When a light of wavelength λ falls on the emitter of a photocell, maximum speed of emitted photoelectrons is V. If the incident wavelength is changed to 2λ/3, maximum speed of emitted photoelectrons will be",
+        options: ["A) √(V² + (hc/3mλ))", "B) √(V² + (2hc/3mλ))", "C) √(V² + (hc/mλ))", "D) √(V² + (4hc/3mλ))"],
+        correct: "A"
+      },
+      {
+        number: "Question 22",
+        text: "The de-Broglie wavelength (λ) of a particle",
+        options: ["A) is proportional to mass", "B) is proportional to impulse", "C) does not depend on impulse", "D) is inversely proportional to impulse"],
+        correct: "D"
+      },
+      {
+        number: "Question 23",
+        text: "Photoelectric emission is observed from a metallic surface for frequencies v₁ and v₂ of the incident light rays (v₁ > v₂). If the maximum values of kinetic energy of the photoelectrons emitted in the two cases are in the ratio of 1:k, then the threshold frequency of metallic surface is",
+        options: ["A) (v₁ - kv₂)/(1 - k)", "B) (kv₂ - v₁)/(k - 1)", "C) (v₁ - v₂)/(k - 1)", "D) (kv₁ - v₂)/(k - 1)"],
+        correct: "B"
+      },
+      {
+        number: "Question 24",
+        text: "On a photosensitive material, when frequency of incident radiation is increased by 20%, maximum kinetic energy of emitted photoelectrons increases from 0.4 eV to 0.7 eV. The work function of the material is",
+        options: ["A) 1.8 eV", "B) 1.6 eV", "C) 1.4 eV", "D) 1.2 eV"],
+        correct: "B"
+      },
+      {
+        number: "Question 25",
+        text: "Light of wavelength 'λ' falls on a metal having work function hc/λ₀. Photoelectric effect will take place only if (λ₀ is the threshold wavelength)",
+        options: ["A) λ ≥ λ₀", "B) λ > λ₀", "C) λ ≤ λ₀", "D) λ < λ₀"],
+        correct: "D"
+      },
+      {
+        number: "Question 26",
+        text: "A parallel beam of light is incident normally on a plane surface absorbing 50% of the light and reflecting the rest. If the incident beam carries 90 W of power, the force exerted by it on the surface is (C = velocity of light in air = 3 × 10⁸ m/s)",
+        options: ["A) 1.5 × 10⁻⁷ N", "B) 2.5 × 10⁻⁷ N", "C) 3.0 × 10⁻⁷ N", "D) 4.5 × 10⁻⁷ N"],
+        correct: "D"
+      },
+      {
+        number: "Question 27",
+        text: "An electron accelerated by a potential difference 'V' has de-Broglie wavelength 'λ'. If the electron is accelerated by a potential difference '9V', its de-Broglie wavelength will be",
+        options: ["A) λ/3", "B) 3λ", "C) λ/9", "D) 9λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 28",
+        text: "The maximum velocity of the photoelectrons emitted by a metal surface is 9 × 10⁵ m/s. The value of ratio of charge (e) to mass (m) of the photoelectron is 1.8 × 10¹¹ C/kg. The value of stopping potential in volt is",
+        options: ["A) 0.45", "B) 0.9", "C) 1.8", "D) 2.7"],
+        correct: "A"
+      },
+      {
+        number: "Question 29",
+        text: "Light of wavelength λ strikes a photoelectric surface and electrons are ejected with energy E. If E is to be increased to twice the original value, the wavelength changes to λ₁",
+        options: ["A) λ₁ = λ/2", "B) λ₁ = 2λ", "C) λ₁ < λ", "D) λ₁ > λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 30",
+        text: "In a photoelectric experiment, if the intensity of incident light is doubled and the frequency is kept slightly greater than threshold frequency, then the saturation photoelectric current",
+        options: ["A) remains same", "B) doubles", "C) quadruples", "D) becomes half"],
+        correct: "B"
+      },
+      {
+        number: "Question 31",
+        text: "Kinetic energy of a proton is equal to energy E of a photon. Let 'λ₁' be the de-Broglie wavelength of proton and 'λ₂' be the wavelength of photon. If (λ₁/λ₂) ∝ Eⁿ then the value of 'n' is",
+        options: ["A) -1", "B) -1/2", "C) 1/2", "D) 1"],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "A point source of light is used in a photoelectric effect. If the source is removed farther from the emitting metal, then the stopping potential will",
+        options: ["A) increase", "B) decrease", "C) remain unchanged", "D) become zero"],
+        correct: "C"
+      },
+      {
+        number: "Question 33",
+        text: "When an electron orbiting in hydrogen atom in its ground state jumps to higher excited state, the de-Broglie wavelength associated with it",
+        options: ["A) will remain same", "B) will decrease", "C) will become zero", "D) will increase"],
+        correct: "D"
+      },
+      {
+        number: "Question 34",
+        text: "The figure shows the variation of photocurrent with anode potential for four different radiations. Let I_a, I_b, I_c and I_d be the intensities for the curves a, b, c and d respectively [f_a, f_b, f_c and f_d are frequencies respectively]",
+        options: ["A) f_a = f_b = f_c = f_d and I_a < I_b < I_c < I_d", "B) f_a < f_b > f_c = f_d and I_a = I_b > I_c > I_d", "C) f_a = f_b > f_c > f_d and I_a = I_b > I_c > I_d", "D) f_a > f_b > f_c > f_d and I_a = I_b = I_c = I_d"],
+        correct: "C"
+      },
+      {
+        number: "Question 35",
+        text: "When a certain metallic surface is illuminated with monochromatic light wavelength λ, the stopping potential for photoelectric current is 4V₀. When the same surface is illuminated with light of wavelength 3λ, the stopping potential is V₀. The threshold wavelength for this surface for photoelectric effect is",
+        options: ["A) 4λ", "B) 5λ", "C) 6λ", "D) 7λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 36",
+        text: "The stopping potential as a function of frequency of incident radiation is plotted for two different photoelectric surfaces A and B. The graph shows that the work function of A is",
+        options: ["A) smaller than that of B", "B) that no comparison can be made from the graphs", "C) greater than that of B", "D) same as that of B"],
+        correct: "C"
+      },
+      {
+        number: "Question 37",
+        text: "Two photons having energies twice and thrice the work function of metal are incident one after another on the metal surface. Then the ratio of maximum velocities of the photoelectrons emitted in the two cases is respectively",
+        options: ["A) 1:√2", "B) 1:√3", "C) √2:√3", "D) √3:√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 38",
+        text: "Electrons are accelerated through a potential difference of 16 kV. If the potential difference is increased to 64 kV, then de-Broglie wavelength associated with electron will",
+        options: ["A) becomes quarter", "B) becomes half", "C) remain same", "D) becomes four time"],
+        correct: "B"
+      },
+      {
+        number: "Question 39",
+        text: "In case of photoelectric effect, the graph of measured stopping potential (V₀) against frequency 'v' of incident light is a straight line. The slope of this line multiplied by the charge of electron (e) gives",
+        options: ["A) the threshold frequency for photoejection from the metal", "B) the maximum kinetic energy of the ejected electrons", "C) the Planck's constant", "D) the work function of the metal"],
+        correct: "C"
+      },
+      {
+        number: "Question 40",
+        text: "A photoelectric surface is illuminated successively by monochromatic light of Wavelength λ and (λ/3). If the maximum kinetic energy of the emitted photoelectrons in the second case is 4 times that in the first case, the work function of the surface of the material is (h = Planck's constant, c = speed of light)",
+        options: ["A) hc/λ", "B) hc/2λ", "C) hc/3λ", "D) hc/4λ"],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "If the frequency of incident radiation (v) is increased, keeping other factors constant, the stopping potential (v > v₀, threshold frequency)",
+        options: ["A) decreases", "B) increases", "C) remains same", "D) becomes zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 42",
+        text: "A photoelectric surface is illuminated successively by monochromatic light of 'wavelength' λ' and (λ/2). If the maximum kinetic energy of the emitted photoelectrons in the first case is one-fourth that in the second case, the work function of the surface of the material is (c = speed of light, h = Planck's constant)",
+        options: ["A) hc/λ", "B) hc/2λ", "C) hc/3λ", "D) hc/4λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 43",
+        text: "Radius of first orbit in H-atom is 'a₀' Then, de-Broglie wavelength of electron in the third orbit is",
+        options: ["A) 9πa₀", "B) 6πa₀", "C) 12πa₀", "D) 3πa₀"],
+        correct: "B"
+      },
+      {
+        number: "Question 44",
+        text: "When a photosensitive surface is irradiated by lights of wavelengths 'λ₁' and 'λ₂', kinetic energies of the emitted photoelectrons is 'E₁' and 'E₂' respectively. The work function of the photosensitive surface is",
+        options: ["A) (λ₁E₁ - λ₂E₂)/(λ₁ - λ₂)", "B) (λ₂E₁ - λ₁E₂)/(λ₂ - λ₁)", "C) (λ₁E₂ - λ₂E₁)/(λ₁ - λ₂)", "D) (λ₂E₂ - λ₁E₁)/(λ₂ - λ₁)"],
+        correct: "C"
+      },
+      {
+        number: "Question 45",
+        text: "In photoelectric effect, the photocurrent",
+        options: ["A) increases with increase in frequency of incident photon", "B) depends both on intensity and frequency of incident radiation", "C) decreases with increase in frequency of incident photon", "D) does not depend on the frequency of photon but depends only on the intensity of incident light"],
+        correct: "D"
+      },
+      {
+        number: "Question 46",
+        text: "If the potential difference used to accelerate electrons is increased four times, by what factor does the de-Broglie wavelength associated with the electrons change?",
+        options: ["A) Wavelength increased two times", "B) Wavelength remains the same", "C) Wavelength increased four times", "D) Wavelength decreased to half"],
+        correct: "D"
+      },
+      {
+        number: "Question 47",
+        text: "Two identical photocathodes receive light of frequencies 'n₁' and 'n₂'. If the velocities of the emitted photoelectrons of mass 'm' are 'V₁' and 'V₂' respectively, then (h = Planck's constant)",
+        options: ["A) V₁² - V₂² = 2h/m (n₁ - n₂)", "B) V₁ - V₂ = √(2h/m (√n₁ - √n₂))", "C) V₁² - V₂² = 2h/m (√n₁ - √n₂)", "D) V₁ - V₂ = (h/m)(n₁ - n₂)"],
+        correct: "A"
+      },
+      {
+        number: "Question 48",
+        text: "The kinetic energy of an electron is increased by 2 times, then the de-Broglie wavelength associated with it changes by a factor.",
+        options: ["A) √2", "B) 1/√2", "C) 2", "D) 1/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 49",
+        text: "A photosensitive metallic surface has work function φ. If photon of energy 3φ falls on the surface, the electron comes out with a maximum velocity of 6 × 10⁶ m/s. When the photon energy is increased to 9φ, then maximum velocity of photoelectrons will be",
+        options: ["A) 8 × 10⁶ m/s", "B) 10 × 10⁶ m/s", "C) 12 × 10⁶ m/s", "D) 14 × 10⁶ m/s"],
+        correct: "C"
+      },
+      {
+        number: "Question 50",
+        text: "The threshold frequency of a metal is 'F₀'. When light of frequency 2F₀ is incident on the metal plate, the maximum velocity of photoelectron is 'V₁'. When the frequency of incident radiation is increased to '5F₀', the maximum velocity of photoelectrons emitted is 'V₂'. The ratio of V₁ to V₂ is",
+        options: ["A) 1:2", "B) 1:√2", "C) 1:√3", "D) 1:√5"],
+        correct: "A"
+      },
+      {
+        number: "Question 51",
+        text: "For a photosensitive material, work function is 'W₀' and stopping potential is 'V'. The wavelength of incident radiation is (h = Planck's constant, c = velocity of light, e = electronic charge)",
+        options: ["A) hc/(W₀ + eV)", "B) hc/(W₀ - eV)", "C) (W₀ + eV)/hc", "D) (W₀ - eV)/hc"],
+        correct: "A"
+      },
+      {
+        number: "Question 52",
+        text: "The graph of stopping potential 'V_s' against frequency 'v' of incident radiation is plotted for two different metals 'X' and 'Y' as shown in graph. 'φ_x' and 'φ_y' are work functions of 'x' and 'Y', respectively then",
+        options: ["A) φ_x > φ_y", "B) φ_x < φ_y", "C) φ_x = φ_y", "D) cannot be determined"],
+        correct: "A"
+      },
+      {
+        number: "Question 53",
+        text: "The frequency of incident light falling on a photosensitive material is doubled, the K.E. of the emitted photoelectrons will be",
+        options: ["A) more than doubled", "B) less than doubled", "C) doubled", "D) unchanged"],
+        correct: "A"
+      },
+      {
+        number: "Question 54",
+        text: "When the electron orbiting in hydrogen atom in its ground state moves to the third excited state, the de-Broglie wavelength associated with it",
+        options: ["A) increases", "B) decreases", "C) remains same", "D) becomes zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 55",
+        text: "The ratio of the wavelength of a photon of energy 'E' to that of the electron of same energy is (m = mass of an electron, c = speed of light, h = Planck's constant)",
+        options: ["A) c√(2mE)", "B) (1/c)√(2m/E)", "C) c√(2m/E)", "D) (1/c)√(2mE)"],
+        correct: "C"
+      },
+      {
+        number: "Question 56",
+        text: "When photons of energy hv fall on a photosensitive surface of work function E₀, photoelectrons of maximum energy k are emitted. If the frequency of radiation is doubled the maximum kinetic energy will be equal to (h = Planck's constant)",
+        options: ["A) 2k", "B) k + hv", "C) k + E₀", "D) k + h(v - v₀)"],
+        correct: "B"
+      },
+      {
+        number: "Question 57",
+        text: "The number of photoelectrons emitted for light of frequency v (higher than the threshold frequency v₀) is proportional to",
+        options: ["A) intensity of light", "B) frequency of light", "C) threshold frequency", "D) stopping potential"],
+        correct: "A"
+      },
+      {
+        number: "Question 58",
+        text: "The stopping potential for a photoelectric emission process is 10 V. The maximum kinetic energy of the electrons ejected in the process is [Charge on electron e = 1.6 × 10⁻¹⁹ C]",
+        options: ["A) 1.6 × 10⁻¹⁸ J", "B) 1.6 × 10⁻¹⁹ J", "C) 1.6 × 10⁻²⁰ J", "D) 1.6 × 10⁻²¹ J"],
+        correct: "A"
+      },
+      {
+        number: "Question 59",
+        text: "When a metallic surface is illuminated with a radiation of wavelength 'λ', the stopping potential is 'V'. If the same surface is illuminated with radiation of wavelength '3λ', the stopping potential is (V/6). The threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "D"
+      },
+      {
+        number: "Question 60",
+        text: "The work function of metal 'A' and 'B' are in the ratio 1:2. If light of frequency 'f' and '2f' is incident on surface 'A' and 'B' respectively, then the ratio of kinetic energies of emitted photo electrons is",
+        options: ["A) 1:1", "B) 1:2", "C) 2:1", "D) 1:4"],
+        correct: "A"
+      },
+      {
+        number: "Question 61",
+        text: "When radiation of wavelength 'λ' is incident on a metallic surface, the stopping potential is 4.8 V. If the surface is illuminated with radiation of double the wavelength then the stopping potential becomes 1.6 V. The threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 62",
+        text: "The de-Broglie wavelength (λ) of a particle is related to its kinetic energy (E) as",
+        options: ["A) λ ∝ E", "B) λ ∝ 1/E", "C) λ ∝ 1/√E", "D) λ ∝ √E"],
+        correct: "C"
+      },
+      {
+        number: "Question 63",
+        text: "If the radius of the first Bohr orbit is 'r' then the de-Broglie wavelength of the electron in the 4th orbit will be",
+        options: ["A) 2πr", "B) 4πr", "C) 8πr", "D) 16πr"],
+        correct: "C"
+      },
+      {
+        number: "Question 64",
+        text: "Dual nature of light is exhibited by",
+        options: ["A) photoelectric effect", "B) diffraction as well as photoelectric effect", "C) diffraction as well as reflection", "D) refraction as well as interference"],
+        correct: "B"
+      },
+      {
+        number: "Question 65",
+        text: "When radiations of wavelength 'λ' is incident on a metallic surface the stopping potential required is 4.8 volt. If same surface is illuminated with radiations of double the wavelength, then required stopping potential becomes 1.6 volt. Then the value of threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 66",
+        text: "When a light of wavelength 300 nm fall on a photoelectric emitter, photo electrons are emitted. For another emitter light of wavelength 600 nm is just sufficient for liberating photoelectrons. The ratio of the work function of the two emitters is",
+        options: ["A) 1:2", "B) 2:1", "C) 4:1", "D) 1:4"],
+        correct: "B"
+      },
+      {
+        number: "Question 67",
+        text: "Light of frequency 1.5 times the threshold frequency is incident on photosensitive material. If the frequency is halved and intensity is doubled, the photocurrent becomes",
+        options: ["A) zero", "B) doubled", "C) four times", "D) unchanged"],
+        correct: "A"
+      },
+      {
+        number: "Question 68",
+        text: "When an electron is accelerated through a potential 'V', the de-Broglie wavelength associated with it is '4λ'. When the accelerating potential is increased to 4V, its wavelength will be",
+        options: ["A) λ", "B) 2λ", "C) λ/2", "D) λ/4"],
+        correct: "B"
+      },
+      {
+        number: "Question 69",
+        text: "Radiations of two photons having energies twice and five times the work function of metal are incident successively on metal surface. The ratio of the maximum velocity of photo electrons emitted in the two cases will be",
+        options: ["A) 1:2", "B) 1:√2", "C) 1:√5", "D) √2:√5"],
+        correct: "A"
+      },
+      {
+        number: "Question 70",
+        text: "When light of wavelength λ is incident on a photosensitive surface the stopping potential is 'V'. When light of wavelength 3λ is incident on same surface the stopping potential is V/6. Then the threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "D"
+      },
+      {
+        number: "Question 71",
+        text: "The wavelength of radiation emitted is 'λ₀' when an electron jumps from the second excited state to the first excited state of hydrogen atom. If the electron jumps from the third excited state to the second orbit of the hydrogen atom, the wavelength of the radiation emitted will be (20/x)λ₀. The value of x is",
+        options: ["A) 7", "B) 9", "C) 11", "D) 13"],
+        correct: "B"
+      },
+      {
+        number: "Question 72",
+        text: "When a metallic surface is illuminated with radiation of wavelength 'λ', the stopping potential is 'V'. If the same surface is illuminated with radiation of wavelength '2λ', the stopping potential is (V/4). The threshold wavelength for the metallic surface is",
+        options: ["A) 3λ", "B) 4λ", "C) 5λ", "D) 6λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 73",
+        text: "The maximum kinetic energies of photoelectrons emitted are K₁ and K₂ when lights of wavelengths λ₁ and λ₂ are incident on a metallic surface. If λ₁ = 3λ₂ then",
+        options: ["A) K₁ > K₂", "B) K₁ < K₂", "C) K₁ = K₂", "D) K₁ = 3K₂"],
+        correct: "B"
+      },
+      {
+        number: "Question 74",
+        text: "If the potential difference used to accelerate electrons is doubled, by what factor does the de-Broglie wavelength associated with electrons change?",
+        options: ["A) √2", "B) 1/√2", "C) 2", "D) 1/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 75",
+        text: "The maximum kinetic energy of the photoelectrons varies",
+        options: ["A) linearly with the frequency of incident radiation and is independent of its intensity", "B) inversely with the frequency of incident radiation and is independent on its intensity", "C) inversely with the intensity of incident radiation and is independent of its frequency", "D) linearly with the frequency of incident radiation and depends on its intensity"],
+        correct: "A"
+      },
+      {
+        number: "Question 76",
+        text: "An electron accelerated through a potential difference 'V₁' has a de-Broglie wavelength 'λ'. When the potential is changed to 'V₂' its de-Broglie wavelength increases by 50%. The value of (V₁/V₂) is",
+        options: ["A) 2.25", "B) 1.5", "C) 1.25", "D) 0.75"],
+        correct: "A"
+      },
+      {
+        number: "Question 77",
+        text: "Maximum kinetic energy of photon is 'E' when wavelength of incident radiation is 'λ'. If wavelength of incident radiations is reduced to λ/3 then energy of photon becomes four times. Then work function of the metal is",
+        options: ["A) hc/λ", "B) hc/2λ", "C) hc/3λ", "D) hc/4λ"],
+        correct: "B"
+      },
+      {
+        number: "Question 78",
+        text: "When photons of energies twice and thrice the work function of a metal are incident on the metal surface one after other, the maximum velocities of the photoelectrons emitted in the two cases are v₁ and v₂ respectively. The ratio v₁:v₂ is",
+        options: ["A) 1:√2", "B) 1:√3", "C) √2:√3", "D) √3:√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 79",
+        text: "When a certain metal surface is illuminated with light of frequency υ, the stopping potential for photoelectric current is V₀. When the same surface is illuminated by light of frequency υ/2, the stopping potential is V₀/4, the threshold frequency of photoelectric emission is",
+        options: ["A) υ/3", "B) 2υ/3", "C) υ/2", "D) υ/4"],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "In photoelectric effect, the kinetic energy of electron emitted from the metal surface depends upon",
+        options: ["A) intensity of incident radiation", "B) frequency of incident radiation", "C) both intensity and frequency", "D) nature of metal surface"],
+        correct: "B"
+      },
+      {
+        number: "Question 81",
+        text: "Graph shows the variation of de-Broglie wavelength λ versus 1/√V where V is the accelerating potential for four particles, P, Q, R, S carrying same charge but of mass m₁, m₂, m₃, m₄. Which one represents a particle of smaller mass?",
+        options: ["A) P", "B) Q", "C) R", "D) S"],
+        correct: "A"
+      },
+      {
+        number: "Question 82",
+        text: "If the kinetic energy of a free electron doubles, its de-Broglie wavelength λ changes by a factor",
+        options: ["A) √2", "B) 1/√2", "C) 2", "D) 1/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 83",
+        text: "The maximum velocity of the photoelectron emitted by the metal surface is v, charge and mass of the photoelectron are denoted by e and m respectively. The stopping potential in volt is",
+        options: ["A) mv²/e", "B) mv²/2e", "C) mv/e", "D) mv/2e"],
+        correct: "B"
+      },
+      {
+        number: "Question 84",
+        text: "The kinetic energy of an electron is tripled, then the de-Broglie wavelength associated with it, will change by a factor",
+        options: ["A) √3", "B) 1/√3", "C) 3", "D) 1/3"],
+        correct: "B"
+      },
+      {
+        number: "Question 85",
+        text: "Threshold frequency for a metal is 15 × 10¹⁴ Hz. The light of wavelength 6000Å falls on the metal surface. Then photoelectrons [velocity of light in air, c = 3 × 10⁸ m/s]",
+        options: ["A) come out with zero velocity", "B) come out with velocity 3 × 10⁶ m/s", "C) are emitted with velocity c", "D) will not be emitted"],
+        correct: "D"
+      },
+      {
+        number: "Question 86",
+        text: "According to de-Broglie hypothesis if an electron of mass 'm' is accelerated by potential difference 'V' then associated wavelength is 'λ'. When a proton of mass 'M' is accelerated through potential difference '9V' then the wavelength associated with it is",
+        options: ["A) λ/3", "B) 3λ", "C) λ/9", "D) 9λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 87",
+        text: "Photoelectric emission takes place from a certain metal at threshold frequency 'v'. If the radiation of frequency '2v' is incident on the metal plate, the maximum velocity of the emitted photoelectron will be (m = mass of electron, h = Planck's constant)",
+        options: ["A) √(hv/m)", "B) √(2hv/m)", "C) √(3hv/m)", "D) √(4hv/m)"],
+        correct: "A"
+      },
+      {
+        number: "Question 88",
+        text: "If the potential difference used to accelerate electrons is doubled, by what factor does the de-Broglie wavelength associated with the electrons change?",
+        options: ["A) √2", "B) 1/√2", "C) 2", "D) 1/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 89",
+        text: "Electrons of mass m with de-Broglie wavelength λ fall on the target. The cut-off wavelength λ₀ is equal to [h = Planck's constant, C = velocity of light]",
+        options: ["A) λ", "B) 2λ", "C) λ/2", "D) λ²"],
+        correct: "A"
+      },
+      {
+        number: "Question 90",
+        text: "In a photoelectric emission experiment, the stopping potential for a given metal is V volt, when radiation of wavelength λ is used. If radiation of wavelength 2λ is used with the same metal, then the stopping potential (in volt) will be [c = velocity of light, e = charge on electron, h = Planck's constant]",
+        options: ["A) V/2", "B) V", "C) 2V", "D) (hc/2eλ) - (h/2e)"],
+        correct: "D"
+      },
+      {
+        number: "Question 91",
+        text: "The work functions for metals A, B and C are 1.92eV, 2.0eV and 5eV respectively the metal(s) which will emit photoelectrons for incident radiation of wavelength 4100 Å is/are [h = 6.63 × 10⁻³⁴ J, e = 1.6 × 10⁻¹⁹ C, c = 3 × 10⁸ m/s]",
+        options: ["A) A only", "B) A and B only", "C) A, B and C", "D) C only"],
+        correct: "B"
+      },
+      {
+        number: "Question 92",
+        text: "Energy of photon whose frequency is 10¹² MHz is [Planck's constant, h = 6.63×10⁻³⁴ Js, e = 1.6×10⁻¹⁹ C]",
+        options: ["A) 4.14 × 10⁻¹⁹ J", "B) 6.63 × 10⁻²² J", "C) 4.14 × 10⁻²² J", "D) 6.63 × 10⁻¹⁹ J"],
+        correct: "A"
+      },
+      {
+        number: "Question 93",
+        text: "An electron of mass 'm' and a photon have same energy E. The ratio of the de-Broglie wavelengths associated with them is (c = velocity of light in air)",
+        options: ["A) c√(2mE)", "B) (1/c)√(2m/E)", "C) c√(2m/E)", "D) (1/c)√(2mE)"],
+        correct: "C"
+      },
+      {
+        number: "Question 94",
+        text: "The de-Broglie wavelength of an electron moving in the n^th Bohr orbit of radius r is",
+        options: ["A) 2πr/n", "B) n/2πr", "C) 2πrn", "D) n²/2πr"],
+        correct: "A"
+      },
+      {
+        number: "Question 95",
+        text: "In the case of photoelectric emission from a certain metal, the cutoff frequency is v. If radiation of frequency 2v is incident on the metal plate, the maximum possible velocity of the emitted electrons will be (m = mass of electron)",
+        options: ["A) √(hv/m)", "B) √(2hv/m)", "C) √(3hv/m)", "D) √(4hv/m)"],
+        correct: "A"
+      },
+      {
+        number: "Question 96",
+        text: "When an electron in a hydrogen atom jumps from the third excited state to the ground state, the de-Broglie wavelength associated with the electron becomes",
+        options: ["A) 4 times", "B) 2 times", "C) 1/4 times", "D) 1/2 times"],
+        correct: "C"
+      },
+      {
+        number: "Question 97",
+        text: "Following graph shown the variation of stopping potential corresponding to the frequency of incident radiation (v) for a given metal. The correct variation is shown in graph [v₀ = threshold frequency]",
+        options: ["A) Linear with positive slope", "B) Linear with negative slope", "C) Parabolic", "D) Exponential"],
+        correct: "A"
+      },
+      {
+        number: "Question 98",
+        text: "Light of two different frequencies whose photons have energies 1.3eV and 2.8eV respectively, successfully illuminate a metallic surface whose work function is 0.8eV. The ratio of maximum speeds of emitted electrons will be",
+        options: ["A) 1:2", "B) 1:√2", "C) √2:1", "D) 2:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 99",
+        text: "A photoelectric surface is illuminated successively by monochromatic light of wavelength 'λ' and (λ/2). If the maximum kinetic energy of the emitted photoelectrons in the first case is one-third that in the second case, the work function of the surface of the material is (c = speed of light, h = Planck's constant.)",
+        options: ["A) hc/λ", "B) hc/2λ", "C) hc/3λ", "D) hc/4λ"],
+        correct: "C"
+      },
+      {
+        number: "Question 100",
+        text: "A photon of energy 'E' ejects photoelectrons from a metal surface whose work function is W₀. If this electron enters into a uniform magnetic field with induction 'B' in a direction perpendicular to the field and describes a circular path of radius 'r', then the radius is given by",
+        options: ["A) √(2m(E - W₀))/eB", "B) √(2m(E - W₀))/B", "C) √(2mE)/eB", "D) √(2mW₀)/eB"],
+        correct: "A"
+      },
+      {
+        number: "Question 101",
+        text: "A light of wavelength 'λ' and intensity 'I' falls on photosensitive material. If 'N' photo electrons are emitted, each with kinetic energy 'E', then",
+        options: ["A) N ∝ I, E ∝ 1/λ", "B) N ∝ I, E ∝ λ", "C) N ∝ 1/I, E ∝ λ", "D) N ∝ 1/I, E ∝ 1/λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 102",
+        text: "In a photoelectric experiment, a graph of maximum kinetic energy (KE_max) against the frequency of incident radiation (v) is plotted. If A and B are the intercepts on the X and Y axis respectively the Planck's constant is given by",
+        options: ["A) A/B", "B) B/A", "C) A × B", "D) A + B"],
+        correct: "B"
+      },
+      {
+        number: "Question 103",
+        text: "De-Broglie wavelength associated with an electron accelerated through a potential difference 'V' is 'λ'. When the accelerating potential is increased to '4V', de-Broglie wavelength.",
+        options: ["A) increases by 25%", "B) reduces to half", "C) reduces to (1/4)^th", "D) remains the same"],
+        correct: "B"
+      },
+      {
+        number: "Question 104",
+        text: "In photoelectric effect, the photocurrent",
+        options: ["A) decreases with Increase in frequency of incident photon", "B) depends on intensity of incident radiation and its frequency", "C) does not depend on the frequency of photon but depends on intensity of incident light", "D) increases with increase in frequency of incident photon"],
+        correct: "C"
+      },
+      {
+        number: "Question 105",
+        text: "An electron of mass 'm' and a photon have same energy 'E'. The ratio of de-Broglie wavelength of electron to the wavelength of photon is (c = velocity of light)",
+        options: ["A) c√(2mE)", "B) (1/c)√(2m/E)", "C) c√(2m/E)", "D) (1/c)√(2mE)"],
+        correct: "C"
+      },
+      {
+        number: "Question 106",
+        text: "When wavelength of incident radiation on the metal surface is reduced from 'λ₁' to 'λ₂' the kinetic energy of emitted photoelectrons is tripled. The work function of metal [h = Plank's constant, c = velocity of light]",
+        options: ["A) hc(3λ₂ - λ₁)/(2λ₁λ₂)", "B) hc(λ₁ - 3λ₂)/(2λ₁λ₂)", "C) hc(3λ₁ - λ₂)/(2λ₁λ₂)", "D) hc(λ₂ - 3λ₁)/(2λ₁λ₂)"],
+        correct: "A"
+      },
+      {
+        number: "Question 107",
+        text: "In photoelectric experiment keeping the frequency of incident radiation and accelerating potential fixed, if the intensity of incident light is increase,",
+        options: ["A) photocurrent increases", "B) stopping potential increases", "C) maximum kinetic energy increases", "D) threshold frequency increases"],
+        correct: "A"
+      },
+      {
+        number: "Question 108",
+        text: "When a photon enters glass from air, which one of the following quantities does not change?",
+        options: ["A) Velocity", "B) Wavelength", "C) Energy", "D) Momentum"],
+        correct: "C"
+      },
+      {
+        number: "Question 109",
+        text: "The light of wavelength 'λ' is incident on the surface of metal of work function φ and emits the electron, The maximum velocity of electron emitted is [m = mass of electron and h = Planck's constant, c = velocity of light]",
+        options: ["A) √(2(hc/λ - φ)/m)", "B) √(2(hc/λ + φ)/m)", "C) √(2(φ - hc/λ)/m)", "D) √(2(hc/λ)/m)"],
+        correct: "A"
+      },
+      {
+        number: "Question 110",
+        text: "Photons of energy 10eV are incident on a photosensitive surface of threshold frequency 2 × 10¹⁵ Hz. The kinetic energy in eV of the photoelectrons emitted is [Planck's constant h = 6.63 × 10⁻³⁴ Js]",
+        options: ["A) 1.7 eV", "B) 3.4 eV", "C) 5.1 eV", "D) 6.8 eV"],
+        correct: "A"
+      },
+      {
+        number: "Question 111",
+        text: "Kinetic energy of a proton is equal to energy 'E' of a photon. Let 'λ₁' be the de-Broglie wavelength of proton and 'λ₂' is the wavelength of photon. If λ₁/λ₂ ∝ Eⁿ, then the value of 'n' is",
+        options: ["A) -1", "B) -1/2", "C) 1/2", "D) 1"],
+        correct: "B"
+      },
+      {
+        number: "Question 112",
+        text: "When a light of wavelength 'λ' falls on the emitter of a photocells, maximum speed of emitted photoelectrons is V. If the incident wavelength is changed to 2λ/3, maximum speed of emitted photoelectrons will be",
+        options: ["A) √(V² + (hc/3mλ))", "B) √(V² + (2hc/3mλ))", "C) √(V² + (hc/mλ))", "D) √(V² + (4hc/3mλ))"],
+        correct: "A"
+      },
+      {
+        number: "Question 113",
+        text: "Photoemission from metal surface take place for frequencies 'v₁' and 'v₂' of incident rays. If ratio of maximum kinetic energy of photoelectrons is 1:K then threshold frequency of metallic surface is",
+        options: ["A) (v₁ - Kv₂)/(1 - K)", "B) (Kv₂ - v₁)/(K - 1)", "C) (v₁ - v₂)/(K - 1)", "D) (Kv₁ - v₂)/(K - 1)"],
+        correct: "B"
+      },
+      {
+        number: "Question 114",
+        text: "A proton and alpha particle are accelerated through the same potential difference. The ratio of the de-Broglie wavelength of proton to that of alpha will be (mass of alpha particle is four times mass of proton.)",
+        options: ["A) 1:1", "B) 1:2", "C) 2:1", "D) 4:1"],
+        correct: "C"
+      },
+      {
+        number: "Question 115",
+        text: "On a photosensitive surface, if the intensity of incident radiation is increased, the stopping potential",
+        options: ["A) increases", "B) decreases", "C) remains same", "D) becomes zero"],
+        correct: "C"
+      },
+      {
+        number: "Question 116",
+        text: "Light of frequency two times the threshold frequency is incident on photosensitive material. If the incident frequency is made (1/3)^rd and intensity is doubled, then the photoelectric current will",
+        options: ["A) increase", "B) decrease", "C) become zero", "D) remain same"],
+        correct: "C"
+      },
+      {
+        number: "Question 117",
+        text: "When light of wavelength 'λ' is incident on a photosensitive surface, photons of power 'P' are emitted. The number of photon 'n' emitted in time 't' is [h = Planck's constant, c = velocity of light in vacuum]",
+        options: ["A) Pλt/hc", "B) Pλ/hct", "C) Pct/hλ", "D) Phc/λt"],
+        correct: "A"
+      },
+      {
+        number: "Question 118",
+        text: "When a photosensitive surface is irradiated by light of wavelength 'λ₁' and 'λ₂', maximum kinetic energies of emitted photoelectrons are 'E₁' and 'E₂' respectively. The work function of photosensitive surface is",
+        options: ["A) (λ₁E₁ - λ₂E₂)/(λ₁ - λ₂)", "B) (λ₂E₁ - λ₁E₂)/(λ₂ - λ₁)", "C) (λ₁E₂ - λ₂E₁)/(λ₁ - λ₂)", "D) (λ₂E₂ - λ₁E₁)/(λ₂ - λ₁)"],
+        correct: "C"
+      },
+      {
+        number: "Question 119",
+        text: "Photoelectrons are emitted when photons of energy 4.2eV are incident on a photosensitive metallic sphere of radius 10cm and work function 2.4eV. The number of photoelectrons emitted before the emission is stopped is [1/4πε₀ = 9×10⁹ SI unit; e = 1.6×10⁻¹⁹ C]",
+        options: ["A) 10⁵", "B) 10⁶", "C) 10⁷", "D) 10⁸"],
+        correct: "B"
+      },
+      {
+        number: "Question 120",
+        text: "What is the additional energy that should be supplied to a moving electron to reduce its de Broglie wavelength from 1 nm to 0.5 nm?",
+        options: ["A) Five times its initial energy", "B) Four times its initial energy", "C) Two times its initial energy", "D) Three times its initial energy"],
+        correct: "D"
+      },
+      {
+        number: "Question 121",
+        text: "Photoelectrons are emitted from a photosensitive surface for the light of wavelengths λ₁ = 360 nm and λ₂ = 600 nm. What is the ratio of work functions for lights of wavelength λ₁ to λ₂?",
+        options: ["A) 5:3", "B) 3:5", "C) 2:1", "D) 1:2"],
+        correct: "A"
+      },
+      {
+        number: "Question 122",
+        text: "A photon of wavelength 3315 Å falls on a photocathode and an electron of energy 3 × 10⁻¹⁹ J is ejected. The threshold wavelength of photon is [Planck's constant (h) = 6.63 × 10⁻³⁴ J-s, velocity of light (c) = 3 × 10⁸ m/s]",
+        options: ["A) 5000 Å", "B) 6000 Å", "C) 6625 Å", "D) 7500 Å"],
+        correct: "C"
+      },
+      {
+        number: "Question 123",
+        text: "Which one of the following four graphs showing lines P, Q, R and S between maximum kinetic energy (E) and intensity of incident light (I) is correct?",
+        options: ["A) E ∝ I", "B) E independent of I", "C) E ∝ 1/I", "D) E ∝ I²"],
+        correct: "B"
+      },
+      {
+        number: "Question 124",
+        text: "If the maximum kinetic energy of emitted electrons in photoelectric effect is 3.2 × 10⁻¹⁹ J and the work function for metal is 6.63 × 10⁻¹⁹ J, then stopping potential and threshold wavelength respectively are [Planck's constant h = 6.63 × 10⁻³⁴ J·s, Velocity of light c = 3 × 10⁸ m s⁻¹, charge on electron = 1.6 × 10⁻¹⁹ C]",
+        options: ["A) 4 V, 6000Å", "B) 1 V, 1000Å", "C) 3 V, 4000Å", "D) 2 V, 3000Å"],
+        correct: "D"
+      },
+      {
+        number: "Question 125",
+        text: "The graph of stopping potential (V_s) against frequency (v) of incident radiation is plotted for two different metals 'P' and 'Q' as shown in the graph. φ_p and φ_q are work functions of P and Q respectively, then",
+        options: ["A) φ_p > φ_q", "B) φ_p < φ_q", "C) φ_p = φ_q", "D) cannot be determined"],
+        correct: "A"
+      },
+      {
+        number: "Question 126",
+        text: "The variation of stopping potential for metals A, B, C and D with frequency of incident radiation is as shown in the figure. For which metal, stopping potential is higher for lower values of threshold frequency (v₀)? [The frequency of incident radiation, 'v' is same.]",
+        options: ["A) A", "B) B", "C) C", "D) D"],
+        correct: "D"
+      },
+      {
+        number: "Question 127",
+        text: "The threshold wavelengths for photoelectric emission from two metals A and B are 400 nm and 800 nm respectively. The ratio of their work functions, φ_A to φ_B is",
+        options: ["A) 1:2", "B) 2:1", "C) 1:4", "D) 4:1"],
+        correct: "B"
+      },
+      {
+        number: "Question 128",
+        text: "The light of wavelength λ' incident on the surface of metal having work function φ emits the electrons. The maximum velocity of electrons emitted is (c = velocity of light, h = Planck's constant, m = mass of electron)",
+        options: ["A) √(2(hc/λ - φ)/m)", "B) √(2(hc/λ + φ)/m)", "C) √(2(φ - hc/λ)/m)", "D) √(2(hc/λ)/m)"],
+        correct: "A"
+      },
+      {
+        number: "Question 129",
+        text: "The graph of kinetic energy against the frequency (V) of incident light is as shown in the figure. The slope of the graph and intercept on X axis respectively are",
+        options: ["A) maximum K.E, threshold frequency", "B) Planck's constant, work function", "C) Planck's constant, threshold frequency", "D) work function, maximum K.E"],
+        correct: "C"
+      },
+      {
+        number: "Question 130",
+        text: "Energy of the incident photon on the metal surface is '3W' and then '5W', where 'W' is the work function for that metal. The ratio of velocities of emitted photoelectrons is",
+        options: ["A) 1:√2", "B) √2:1", "C) 1:√3", "D) √3:√2"],
+        correct: "A"
+      },
+      {
+        number: "Question 131",
+        text: "The maximum velocity of the photoelectron emitted by the metal surface is 'V'. Charge and mass of the photoelectron is denoted by 'e' and 'm' respectively. The stopping potential in volt is",
+        options: ["A) mV²/e", "B) mV²/2e", "C) mV/e", "D) mV/2e"],
+        correct: "B"
+      },
+      {
+        number: "Question 132",
+        text: "When a photon enters glass from air, which one of the following quantity does NOT change?",
+        options: ["A) Velocity", "B) Wavelength", "C) Energy", "D) Momentum"],
+        correct: "C"
+      },
+      {
+        number: "Question 133",
+        text: "When a photosensitive surface is irradiated by lights of wavelengths λ₁ and λ₂, kinetic energies of emitted photoelectrons are E₁ and E₂ respectively. The work function of the photosensitive surface is",
+        options: ["A) (λ₁E₁ - λ₂E₂)/(λ₁ - λ₂)", "B) (λ₂E₁ - λ₁E₂)/(λ₂ - λ₁)", "C) (λ₁E₂ - λ₂E₁)/(λ₁ - λ₂)", "D) (λ₂E₂ - λ₁E₁)/(λ₂ - λ₁)"],
+        correct: "C"
+      },
+      {
+        number: "Question 134",
+        text: "Light of incident frequency 2 times the threshold frequency is incident on a photosensitive material. If the incident frequency is made (1/3)^rd and intensity is doubled then the photoelectric current will",
+        options: ["A) increase", "B) decrease", "C) become zero", "D) remain same"],
+        correct: "C"
+      },
+      {
+        number: "Question 135",
+        text: "If the frequency of incident radiation is kept constant and the experiment is repeated by using incident light of different intensities, then stopping potential (V_s)",
+        options: ["A) increases", "B) decreases", "C) remains same", "D) becomes zero"],
+        correct: "C"
+      },
+      {
+        number: "Question 136",
+        text: "In experiment of photoelectric effect, the stopping potential for a given metal is 'V₀' volt, when radiation of wavelength λ₀' is used. If radiation of wavelength '2λ₀' is used for the same metal, then the stopping potential (in volt) will be [e = charge on electron, c = speed of light, h = Planck's constant.]",
+        options: ["A) V₀/2", "B) V₀", "C) 2V₀", "D) (hc/2eλ₀) - (h/2e)"],
+        correct: "D"
+      },
+      {
+        number: "Question 137",
+        text: "How much energy is imparted to an electron so that its de-Broglie wavelength reduces from 10⁻¹⁰ m to 0.5 × 10⁻¹⁰ m? (E = energy of electron)",
+        options: ["A) 2E", "B) 3E", "C) 4E", "D) 5E"],
+        correct: "B"
+      },
+      {
+        number: "Question 138",
+        text: "When light of wavelength 'λ' is incident on photosensitive surface, photons of power 'P' are emitted. The number of photons (n) emitted in 't' second is (h = Planck's constant, c = velocity of light in vacuum)",
+        options: ["A) Pλt/hc", "B) Pλ/hct", "C) Pct/hλ", "D) Phc/λt"],
+        correct: "A"
+      },
+      {
+        number: "Question 139",
+        text: "Out of the following graphs, which graph shows the correct variation of maximum kinetic energy (E) of photo electron with intensity of incident radiation (I)?",
+        options: ["A) E ∝ I", "B) E independent of I", "C) E ∝ 1/I", "D) E ∝ I²"],
+        correct: "B"
+      },
+      {
+        number: "Question 140",
+        text: "Using Einstein's photoelectric equation, the graph between the K.E.(E) of photoelectrons emitted and the frequency of incident radiation (v) is shown correctly in figure",
+        options: ["A) Straight line with positive slope", "B) Straight line with negative slope", "C) Parabola", "D) Hyperbola"],
+        correct: "A"
+      },
+      {
+        number: "Question 141",
+        text: "An electron and photon are accelerated through the same potential difference. The ratio of the de-Broglie wavelength λ_p to λ_e is [m_e = mass of electron, m_p = mass of proton]",
+        options: ["A) √(m_e/m_p)", "B) √(m_p/m_e)", "C) m_e/m_p", "D) m_p/m_e"],
+        correct: "B"
+      },
+      {
+        number: "Question 142",
+        text: "A metal surface having work function 'w₀' emits photoelectrons when photons of energy 'E' are incident on it. The electron enters the uniform magnetic field (B) in perpendicular direction and moves in circular path of radius 'r'. Then 'r' is equal to (m and e be the mass and charge of electron respectively).",
+        options: ["A) √(2m(E - w₀))/eB", "B) √(2m(E - w₀))/B", "C) √(2mE)/eB", "D) √(2mw₀)/eB"],
+        correct: "A"
+      },
+      {
+        number: "Question 143",
+        text: "If the potential difference used to accelerate electrons is doubled, by what factor does the de-Broglie wavelength associated with the electrons change?",
+        options: ["A) √2", "B) 1/√2", "C) 2", "D) 1/2"],
+        correct: "B"
+      },
+      {
+        number: "Question 144",
+        text: "Photons of wavelength λ' are incident on the cathode of a photocell. Electrons are emitted from the cathode surface. The de-Broglie wavelength of the emitted electrons is (work function is negligible) (c = velocity of light, h = Planck's constant, m = mass of electron)",
+        options: ["A) λ", "B) λ/2", "C) h/√(2mhc/λ)", "D) h/√(mhc/λ)"],
+        correct: "C"
+      },
+      {
+        number: "Question 145",
+        text: "Threshold frequency for a metal is 15 × 10¹⁴ Hz. The light of wavelength 6000 Å falls on the metal surface. Which one of the following statements is correct? [velocity of light, c = 3 × 10⁸ m/s]",
+        options: ["A) photoelectrons come out with velocity 3 × 10⁶ m/s", "B) photoelectrons are emitted with velocity c", "C) photoelectrons will not be emitted", "D) photoelectrons come out with zero velocity"],
+        correct: "C"
+      },
+      {
+        number: "Question 146",
+        text: "If the kinetic energy of a particle is increased to 16 times its previous value, the percentage change in the de-Broglie wavelength of the particle is",
+        options: ["A) 25%", "B) 50%", "C) 75%", "D) 100%"],
+        correct: "C"
+      },
+      {
+        number: "Question 147",
+        text: "If the frequency of incident light falling on a metallic surface is doubled, maximum kinetic energy of emitted photoelectrons",
+        options: ["A) more than doubles", "B) less than doubles", "C) doubles", "D) remains same"],
+        correct: "A"
+      },
+      {
+        number: "Question 148",
+        text: "The maximum velocity of the photoelectron emitted by the metal surface is 'v'. Charge and mass of the photoelectron is denoted by 'e' and 'm' respectively. The stopping potential in volt is",
+        options: ["A) mv²/e", "B) mv²/2e", "C) mv/e", "D) mv/2e"],
+        correct: "B"
+      },
+      {
+        number: "Question 149",
+        text: "If intensity of incident radiation in a photocell is increased, the stopping potential",
+        options: ["A) first increases and then decreases", "B) remains unchanged", "C) increases", "D) decreases"],
+        correct: "B"
+      },
+      {
+        number: "Question 150",
+        text: "When photons of energy hv fall on metal plate of work function 'W₀', photoelectrons of maximum kinetic energy, 'K' are ejected. If the frequency of the radiation is doubled, the maximum kinetic energy of the ejected photoelectrons will be",
+        options: ["A) K + hv", "B) K + W₀", "C) K + 2hv", "D) K + 2W₀"],
+        correct: "A"
+      },
+      {
+        number: "Question 151",
+        text: "The maximum velocity of the photoelectron emitted by the metal surface is 'V'. Charge and mass of the photoelectron is denoted by 'e' and 'm' respectively. The stopping potential in volt is",
+        options: ["A) mV²/e", "B) mV²/2e", "C) mV/e", "D) mV/2e"],
+        correct: "B"
+      },
+      {
+        number: "Question 152",
+        text: "A metal surface is illuminated by light of given intensity and frequency to cause photoemission. If the intensity of illumination is reduced to one fourth of its original value then the maximum KE of the emitted photoelectrons would be",
+        options: ["A) Unchanged", "B) Twice the original value", "C) One fourth of the original value", "D) Four times the original value"],
+        correct: "A"
+      },
+      {
+        number: "Question 153",
+        text: "When certain metal surface is illuminated with a light of wavelength λ, the stopping potential is V, when the same surface is illuminated by light of wavelength 2λ, the stopping potential is (V/3). The threshold wavelength for the surface is",
+        options: ["A) 3λ", "B) 4λ", "C) 5λ", "D) 6λ"],
+        correct: "B"
+      },
+      {
+        number: "Question 154",
+        text: "If an electron and a proton have the same de-Broglie wavelength, then the kinetic energy of the electron is",
+        options: ["A) greater than that of proton", "B) less than that of proton", "C) equal to that of proton", "D) zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 155",
+        text: "In a Photoelectric effect experiment, frequency of incident radiation is increased by keeping other factors constant (f > f₀). The stopping potential",
+        options: ["A) decreases", "B) increases", "C) remains same", "D) becomes zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 156",
+        text: "Following graphs show the variation of stopping potential corresponding to the frequency of incident radiation (f) for a given metal. The correct variation is shown in graph (f₀ = Threshold frequency)",
+        options: ["A) Linear with positive slope", "B) Linear with negative slope", "C) Parabolic", "D) Exponential"],
+        correct: "A"
+      },
+      {
+        number: "Question 157",
+        text: "The kinetic energy of an electron having de-Broglie wavelength λ is (h = Planck's constant, m = mass of electron)",
+        options: ["A) h²/(2mλ²)", "B) h²/(mλ²)", "C) 2h²/(mλ²)", "D) h²/(4mλ²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 158",
+        text: "An electron in a hydrogen atom jumps from second Bohr orbit to ground state and the energy difference of the two states is radiated in the form of photons. These are then allowed to fall on a metal surface having a work-function equal to 4.2 eV, then the stopping potential is [Energy of electron in n^th orbit = -13.6/n² eV]",
+        options: ["A) 4.2 V", "B) 6.8 V", "C) 8.8 V", "D) 10.2 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 159",
+        text: "On a photosensitive material, when the frequency of incident radiation is increased by 30%, the kinetic energy of emitted photoelectrons increases from 0.4 eV to 0.9 eV. The work function of the surface is",
+        options: ["A) 1.4 eV", "B) 1.6 eV", "C) 1.8 eV", "D) 2.0 eV"],
+        correct: "B"
+      },
+      {
+        number: "Question 160",
+        text: "According to de-Broglie hypothesis, the wavelength associated with moving electron of mass m is λ. If energy relation and Planck's quantum theory, the wavelength associated with photon is λ'. If energy (E) of electron and photon is same then relation between λ and λ' is",
+        options: ["A) λ = λ'", "B) λ ∝ λ'", "C) λ ∝ 1/λ'", "D) λ ∝ √λ'"],
+        correct: "C"
+      },
+      {
+        number: "Question 161",
+        text: "An electron of mass m has de-Broglie wavelength λ when accelerated through potential difference V. When proton of mass M, is accelerated through potential difference 9V, the de-Broglie wavelength associated with it will be (Assume that wavelength is determined at low voltage)",
+        options: ["A) λ/3", "B) 3λ", "C) λ/9", "D) 9λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 162",
+        text: "Light of wavelength λ which is less than threshold wavelength is incident on a photosensitive material. If incident wavelength is decreased so that emitted photoelectrons are moving with same velocity then stopping potential will",
+        options: ["A) increase", "B) decrease", "C) remain same", "D) become zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 163",
+        text: "When light of wavelength λ is incident on photosensitive surface, the stopping potential is V. When light of wavelength 3λ is incident on same surface, the stopping potential is V/6. Threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "D"
+      },
+      {
+        number: "Question 164",
+        text: "When the kinetic energy of an electron is increased the wavelength of the associated wave will",
+        options: ["A) increase", "B) decrease", "C) remain same", "D) become zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 165",
+        text: "The de-Broglie wavelength of an electron in the ground state of the hydrogen atom is",
+        options: ["A) equal to circumference of first orbit", "B) equal to half the circumference of first orbit", "C) equal to twice the circumference of first orbit", "D) equal to four times the circumference of first orbit"],
+        correct: "A"
+      },
+      {
+        number: "Question 166",
+        text: "In photoelectric effect if the intensity of light is doubled, then maximum kinetic energy of photoelectrons will become",
+        options: ["A) doubled", "B) halved", "C) four times", "D) unchanged"],
+        correct: "D"
+      },
+      {
+        number: "Question 167",
+        text: "Which of the following is not the property of the photons?",
+        options: ["A) They have energy", "B) They have momentum", "C) They have rest mass", "D) They travel with speed of light"],
+        correct: "C"
+      },
+      {
+        number: "Question 168",
+        text: "Which of the following while in motion cannot be deflected by magnetic field?",
+        options: ["A) Alpha particles", "B) Beta particles", "C) Photons", "D) Protons"],
+        correct: "C"
+      },
+      {
+        number: "Question 169",
+        text: "Which one of the following processes depends on gravity?",
+        options: ["A) Photoelectric effect", "B) Thermionic emission", "C) Pair production", "D) Compton effect"],
+        correct: "B"
+      },
+      {
+        number: "Question 170",
+        text: "In bringing an electron towards another electron, the electrostatic potential energy of the system",
+        options: ["A) increases", "B) decreases", "C) remains same", "D) becomes zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 171",
+        text: "If coil is open then L and R become",
+        options: ["A) zero", "B) infinite", "C) L becomes zero, R infinite", "D) L infinite, R zero"],
+        correct: "C"
+      },
+      {
+        number: "Question 172",
+        text: "In a circuit, the current lags behind the voltage by a phase difference of π/2, the circuit will contain which of the following?",
+        options: ["A) Only resistance", "B) Only inductance", "C) Only capacitance", "D) Resistance and inductance"],
+        correct: "B"
+      },
+      {
+        number: "Question 173",
+        text: "When a certain metal surface is illuminated with a light of wavelength λ, the stopping potential is V, when the same surface is illuminated by light of wavelength 2λ, the stopping potential is (V/3). The threshold wavelength for the surface is",
+        options: ["A) 3λ", "B) 4λ", "C) 5λ", "D) 6λ"],
+        correct: "B"
+      },
+      {
+        number: "Question 174",
+        text: "If an electron and a proton have the same de-Broglie wavelength, then the kinetic energy of the electron is",
+        options: ["A) greater than that of proton", "B) less than that of proton", "C) equal to that of proton", "D) zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 175",
+        text: "In a Photoelectric effect experiment, frequency of incident radiation is increased by keeping other factors constant (f > f₀). The stopping potential",
+        options: ["A) decreases", "B) increases", "C) remains same", "D) becomes zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 176",
+        text: "Following graphs show the variation of stopping potential corresponding to the frequency of incident radiation (f) for a given metal. The correct variation is shown in graph (f₀ = Threshold frequency)",
+        options: ["A) Linear with positive slope", "B) Linear with negative slope", "C) Parabolic", "D) Exponential"],
+        correct: "A"
+      },
+      {
+        number: "Question 177",
+        text: "The kinetic energy of an electron having de-Broglie wavelength λ is (h = Planck's constant, m = mass of electron)",
+        options: ["A) h²/(2mλ²)", "B) h²/(mλ²)", "C) 2h²/(mλ²)", "D) h²/(4mλ²)"],
+        correct: "A"
+      },
+      {
+        number: "Question 178",
+        text: "An electron in a hydrogen atom jumps from second Bohr orbit to ground state and the energy difference of the two states is radiated in the form of photons. These are then allowed to fall on a metal surface having a work-function equal to 4.2 eV, then the stopping potential is [Energy of electron in n^th orbit = -13.6/n² eV]",
+        options: ["A) 4.2 V", "B) 6.8 V", "C) 8.8 V", "D) 10.2 V"],
+        correct: "C"
+      },
+      {
+        number: "Question 179",
+        text: "On a photosensitive material, when the frequency of incident radiation is increased by 30%, the kinetic energy of emitted photoelectrons increases from 0.4 eV to 0.9 eV. The work function of the surface is",
+        options: ["A) 1.4 eV", "B) 1.6 eV", "C) 1.8 eV", "D) 2.0 eV"],
+        correct: "B"
+      },
+      {
+        number: "Question 180",
+        text: "According to de-Broglie hypothesis, the wavelength associated with moving electron of mass m is λ. If energy relation and Planck's quantum theory, the wavelength associated with photon is λ'. If energy (E) of electron and photon is same then relation between λ and λ' is",
+        options: ["A) λ = λ'", "B) λ ∝ λ'", "C) λ ∝ 1/λ'", "D) λ ∝ √λ'"],
+        correct: "C"
+      },
+      {
+        number: "Question 181",
+        text: "An electron of mass m has de-Broglie wavelength λ when accelerated through potential difference V. When proton of mass M, is accelerated through potential difference 9V, the de-Broglie wavelength associated with it will be (Assume that wavelength is determined at low voltage)",
+        options: ["A) λ/3", "B) 3λ", "C) λ/9", "D) 9λ"],
+        correct: "A"
+      },
+      {
+        number: "Question 182",
+        text: "Light of wavelength λ which is less than threshold wavelength is incident on a photosensitive material. If incident wavelength is decreased so that emitted photoelectrons are moving with same velocity then stopping potential will",
+        options: ["A) increase", "B) decrease", "C) remain same", "D) become zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 183",
+        text: "When light of wavelength λ is incident on photosensitive surface, the stopping potential is V. When light of wavelength 3λ is incident on same surface, the stopping potential is V/6. Threshold wavelength for the surface is",
+        options: ["A) 2λ", "B) 3λ", "C) 4λ", "D) 5λ"],
+        correct: "D"
+      },
+      {
+        number: "Question 184",
+        text: "When the kinetic energy of an electron is increased the wavelength of the associated wave will",
+        options: ["A) increase", "B) decrease", "C) remain same", "D) become zero"],
+        correct: "B"
+      },
+      {
+        number: "Question 185",
+        text: "The de-Broglie wavelength of an electron in the ground state of the hydrogen atom is",
+        options: ["A) equal to circumference of first orbit", "B) equal to half the circumference of first orbit", "C) equal to twice the circumference of first orbit", "D) equal to four times the circumference of first orbit"],
+        correct: "A"
+      },
+      {
+        number: "Question 186",
+        text: "In photoelectric effect if the intensity of light is doubled, then maximum kinetic energy of photoelectrons will become",
+        options: ["A) doubled", "B) halved", "C) four times", "D) unchanged"],
+        correct: "D"
+      },
+      {
+        number: "Question 187",
+        text: "Which of the following is not the property of the photons?",
+        options: ["A) They have energy", "B) They have momentum", "C) They have rest mass", "D) They travel with speed of light"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      
+      // Generate test name with timestamp
+      const now = new Date();
+      const testName = `MHT-CET Test ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      // Create result object
+      const resultData = {
+        testName: testName,
+        total: questions.length,
+        correct: correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        timestamp: now.toISOString(),
+        details: results
+      };
+
+      // Save to localStorage
+      try {
+        // Get existing scores or initialize empty array
+        let scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+        
+        // Add new score
+        scores.push(resultData);
+        
+        // Save back to localStorage
+        localStorage.setItem("quizScores", JSON.stringify(scores));
+        
+        // Also save the current result for the result page
+        localStorage.setItem("quizResults", JSON.stringify(resultData));
+        
+        // Show save notification
+        showNotification();
+        
+        // Redirect to results page after a short delay
+        setTimeout(() => {
+          window.location.href = "MCCW-PRC27.html";
+        }, 1500);
+      } catch (e) {
+        console.error("Error saving results:", e);
+        alert("Error saving results. Please try again.");
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "flex";
+    }
+
+    function hideNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "none";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

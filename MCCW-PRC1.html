@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Result Summary</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    .header {
+      background: #1e3a8a;
+      color: white;
+      padding: 15px;
+      border-radius: 8px 8px 0 0;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .score-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .score-box {
+      background: #fef3c7;
+      color: #b45309;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .chart-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    .pie-chart {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      position: relative;
+      background: #d1d5db;
+    }
+    .pie-chart::after {
+      content: '';
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      width: 50%;
+      height: 50%;
+      background: white;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    .chart-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .chart-labels .correct-label {
+      background: #10b981;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .chart-labels .wrong-label {
+      background: #ef4444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .stat-box {
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .stat-box.attempted { 
+      border-left: 4px solid #8b5cf6; 
+      background: #ede9fe; 
+      color: #4c1d95; 
+    }
+    .stat-box.unattempted { 
+      border-left: 4px solid #6366f1; 
+      background: #eef2ff; 
+      color: #3730a3; 
+    }
+    .stat-box.accuracy { 
+      border-left: 4px solid #f59e0b; 
+      background: #fef3c7; 
+      color: #92400e; 
+    }
+    .stat-box.time { 
+      border-left: 4px solid #0ea5e9; 
+      background: #e0f2fe; 
+      color: #075985; 
+    }
+    .stat-box.negative { 
+      border-left: 4px solid #dc2626; 
+      background: #fee2e2; 
+      color: #991b1b; 
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .grid button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .grid button:hover {
+      transform: scale(1.1);
+    }
+    .correct {
+      background: #10b981;
+      color: white;
+    }
+    .wrong {
+      background: #ef4444;
+      color: white;
+      border: 2px solid #dc2626;
+      font-weight: 700;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    .unattempted {
+      background: #d1d5db;
+      color: #333;
+    }
+    
+    /* Question Detail Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .close-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    
+    .close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+    
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .question-section {
+      margin-bottom: 25px;
+    }
+    
+    .question-text {
+      font-size: 17px;
+      line-height: 1.6;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border-left: 5px solid #3b82f6;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .question-text .question-number {
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-right: 8px;
+    }
+    
+    .options-section {
+      margin-bottom: 25px;
+    }
+    
+    .options-section h4 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .options-section h4:before {
+      content: '📋';
+      font-size: 14px;
+    }
+    
+    .option {
+      padding: 14px 16px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 4px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .option.correct-answer {
+      background: linear-gradient(to right, #d1fae5, #ecfdf5);
+      border-left: 4px solid #10b981;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+    }
+    
+    .option.user-answer-correct {
+      background: linear-gradient(to right, #d1fae5, #ecfdf5);
+      border-left: 4px solid #10b981;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+    }
+    
+    .option.user-answer-wrong {
+      background: linear-gradient(to right, #fee2e2, #fef2f2);
+      border-left: 4px solid #ef4444;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
+    }
+    
+    .option.neutral {
+      background: #f8fafc;
+      border-left: 4px solid #94a3b8;
+    }
+    
+    .option-indicator {
+      font-weight: bold;
+      color: #475569;
+      min-width: 24px;
+      font-size: 15px;
+    }
+    
+    .option-content {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    .answer-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+      margin-top: 2px;
+    }
+    
+    .answer-tag.correct {
+      background: #10b981;
+      color: white;
+    }
+    
+    .answer-tag.wrong {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .answer-tag.unattempted {
+      background: #6b7280;
+      color: white;
+    }
+    
+    .solution-section {
+      background: linear-gradient(to right, #fef3c7, #fef9c3);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 5px solid #f59e0b;
+      margin-top: 25px;
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.15);
+    }
+    
+    .solution-section h4 {
+      color: #92400e;
+      margin-bottom: 15px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .solution-section h4:before {
+      content: '💡';
+      font-size: 14px;
+    }
+    
+    .solution-content {
+      color: #78350f;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    
+    .solution-content p {
+      margin: 10px 0;
+    }
+    
+    .solution-content strong {
+      color: #92400e;
+    }
+    
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #e2e8f0;
+    }
+    
+    .nav-btn {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-btn:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .nav-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .question-status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+      background: #3b82f6;
+      color: white;
+    }
+    
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      
+      .modal-content {
+        width: 95%;
+        max-height: 90vh;
+      }
+      
+      .modal-body {
+        padding: 16px;
+      }
+      
+      .question-text {
+        font-size: 16px;
+        padding: 12px;
+      }
+      
+      .option {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header" id="testHeader">MHT–CET Physics Test</div>
+    <div class="card">
+      <p><strong>Test taken on:</strong> <span id="testTimestamp"></span></p>
+      <div class="score-section">
+        <div class="score-box" id="scoreBox">0 / 0</div>
+        <div class="chart-wrapper">
+          <div class="pie-chart" id="pieChart"></div>
+          <div class="chart-labels">
+            <div class="correct-label" id="correctLabel">Correct: 0</div>
+            <div class="wrong-label" id="wrongLabel">Wrong: 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box attempted" id="attemptedBox">Attempted<br>0 / 0</div>
+        <div class="stat-box unattempted" id="unattemptedBox">Unattempted<br>0</div>
+        <div class="stat-box accuracy" id="accuracyBox">Accuracy<br>0%</div>
+        <div class="stat-box time" id="timeBox">Time<br>00:00</div>
+        <div class="stat-box negative" id="negativeBox">Negative Marks<br>0.0 / 0.0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Question Grid - Click any question to view details and solution</h3>
+      <div class="grid" id="questionGrid"></div>
+    </div>
+  </div>
+
+  <!-- Question Detail Modal -->
+  <div class="modal-overlay" id="questionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          Question <span id="modalQuestionNumber">1</span>
+          <span id="modalQuestionStatus" class="question-status"></span>
+        </h3>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="question-section">
+          <div class="question-text" id="modalQuestionText"></div>
+        </div>
+        
+        <div class="options-section">
+          <h4>Options</h4>
+          <div id="modalOptions"></div>
+        </div>
+        
+        <div class="solution-section" id="solutionSection">
+          <h4>Solution & Explanation</h4>
+          <div class="solution-content" id="solutionContent"></div>
+        </div>
+        
+        <div class="navigation-buttons">
+          <button class="nav-btn" id="prevQuestionBtn" onclick="navigateQuestion(-1)">
+            <span>←</span> Previous Question
+          </button>
+          <button class="nav-btn" id="nextQuestionBtn" onclick="navigateQuestion(1)">
+            Next Question <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let resultData = null;
+    let currentModalQuestionIndex = 0;
+    let resultSaved = false;
+    let originalQuestions = [];
+    
+    // Solutions database
+    const solutionsDatabase = {
+      1: "Density = Mass/Volume. For a cube, Volume = L³. Error in density = error in mass + 3 × error in length = 3% + 3×3% = 12%. But since density = M/L³, % error = %ΔM + 3×%ΔL = 3 + 3×3 = 12%. Wait, correction: For a rectangular object, density ρ = m/V = m/L³. % error in ρ = %Δm + 3×%ΔL = 3 + 3×3 = 12%.",
+      
+      2: "Pressure = Force/Area = F/L². % error in pressure = %ΔF + 2×%ΔL = 3% + 2×2% = 3% + 4% = 7%.",
+      
+      3: "Density = Mass/Volume = m/(πr²l). % error in density = %Δm + 2×%Δr + %Δl = (0.003/0.3)×100 + 2×(0.005/0.5)×100 + (0.06/6)×100 = 1% + 2×1% + 1% = 4%. Maximum % error = 4%.",
+      
+      4: "Pressure = Force/Area = F/L². % error in pressure = %ΔF + 2×%ΔL = 4% + 2×2% = 4% + 4% = 8%.",
+      
+      5: "Random errors are unpredictable fluctuations that occur due to uncontrollable factors. Option D describes fluctuations in electric power supply which are random in nature.",
+      
+      6: "Kinetic Energy = ½mv². % error in KE = %Δm + 2×%Δv = 3% + 2×4% = 3% + 8% = 11%.",
+      
+      7: "T = 2π√(l/g) ⇒ g = 4π²l/T². %Δg = %Δl + 2×%ΔT. %Δl = (0.1/100)×100 = 0.1%. For time, T = total time/n. %ΔT = (0.1/200)×100 = 0.05%. So %Δg = 0.1% + 2×0.05% = 0.2%.",
+      
+      8: "Volume of sphere V = (4/3)πr³. % error in volume = 3×% error in radius = 3×2% = 6%.",
+      
+      9: "A = B^a C^b / D E^r. %ΔA = a×%ΔB + b×%ΔC + %ΔD + r×%ΔE. So maximum error = (ab + Bc + yd + de)%.",
+      
+      10: "Density = Mass/Volume = m/L³. % error = %Δm + 3×%ΔL = 5% + 3×6% = 5% + 18% = 23%.",
+      
+      11: "Mean time = (30+32+35+35)/4 = 33 s. Max deviation = |33-30| = 3 s. So mean time = (33±3) s.",
+      
+      12: "L/R has dimensions of time. L (inductance) = [ML²T⁻²A⁻²], R (resistance) = [ML²T⁻³A⁻²]. So L/R = [T] which is seconds.",
+      
+      13: "Rise = (82.3 - 38.6) = 43.7°C. Error = √(0.2² + 0.3²) = √(0.04+0.09) = √0.13 ≈ 0.36 ≈ 0.4°C. So (43.7±0.5)°C.",
+      
+      14: "P = x³y/z². %ΔP = 3×%Δx + %Δy + 2×%Δz = 3×0.6 + 3 + 2×1.3 = 1.8 + 3 + 2.6 = 7.4%.",
+      
+      15: "x = πR²(P²−Q²)/2. All terms P, Q, R are lengths. So R² has dimension L², (P²−Q²) has dimension L². So overall dimension = L⁴ which is volume.",
+      
+      16: "Stefan's constant σ = [MT⁻³K⁻⁴]. Wien's constant b = [LK]. So σb = [MT⁻³K⁻⁴][LK] = [L¹M¹T⁻³K⁻³].",
+      
+      17: "Argument of sin and cos must be dimensionless. So Ct must be dimensionless ⇒ C has dimension T⁻¹. Dx must be dimensionless ⇒ D has dimension L⁻¹. Angular velocity has dimension T⁻¹.",
+      
+      18: "Torque = Force × distance = [MLT⁻²][L] = [ML²T⁻²].",
+      
+      19: "Planck's constant h = [ML²T⁻¹]. Moment of inertia I = [ML²]. So h/I = [ML²T⁻¹]/[ML²] = [T⁻¹] which is frequency.",
+      
+      20: "Inductance L = [ML²T⁻²I⁻²]. Mutual inductance has same dimensions.",
+      
+      21: "F = Vd ⇒ V = F/d. Dimensions: F = [MLT⁻²], d = [ML⁻³]. So V = [MLT⁻²]/[ML⁻³] = [L⁴T⁻²].",
+      
+      22: "Gyromagnetic ratio = magnetic moment/angular momentum = [L²I]/[ML²T⁻¹] = [M⁻¹T⁻¹I]. But checking: Actually gyromagnetic ratio for electron = e/2m, dimensions = [TI⁻¹]/[M] = [M⁻¹TI⁻¹]. Wait standard: γ = [L¹M⁰T⁻¹I¹] or [L⁻¹M⁰T¹I¹]. Given option D matches."
+    };
+
+    // Original questions from the quiz page - formatted with "Q.1)" at the beginning
+    const originalQuestionsData = [
+      {
+        number: "Q.1)",
+        text: "The error in the measurement of length and mass is 3% and 4% respectively. The error in the measurement of density will be",
+        options: ["6%", "13%", "9%", "15%"],
+        correct: "C"
+      },
+      {
+        number: "Q.2)",
+        text: "A force F is applied on a square plate of side L. If the percentage error in determining F is 3% and that in L is 2%, then the percentage error in determining the pressure is",
+        options: ["7%", "5%", "3%", "2%"],
+        correct: "A"
+      },
+      {
+        number: "Q.3)",
+        text: "A wire has a mass 0.3 ± 0.003 gram, radius 0.5 ± 0.005 mm and length 6 ± 0.06 cm. The maximum percentage error in the measurement of its density is",
+        options: ["2%", "5%", "4%", "3%"],
+        correct: "B"
+      },
+      {
+        number: "Q.4)",
+        text: "The pressure on a square plate is measured by measuring the force acting on the plate and length of the sides of the plate. The maximum error in the measurement of force and length are respectively 4% and 2%, the percentage error in the measurement of pressure is",
+        options: ["1%", "2%", "6%", "8%"],
+        correct: "C"
+      },
+      {
+        number: "Q.5)",
+        text: "Which of the following comes under the category of random errors?",
+        options: [
+          "Improper calibration of thermometer",
+          "Zero error of 1u V in voltmeter",
+          "Student measures 22°, where as the correct angle is 20°",
+          "Errors resulting from the fluctuations in electric power supply"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Q.6)",
+        text: "The percentage error in the measurement of mass and speed of a particular body is 3% and 4% respectively. The percentage error in the measurement of kinetic energy is",
+        options: ["9%", "10%", "11%", "12%"],
+        correct: "C"
+      },
+      {
+        number: "Q.7)",
+        text: "The period of oscillating simple pendulum is T = 2π√(l/g) where length 'l' is 100 cm with error 1 mm. Period is 2 second. The time of 100 oscillations is measured by a stopwatch of least count 0.1s. The percentage error in gravitational acceleration 'g' is",
+        options: ["0.2%", "0.1%", "1%", "2%"],
+        correct: "A"
+      },
+      {
+        number: "Q.8)",
+        text: "Error in the measurement of radius of the sphere is 2%. The error in the calculated value of its volume is",
+        options: ["3%", "2%", "6%", "9%"],
+        correct: "D"
+      },
+      {
+        number: "Q.9)",
+        text: "A physical quantity A can be determined by measuring parameters B, C, D and E using the relation A = B^a * C^b / D * E^r. If the maximum errors in the measurement are b%, c%, d% and e% then maximum error in the value of A is",
+        options: [
+          "(ab + Bc - yd - de)%",
+          "(b + c - d - e)%",
+          "(ab + Bc + yd + de)%",
+          "(b + c + d + e)%"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Q.10)",
+        text: "The density of a cube is measured by measuring its mass and length of its sides. The % error in the measurement of mass and length are 5% and 6% respectively. The percentage error in the measurement of density is",
+        options: ["21%", "23%", "25%", "27%"],
+        correct: "C"
+      },
+      {
+        number: "Q.11)",
+        text: "A student measures time for 20 oscillations of a simple pendulum as 30 s, 32 s, 35 s and 35 s. If the minimum division in the measuring clock is 1 s, then correct mean time (in second) is",
+        options: ["(33±2)", "(32±3)", "(33±3)", "(32±2)"],
+        correct: "C"
+      },
+      {
+        number: "Q.12)",
+        text: "If L is the inductance and R is the resistance then the SI unit of L/R is",
+        options: ["second", "volt", "ampere", "per second"],
+        correct: "A"
+      },
+      {
+        number: "Q.13)",
+        text: "The initial and final temperatures of water as recorded by an observer are (38.6 ± 0.2)°C and (82.3 ± 0.3)°C. The rise in temperature with proper error limits is",
+        options: ["(43.7 ± 0.2)°C", "(43.7 ± 0.3)°C", "(43.7 ± 0.1)°C", "(43.7 ± 0.5)°C"],
+        correct: "D"
+      },
+      {
+        number: "Q.14)",
+        text: "The formula for the physical quantity is P = x³y/z² and the percentage error in x, y, z are 0.6%, 3% and 1.3% respectively. The percentage error in P is",
+        options: ["2.2%", "4.9%", "5.3%", "7.4%"],
+        correct: "C"
+      },
+      {
+        number: "Q.15)",
+        text: "Let x = (πR²(P² − Q²))/2, where P, Q and R are lengths. The physical quantity x is",
+        options: ["area", "length", "volume", "velocity"],
+        correct: "C"
+      },
+      {
+        number: "Q.16)",
+        text: "Let σ and b be Stefan's constant and Wien's constant respectively, then dimensions of σb are",
+        options: ["L¹M⁻¹T⁻³K⁻³", "L¹M¹T³K⁻³", "L⁻¹M¹T³K³", "L¹M¹T⁻³K⁻³"],
+        correct: "A"
+      },
+      {
+        number: "Q.17)",
+        text: "Let force F = A sin(Ct) + B cos(Dx), where x and t are displacement and time respectively. The dimensions of C are same as dimensions of",
+        options: ["angular velocity", "velocity", "angular momentum", "velocity gradient"],
+        correct: "A"
+      },
+      {
+        number: "Q.18)",
+        text: "L²M¹T⁻² are the dimensions of",
+        options: ["torque", "force", "angular acceleration", "angular momentum"],
+        correct: "A"
+      },
+      {
+        number: "Q.19)",
+        text: "The ratio of the dimensions of Planck's constant to that of moment of inertia is the dimensions of",
+        options: ["angular momentum", "velocity", "frequency", "time"],
+        correct: "C"
+      },
+      {
+        number: "Q.20)",
+        text: "The dimensions of self or mutual inductance are given as",
+        options: ["L²M¹T⁻²I⁻²", "L²M²T⁻²I⁻²", "L¹M¹T⁻²I⁻²", "L²M²T⁻²I⁻²"],
+        correct: "C"
+      },
+      {
+        number: "Q.21)",
+        text: "The force F acting on a body of density d are related by the relation F = Vd. The dimensions of V are",
+        options: ["L⁻¹M²T²", "L⁻¹MT⁻²", "L⁻¹M¹T⁻²", "L¹M¹T²"],
+        correct: "C"
+      },
+      {
+        number: "Q.22)",
+        text: "Dimensions of Gyromagnetic ratio are",
+        options: ["L¹M⁰T¹I¹", "L⁰M⁻¹T¹I¹", "L¹M⁰T⁰I⁻¹", "L⁻¹M⁰T¹I¹"],
+        correct: "D"
+      }
+    ];
+
+    // Timestamp
+    const now = new Date();
+    const options = {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    document.getElementById("testTimestamp").textContent = now.toLocaleString('en-IN', options);
+
+    // Load results from localStorage
+    const data = JSON.parse(localStorage.getItem("quizResults"));
+    if (!data) {
+      document.body.innerHTML = "<h2 style='text-align:center;color:red;'>⚠ No results found. Please attempt the quiz first.</h2>";
+    } else {
+      resultData = data;
+      originalQuestions = originalQuestionsData; // Use the embedded questions data
+      
+      const total = data.total;
+      const correct = data.correct;
+      const wrong = data.details.filter(q => q.userAns !== "Not Answered" && !q.isCorrect).length;
+      const notAnswered = data.details.filter(q => q.userAns === "Not Answered").length;
+      const attempted = total - notAnswered;
+      const accuracy = data.accuracy;
+      const score = correct;
+      const timeTaken = data.time;
+
+      // Update UI
+      document.getElementById("scoreBox").textContent = `${score} / ${total}`;
+      document.getElementById("correctLabel").textContent = `Correct: ${correct}`;
+      document.getElementById("wrongLabel").textContent = `Wrong: ${wrong}`;
+      document.getElementById("attemptedBox").innerHTML = `Attempted<br>${attempted} / ${total}`;
+      document.getElementById("unattemptedBox").innerHTML = `Unattempted<br>${notAnswered}`;
+      document.getElementById("accuracyBox").innerHTML = `Accuracy<br>${accuracy}%`;
+      document.getElementById("timeBox").innerHTML = `Time<br>${timeTaken}`;
+      document.getElementById("negativeBox").innerHTML = `Negative Marks<br>0.0 / ${total.toFixed(1)}`;
+
+      // Pie chart
+      const correctPercent = (correct / total) * 100;
+      const wrongPercent = (wrong / total) * 100;
+      document.getElementById("pieChart").style.background = `conic-gradient(
+        #10b981 0% ${correctPercent}%,
+        #ef4444 ${correctPercent}% ${correctPercent + wrongPercent}%,
+        #d1d5db ${correctPercent + wrongPercent}% 100%
+      )`;
+
+      // Question grid
+      const grid = document.getElementById("questionGrid");
+      data.details.forEach((res, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = i + 1;
+        btn.dataset.index = i;
+        
+        if (res.userAns === "Not Answered") {
+          btn.classList.add("unattempted");
+        } else if (res.isCorrect) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+        
+        // Add click event
+        btn.addEventListener("click", () => {
+          openQuestionModal(i);
+        });
+        
+        grid.appendChild(btn);
+      });
+
+      // Extract chapter name BEFORE saving
+      const chapterName = extractChapterName(data);
+      
+      // Update the header with the chapter name
+      document.getElementById("testHeader").textContent = chapterName;
+      
+      // Save the result only once
+      if (!resultSaved) {
+        saveQuizResult(data, chapterName);
+        resultSaved = true;
+      }
+      
+      // Initialize the modal with first question
+      updateModalContent(0);
+    }
+
+    // Function to open the question modal
+    function openQuestionModal(index) {
+      currentModalQuestionIndex = index;
+      updateModalContent(index);
+      document.getElementById("questionModal").style.display = "flex";
+    }
+
+    // Function to close the modal
+    function closeModal() {
+      document.getElementById("questionModal").style.display = "none";
+    }
+
+    // Function to navigate between questions in the modal
+    function navigateQuestion(direction) {
+      const newIndex = currentModalQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < resultData.details.length) {
+        currentModalQuestionIndex = newIndex;
+        updateModalContent(newIndex);
+      }
+    }
+
+    // Function to update modal content
+    function updateModalContent(index) {
+      if (!resultData || !resultData.details) return;
+      
+      const questionDetail = resultData.details[index];
+      const questionNumber = index + 1;
+      
+      // Update modal header
+      document.getElementById("modalQuestionNumber").textContent = questionNumber;
+      
+      const statusElement = document.getElementById("modalQuestionStatus");
+      if (questionDetail.userAns === "Not Answered") {
+        statusElement.textContent = "Unattempted";
+        statusElement.style.background = "#6b7280";
+      } else if (questionDetail.isCorrect) {
+        statusElement.textContent = "Correct";
+        statusElement.style.background = "#10b981";
+      } else {
+        statusElement.textContent = "Incorrect";
+        statusElement.style.background = "#ef4444";
+      }
+      
+      // Get original question data
+      const originalQuestion = originalQuestions[index];
+      
+      // Update question text with formatted number
+      const questionTextElement = document.getElementById("modalQuestionText");
+      if (originalQuestion) {
+        // Display with formatted question number: "Q.1) The error in the measurement..."
+        questionTextElement.innerHTML = `
+          <span class="question-number">${originalQuestion.number}</span>
+          ${originalQuestion.text}
+        `;
+      } else {
+        // Fallback if no original question data
+        questionTextElement.innerHTML = `
+          <span class="question-number">Q.${questionNumber})</span>
+          Question ${questionNumber}
+        `;
+      }
+      
+      // Update options
+      const optionsContainer = document.getElementById("modalOptions");
+      optionsContainer.innerHTML = '';
+      
+      const options = originalQuestion ? originalQuestion.options : ['Option A', 'Option B', 'Option C', 'Option D'];
+      const correctAnswer = originalQuestion ? originalQuestion.correct : questionDetail.correctAns;
+      const userAnswer = questionDetail.userAns;
+      
+      options.forEach((optionText, optionIndex) => {
+        const optionLetter = String.fromCharCode(65 + optionIndex);
+        const optionDiv = document.createElement("div");
+        
+        // Determine classes
+        let optionClass = "option";
+        let tagText = "";
+        let tagClass = "";
+        
+        if (optionLetter === correctAnswer) {
+          optionClass += " correct-answer";
+          if (optionLetter === userAnswer) {
+            tagText = "Your Answer (Correct)";
+            tagClass = "correct";
+            optionClass += " user-answer-correct";
+          } else {
+            tagText = "Correct Answer";
+            tagClass = "correct";
+          }
+        } else if (optionLetter === userAnswer) {
+          optionClass += " user-answer-wrong";
+          tagText = "Your Answer (Wrong)";
+          tagClass = "wrong";
+        } else {
+          optionClass += " neutral";
+        }
+        
+        optionDiv.className = optionClass;
+        
+        optionDiv.innerHTML = `
+          <div class="option-indicator">${optionLetter}.</div>
+          <div class="option-content">
+            ${optionText}
+            ${tagText ? `<span class="answer-tag ${tagClass}">${tagText}</span>` : ''}
+          </div>
+        `;
+        
+        optionsContainer.appendChild(optionDiv);
+      });
+      
+      // Update solution
+      const solutionContent = document.getElementById("solutionContent");
+      const solution = solutionsDatabase[questionNumber] || 
+        `Solution for question ${questionNumber} will be available soon.`;
+      
+      const userAnswerText = userAnswer === "Not Answered" ? 
+        "Not Attempted" : 
+        `${userAnswer}) ${options[userAnswer.charCodeAt(0) - 65]}`;
+      
+      const correctAnswerText = `${correctAnswer}) ${options[correctAnswer.charCodeAt(0) - 65]}`;
+      
+      solutionContent.innerHTML = `
+        <p><strong>Correct Answer:</strong> ${correctAnswerText}</p>
+        <p><strong>Your Answer:</strong> ${userAnswerText}</p>
+        <p><strong>Explanation:</strong></p>
+        <p>${solution}</p>
+        <p><strong>Formula/Concept:</strong> ${getConceptForQuestion(questionNumber)}</p>
+      `;
+      
+      // Update navigation buttons state
+      document.getElementById("prevQuestionBtn").disabled = index === 0;
+      document.getElementById("nextQuestionBtn").disabled = index === resultData.details.length - 1;
+    }
+
+    // Function to get concept for question
+    function getConceptForQuestion(questionNumber) {
+      const concepts = {
+        1: "Error Analysis: % error in derived quantities",
+        2: "Pressure and Error Propagation",
+        3: "Density Calculation with Errors",
+        4: "Pressure Measurement Errors",
+        5: "Types of Errors in Measurement",
+        6: "Kinetic Energy Error Calculation",
+        7: "Simple Pendulum and Error Analysis",
+        8: "Volume Error in Sphere",
+        9: "General Error Propagation Formula",
+        10: "Density Error for Cube",
+        11: "Mean Value with Errors",
+        12: "Dimensions of Physical Quantities",
+        13: "Error in Difference of Measurements",
+        14: "Complex Error Propagation",
+        15: "Dimensional Analysis",
+        16: "Dimensions of Constants",
+        17: "Dimensions in Trigonometric Functions",
+        18: "Dimensions of Torque",
+        19: "Ratio of Dimensions",
+        20: "Dimensions of Inductance",
+        21: "Dimensional Analysis from Formula",
+        22: "Dimensions of Gyromagnetic Ratio"
+      };
+      return concepts[questionNumber] || "Physics Concept";
+    }
+
+    // Function to save quiz result with unique ID and chapter name
+    function saveQuizResult(resultData, chapterName) {
+      // Generate a unique ID for this test result
+      const testId = 'mhtcet_test_' + Date.now();
+      
+      // Add metadata to the result
+      const resultToSave = {
+        ...resultData,
+        id: testId,
+        timestamp: new Date().toISOString(),
+        subject: 'physics',
+        title: chapterName,
+        chapter: chapterName
+      };
+      
+      // Save to localStorage with unique ID
+      localStorage.setItem(testId, JSON.stringify(resultToSave));
+      
+      // Also update the list of all test IDs
+      let allTests = JSON.parse(localStorage.getItem("allQuizTests")) || [];
+      if (!allTests.includes(testId)) {
+        allTests.push(testId);
+        localStorage.setItem("allQuizTests", JSON.stringify(allTests));
+      }
+      
+      console.log("Result saved with ID:", testId, "Chapter:", chapterName);
+      
+      // Clean up the temporary quizResults
+      localStorage.removeItem("quizResults");
+    }
+
+    // Function to extract chapter name from quiz data
+    function extractChapterName(resultData) {
+      // Priority 1: Direct chapter data from quiz
+      if (resultData.chapter) {
+        return resultData.chapter;
+      }
+      
+      // Priority 2: URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const chapterFromUrl = urlParams.get('chapter');
+      if (chapterFromUrl) {
+        return decodeURIComponent(chapterFromUrl);
+      }
+      
+      // Priority 3: localStorage for current chapter
+      const currentChapter = localStorage.getItem("currentChapter");
+      if (currentChapter) {
+        return currentChapter;
+      }
+      
+      // Priority 4: Check if there's a specific title in quiz data
+      if (resultData.title && resultData.title !== "MHT-CET Quiz") {
+        return resultData.title;
+      }
+      
+      // Priority 5: Extract from question data if available
+      if (resultData.details && resultData.details.length > 0) {
+        const firstQuestion = resultData.details[0];
+        if (firstQuestion.chapter) {
+          return firstQuestion.chapter;
+        }
+      }
+      
+      // Priority 6: Check referrer
+      if (document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer);
+          const referrerParams = new URLSearchParams(referrerUrl.search);
+          const chapterFromReferrer = referrerParams.get('chapter');
+          if (chapterFromReferrer) {
+            return decodeURIComponent(chapterFromReferrer);
+          }
+        } catch (e) {
+          console.log("Could not parse referrer URL");
+        }
+      }
+      
+      // Final fallback - use session storage or default
+      const sessionChapter = sessionStorage.getItem("quizChapter");
+      if (sessionChapter) {
+        return sessionChapter;
+      }
+      
+      return "Physics Chapter Test";
+    }
+
+    // Close modal when clicking outside
+    document.getElementById("questionModal").addEventListener("click", function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    });
+
+    // Keyboard navigation for questions
+    document.addEventListener("keydown", function(e) {
+      if (document.getElementById("questionModal").style.display === "flex") {
+        if (e.key === "ArrowLeft") {
+          navigateQuestion(-1);
+        } else if (e.key === "ArrowRight") {
+          navigateQuestion(1);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

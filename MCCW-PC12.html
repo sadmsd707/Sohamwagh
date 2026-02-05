@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+      line-height: 1.5;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+    }
+    .question-item {
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Save notification */
+    .save-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #3b82f6;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Thermal Properties of Matter</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions (1-169)</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <!-- Save notification -->
+  <div class="save-notification" id="saveNotification">
+    <span>Results saved successfully!</span>
+    <button onclick="hideNotification()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+
+  <script>
+    // Compressed questions data - all 169 questions
+    const questionData = [
+      {q: "A black body has maximum wavelength 'λₘ' at temperature 2000 K. Its maximum wavelength at 3000 K will be", o: ["(2/3)λₘ", "(3/2)λₘ", "(4/9)λₘ", "(9/4)λₘ"], c: "A"},
+      {q: "The outer surface of star in the form of a sphere radiates heat as a black body at temperature 'T'. The total radiant energy per unit area, normal to the direction of incidence, received at a distance 'R' from the centre of a star of radius 'r' is (R > r) (σ = Stefan's constant)", o: ["σT⁴(r²/R²)", "σT⁴(r/R)", "σT⁴(r⁴/R⁴)", "σT⁴"], c: "A"},
+      {q: "The length of steel rod is 5 cm longer than the copper rod at all temperatures. The length of the steel and copper rod is respectively (Coefficient of linear expansion for steel and copper is respectively 1.1×10⁻⁵/°C and 1.7×10⁻⁵/°C)", o: ["nearly 13 cm and 8 cm", "nearly 12 cm and 7 cm", "nearly 14 cm and 9 cm", "nearly 15 cm and 10 cm"], c: "C"},
+      {q: "A liquid having coefficient of cubical expansion 'γ' is kept in a copper vessel having coefficient of linear expansion 7γ/3. If heat is supplied to the vessel, the original level of the liquid in the vessel will", o: ["rise", "fall", "remain same", "first rise then fall"], c: "B"},
+      {q: "Two spherical black bodies have radii 'r₁' and 'r₂'. Their surface temperatures are 'T₁' and 'T₂'. If they radiate same power, then r₂/r₁ is", o: ["(T₁/T₂)²", "(T₂/T₁)²", "(T₁/T₂)⁴", "(T₂/T₁)⁴"], c: "A"},
+      {q: "A black sphere has radius R whose rate of radiation is E at temperature T. If radius is made R/2 and temperature 3T, the rate of radiation will be", o: ["(9/4)E", "(4/9)E", "(3/2)E", "(2/3)E"], c: "A"},
+      {q: "Two black spheres P & Q have radii in the ratio 4 : 3. The wavelength of maximum intensity of radiation are in the ratio 4 : 5 respectively. The ratio of radiated power by P to Q is", o: ["256 : 225", "225 : 256", "16 : 15", "15 : 16"], c: "A"},
+      {q: "The difference in length between two rods A and B is 60 cm at all temperatures. If α_A = 18 × 10⁻⁶/°C and α_B = 27 × 10⁻⁶/°C, then the length of rod A and rod B at 0°C is respectively", o: ["ℓ_A = 180 cm, ℓ_B = 120 cm", "ℓ_A = 270 cm, ℓ_B = 210 cm", "ℓ_A = 240 cm, ℓ_B = 180 cm", "ℓ_A = 120 cm, ℓ_B = 60 cm"], c: "C"},
+      {q: "The volume of a metal sphere increases by 0.33% when its temperature is raised by 50°C. The coefficient of linear expansion of the metal is", o: ["2.2 × 10⁻⁵/°C", "3.3 × 10⁻⁵/°C", "6.6 × 10⁻⁵/°C", "9.9 × 10⁻⁵/°C"], c: "A"},
+      {q: "A black body emits radiation of maximum intensity at wavelength 'λ' at temperature T K. Its corresponding wavelength at temperature 1.5 T K will be", o: ["(2/3)λ", "(3/2)λ", "(4/9)λ", "(9/4)λ"], c: "A"},
+      {q: "A rectangular black body of temperature 127°C has surface area 4cm×2cm and rate of radiation is E. If its temperature is increased by 400°C and surface area is reduced to half of the initial value then the rate of radiation is", o: ["4E", "8E", "16E", "32E"], c: "C"},
+      {q: "A body cools from 80°C to 50°C in 5 min. In the next time of 't' min, the body continues to cool from 50°C to 30°C. The total time taken by the body to cool from 80°C to 30°C is [The temperature of the surroundings is 20°C]", o: ["10 min", "15 min", "20 min", "25 min"], c: "B"},
+      {q: "A stationary object at 4°C and weighing 3.5 kg falls from a height of 2000 m on snow mountain at 0°C. If the temperature of the object just before hitting the snow is 0°C and the object comes to rest immediately then the quantity of ice that melts is (Acceleration due to gravity = 10 m/s², Latent heat of ice = 3.5 × 10⁵ J/kg)", o: ["0.1 kg", "0.2 kg", "0.3 kg", "0.4 kg"], c: "B"},
+      {q: "Two spherical black bodies have radii 'R₁' and 'R₂'. Their surface temperatures are T₁K and T₂K respectively. If they radiate the same power, the ratio R₁/R₂ is", o: ["(T₂/T₁)²", "(T₁/T₂)²", "(T₂/T₁)⁴", "(T₁/T₂)⁴"], c: "A"},
+      {q: "The two ends of a rod of length 'x' and uniform cross-sectional area 'A' are kept at temperatures 'T₁' and 'T₂' respectively (T₁ > T₂). If the rate of heat transfer is 'Q/t', through the rod in steady state, then the coefficient of thermal conductivity 'K' is", o: ["(Qx)/(At(T₁-T₂))", "(Qt)/(Ax(T₁-T₂))", "(QA(T₁-T₂))/(tx)", "(Q(T₁-T₂))/(Atx)"], c: "A"},
+      {q: "Black bodies A and B radiate maximum energy with wavelength difference 4μm. The absolute temperature of body A is 3 times that of B. The wavelength at which body B radiates maximum energy is", o: ["2 μm", "3 μm", "4 μm", "6 μm"], c: "D"},
+      {q: "Two bodies A and B at temperatures 'T'K and 'T'K respectively have the same dimensions. Their emissivities are in the ratio 16 : 1. At T₁ = xT₂, they radiate the same amount of heat per unit area per unit time. The value of x is", o: ["1/2", "2", "4", "16"], c: "B"},
+      {q: "The temperature of a body on Kelvin scale is 'x' K. When it is measured by a Fahrenheit thermometer, it is found to be 'x' °F. The value of 'x' is (nearly)", o: ["273", "301", "574", "212"], c: "C"},
+      {q: "If 120 J of thermal energy is incident on area 3 m², the amount of heat transmitted is 12 J, coefficient of absorption is 0.6, then the amount of heat reflected is", o: ["36 J", "48 J", "60 J", "72 J"], c: "A"},
+      {q: "Hot water cools from 80°C to 60°C in 1 minute. In cooling from 60°C to 50°C it will take (room temperature = 30°C)", o: ["48 sec", "60 sec", "72 sec", "90 sec"], c: "C"},
+      {q: "If a black body at 400 K surrounded by atmosphere at 300 K has rate of cooling 'R₀', the same body at 900 K, surrounded by same atmosphere, will have rate of cooling nearly", o: ["16R₀", "8R₀", "4R₀", "2R₀"], c: "A"},
+      {q: "A rectangular block of surface area A emits energy E per second at 27°C. If length and breadth is reduced to half of initial value and temperature is raised to 327°C then energy emitted per second becomes", o: ["E", "2E", "4E", "8E"], c: "C"},
+      {q: "A centigrade and Fahrenheit thermometer are dipped in boiling water. The water temperature is lowered until the Fahrenheit temperature observed is 140°F. At that time the temperature registered by the centigrade thermometer is", o: ["60°C", "48°C", "52°C", "58°C"], c: "A"},
+      {q: "A metal sphere cools at a rate of 1.5°C/min when its temperature is 80°C. When the temperature of the sphere is 40°C, its rate of cooling is 0.3°C/min. The temperature of the surrounding (θ₀) is", o: ["20°C", "25°C", "30°C", "35°C"], c: "B"},
+      {q: "For a perfectly black body, coefficient of emission is", o: ["0", "1", "∞", "between 0 and 1"], c: "B"},
+      {q: "A body cools from 60°C to 40°C in 6 minutes. After next 6 minutes its temperature will be (Temperature of the surroundings is 10°C)", o: ["28°C", "30°C", "32°C", "34°C"], c: "A"},
+      {q: "A composite slab consists of two materials having coefficients of thermal conductivity K and 2K, thickness x and 4x respectively. The temperatures of two outer surfaces of a composite slab are T₂ and T₁ respectively (T₂ > T₁). The rate of heat transfer through the slab in a steady state is [A(T₂ - T₁)K/x]f, where f is equal to", o: ["1", "2/3", "1/2", "1/3"], c: "B"},
+      {q: "The coefficient of absorption and the coefficient of reflection of a thin uniform plate are 0.77 and 0.17 respectively. If 250 kcal of heat is incident on the surface of the plate, the quantity of heat transmitted is", o: ["15 kcal", "20 kcal", "30 kcal", "40 kcal"], c: "A"},
+      {q: "Black sphere of radius R radiates power P at certain temperature T. If the temperature is doubled, the radius gets doubled. Now the power radiated would be", o: ["4P", "16P", "64P", "256P"], c: "C"},
+      {q: "Two rods of different materials have lengths 'ℓ₁' and 'ℓ₂' whose coefficient of linear expansions are 'α₁' and 'α₂' respectively. If the difference between the two lengths is independent of temperature then", o: ["ℓ₁/ℓ₂ = α₁/α₂", "ℓ₁/ℓ₂ = α₂/α₁", "ℓ₁α₁ = ℓ₂α₂", "ℓ₁α₂ = ℓ₂α₁"], c: "C"},
+      {q: "At certain temperature, rod A and rod B of different materials have lengths L_A and L_B respectively. Their coefficients of linear expansion are α_A and α_B respectively. It is observed that the difference between their lengths remain constant at all temperatures. The ratio L_A / L_B is given by", o: ["α_B/α_A", "α_A/α_B", "(α_A/α_B)²", "(α_B/α_A)²"], c: "A"},
+      {q: "The power radiated by a black body is P and it radiates maximum energy around the wavelength λ₀. Now the temperature of the black body is changed so that it radiates maximum energy around wavelength (λ₀/2). The power radiated by it will now increase by a factor of", o: ["2", "4", "8", "16"], c: "D"},
+      {q: "A bucket full of hot water is kept in a room. If it cools from 75°C to 70°C in t₁ minutes, from 70°C to 65°C in t₂ minutes and 65°C to 60°C in t₃ minutes, then", o: ["t₁ = t₂ = t₃", "t₁ < t₂ < t₃", "t₁ > t₂ > t₃", "t₁ < t₂ > t₃"], c: "B"},
+      {q: "A cylindrical rod is having temperatures θ₁ and θ₂ at its ends. The rate of heat flow is Q/S. All the linear dimensions of the rod are doubled by keeping the temperature constant. The new rate of flow of heat is", o: ["Q/2S", "2Q/S", "4Q/S", "8Q/S"], c: "B"},
+      {q: "A metal rod having coefficient of linear expansion 2 × 10⁻⁵/°C is 0.75 m long at 45°C. When the temperature rises to 65°C, the increase in length of the rod will be", o: ["0.3 mm", "0.4 mm", "0.5 mm", "0.6 mm"], c: "A"},
+      {q: "Two spheres S₁ and S₂ have same radii but temperatures T₁ and T₂ respectively. Their emissive power is same and emissivity in the ratio 1:4. Then the ratio T₁:T₂ is", o: ["1:2", "2:1", "1:√2", "√2:1"], c: "B"},
+      {q: "Rails of material of steel are laid with gaps to allow for thermal expansion. Each track is 10 m long, when laid at temperature 17°C. The maximum temperature that can be reached is 45°C. The gap to be kept between the two segments of railway track is (α_steel = 1.3 × 10⁻⁵/°C)", o: ["0.36 cm", "0.72 cm", "1.08 cm", "1.44 cm"], c: "A"},
+      {q: "The black discs x, y and z have radii 1m, 2m and 3m respectively. The wavelengths corresponding to maximum intensity are 200 nm, 300 nm and 400 nm respectively. The relation between emissive power E_x, E_y and E_z is", o: ["E_x > E_y > E_z", "E_x < E_y < E_z", "E_x = E_y = E_z", "E_x < E_y = E_z"], c: "B"},
+      {q: "Rate of radiation by a black body is 'R' at temperature 'T'. Another body has same area but emissivity is 0.2 and temperature 3T. Its rate of radiation is", o: ["1.6R", "3.2R", "4.8R", "6.4R"], c: "A"},
+      {q: "An ordinary body cools from '40' to '30' in 't' minutes. The temperature of that body after next 't' minutes is (Assume Newton's law of cooling and room temperature is θ)", o: ["20", "25", "θ", "20 + θ"], c: "C"},
+      {q: "A black sphere has radius R whose rate of radiation is E at temperature T. If radius is made half and temperature 4T, the rate of radiation will be", o: ["E", "2E", "4E", "8E"], c: "C"},
+      {q: "Ordinary bodies P and Q radiate maximum energy with wavelength difference 3μm. The absolute temperature of body P is four times that of Q. The wavelength at which body Q radiates maximum energy is", o: ["2 μm", "3 μm", "4 μm", "5 μm"], c: "C"},
+      {q: "A' black body radiates power 'P' and maximum energy is radiated by it at a wavelength λ₀. The temperature of the black body is now so changed that it radiates maximum energy at the wavelength λ₀/4. The power radiated by it at new temperature is", o: ["4P", "16P", "64P", "256P"], c: "D"},
+      {q: "The temperature of a liquid falls from 365 K to 359 K in 3 minutes. The time during which temperature of this liquid falls from 342 K to 338 K is [Let the room temperature be 296 K]", o: ["2 min", "3 min", "4 min", "5 min"], c: "C"},
+      {q: "Three identical metal spheres (of same surface area) have red, black and white colors and they are heated up to same temperature. They are allowed to cool. Arrange them from maximum rate of cooling to minimum rate of cooling", o: ["Black, red, white", "Black, white, red", "White, red, black", "Red, black, white"], c: "A"},
+      {q: "At certain temperature, rod A and rod B of different materials have lengths L_A and L_B respectively: Their coefficients of linear expansion are α_A and α_B respectively. It is observed that the difference between their length's remains constant at all temperatures. The ratio L_A:L_B is given by", o: ["α_B:α_A", "α_A:α_B", "α_A²:α_B²", "α_B²:α_A²"], c: "A"},
+      {q: "A lead bullet moving with velocity 'v' strikes a wall and stops. If 50% of its energy is converted into heat, then the increase in temperature is (s = specific heat of lead)", o: ["v²/4s", "v²/2s", "v²/s", "2v²/s"], c: "A"},
+      {q: "Two rods of same length & material transfer a given amount of heat in 12 s when they are joined end to end. But when they are joined length wise parallel to each other they will transfer same amount of heat in same condition in time", o: ["3 s", "6 s", "24 s", "48 s"], c: "A"},
+      {q: "A sphere is at temperature 600 K. In an external environment of 200 K, its cooling rate is 'R'. When the temperature of the sphere falls to 400 K, then cooling rate 'R' will become", o: ["R/2", "R/4", "R/8", "R/16"], c: "C"},
+      {q: "A monoatomic gas is heated at constant pressure. The percentage of total heat used for doing external work is", o: ["20%", "40%", "60%", "80%"], c: "B"},
+      {q: "Two rods, one of copper (Cu) and the other of iron (Fe) having initial lengths L₁ and L₂ respectively are connected together to form a single rod of length L₁ + L₂. The coefficient of linear expansion of Cu and Fe are α_c and α_i respectively. If the length of each rod increases by the same amount when their temperatures are raised by t°C, then ratio of (L₁ - L₂)/(L₁ + L₂) will be", o: ["(α_c - α_i)/(α_c + α_i)", "(α_i - α_c)/(α_c + α_i)", "(α_c + α_i)/(α_c - α_i)", "(α_c + α_i)/(α_i - α_c)"], c: "B"},
+      {q: "Given that 'x' joule of heat is incident on a body. Out of that, total heat reflected and transmitted is 'y' joule. The absorption coefficient of body is", o: ["(x-y)/x", "(y-x)/x", "x/(x-y)", "y/x"], c: "A"},
+      {q: "Two spherical black bodies of radii 'R₁' and 'R₂' and with surface temperature 'T₁' and 'T₂' respectively radiate the same power. The ratio of 'R₁' to 'R₂' will be", o: ["(T₂/T₁)²", "(T₁/T₂)²", "(T₂/T₁)⁴", "(T₁/T₂)⁴"], c: "A"},
+      {q: "Rate of flow of heat through a cylindrical rod is 'H₁'. The temperature at the ends of the rod are 'T₁' and 'T₂'. If all the dimensions of the rod become double and the temperature difference remains the same, the rate of flow of heat becomes 'H₂'. Then", o: ["H₂ = H₁", "H₂ = 2H₁", "H₂ = 4H₁", "H₂ = 8H₁"], c: "B"},
+      {q: "The frequency 'ν_m' corresponding to which the energy emitted by a black body is maximum may vary with the temperature 'T' of the body as shown by the curves 'A', 'B', 'C' and 'D' in the figure. Which one of these represents the correct variation?", o: ["ν_m ∝ T", "ν_m ∝ T²", "ν_m ∝ T³", "ν_m ∝ T⁴"], c: "A"},
+      {q: "A metal rod cools at the rate of 4°C/min when its temperature is 90°C and the rate of 1°C/min when its temperature is 30°C. The temperature of the surrounding is", o: ["10°C", "15°C", "20°C", "25°C"], c: "B"},
+      {q: "A sphere and a cube, both of copper have equal volumes and are black. They are allowed to cool at same temperature and in same atmosphere. The ratio of their rate of loss of heat will be", o: ["1:1", "(4π/3)^(1/3):1", "(π/6)^(1/3):1", "(π/6)^(2/3):1"], c: "A"},
+      {q: "A body is said to be opaque to the radiation if (a, r and t are coefficient of absorption, reflection and transmission respectively)", o: ["a = 0, r = 0, t = 1", "a = 1, r = 0, t = 0", "a = 0, r = 1, t = 0", "a = 0.5, r = 0.5, t = 0"], c: "C"},
+      {q: "A sphere, a cube and a thin circular plate all made of same material and having the same mass are heated to same temperature of 200°C. When these are left in a room.", o: ["the sphere reaches room temperature fast", "the circular plate reaches room temperature fast", "the cube reaches room temperature fast", "all will reach the room temperature simultaneously"], c: "B"},
+      {q: "Which one of the following is based on convection?", o: ["Heating of a copper utensil", "Heating of Iron rod", "Heating a room by heater", "Heat transferred from sun to earth"], c: "C"},
+      {q: "A black body at temperature 127°C radiates heat at the rate of 5 cal/cm² s. At a temperature 927°C, its rate of emission in units of cal/cm² s will be", o: ["80", "160", "320", "640"], c: "D"},
+      {q: "The temperature gradient in a rod of length 75 cm is 40°C/m. If the temperature of cooler end of the rod is 10°C, then the temperature of hotter end is", o: ["20°C", "30°C", "40°C", "50°C"], c: "C"},
+      {q: "A black body radiates maximum energy at wavelength 'λ' and its emissive power is 'E'. Now due to a change in temperature of that body, it radiates maximum energy at wavelength λ/3. At that temperature emissive power is", o: ["3E", "9E", "27E", "81E"], c: "D"},
+      {q: "The volume of a metal block increases by 0.225% when its temperature is increased by 30°C. Hence coefficient of linear expansion of the material of metal block is", o: ["2.5 × 10⁻⁵/°C", "5.0 × 10⁻⁵/°C", "7.5 × 10⁻⁵/°C", "10.0 × 10⁻⁵/°C"], c: "A"},
+      {q: "A monoatomic ideal gas initially at temperature 'T₁' is enclosed in a cylinder fitted with massless, frictionless piston. By releasing the piston suddenly the gas is allowed to expand to adiabatically to a temperature 'T₂'. If 'L₁' and 'L₂' are the lengths of the gas columns before and after expansion respectively, then T₂/T₁ is", o: ["(L₁/L₂)^(2/3)", "(L₂/L₁)^(2/3)", "(L₁/L₂)^(5/3)", "(L₂/L₁)^(5/3)"], c: "B"},
+      {q: "A composite slab consists of two materials having coefficient of thermal conductivity K and 2K, thickness x and 4x respectively. The temperature of the two outer surfaces of a composite slab are T₂ and T₁ (T₂ > T₁). The rate of heat transfer through the slab in a steady state is [A(T₂ - T₁)K/x]·f where 'f' is equal to", o: ["1", "2/3", "1/2", "1/3"], c: "B"},
+      {q: "A black sphere has radius 'R' whose rate of radiation is 'E' at temperature 'T'. If radius is made R/3 and temperature '3T', the rate of radiation will be", o: ["E", "3E", "9E", "27E"], c: "A"},
+      {q: "About black body radiation, which of the following is the wrong statement?", o: ["All wavelengths are emitted by a black body.", "For all wavelengths, intensity is same.", "For longer wavelengths, intensity is less.", "For shorter wavelengths, intensity is more."], c: "B"},
+      {q: "Two bodies A and B at temperatures 'T1' K and 'T2' K respectively have the same dimensions. Their emissivities are in the ratio 1 : 3. If they radiate the same amount of heat per unit area per unit time, then the ratio of their temperatures (T₁:T₂) is", o: ["1:√3", "√3:1", "1:3", "3:1"], c: "B"},
+      {q: "The difference in length between two rods A and B is 60 cm at all temperatures. If α_A = 18 × 10⁻⁶/°C and β_B = 27 × 10⁻⁶/°C, the lengths of the two rods are", o: ["120 cm and 60 cm", "180 cm and 120 cm", "240 cm and 180 cm", "300 cm and 240 cm"], c: "C"},
+      {q: "Two spherical black bodies of radii 'r₁' and 'r₂' at temperature 'T₁' and 'T₂' respectively radiate power in the ratio 1 : 2 Then r₁:r₂ is", o: ["(T₂/T₁)²:1", "1:(T₂/T₁)²", "(T₂/T₁)⁴:1", "1:(T₂/T₁)⁴"], c: "B"},
+      {q: "The rate of flow of heat through a metal rod with temperature difference 40°C is 1600 cal/s. The thermal resistance of metal rod in °C s/cal is", o: ["0.025", "0.04", "25", "40"], c: "A"},
+      {q: "If the temperature of a hot body is increased by 50%, then the increase in the quantity of emitted heat radiation will be approximately", o: ["50%", "100%", "200%", "400%"], c: "C"},
+      {q: "A black body radiates maximum energy at wavelength 'λ' and its emissive power is E. Now due to change in temperature of that body, it radiates maximum energy at wavelength 2λ/3. At that temperature emissive power is", o: ["(16/81)E", "(81/16)E", "(3/2)E", "(2/3)E"], c: "B"},
+      {q: "A soap bubble of radius 'R' is blown. After heating a solution, a second bubble of radius '2R' is blown. The work required to blow the 2nd bubble in comparison to that required for the 1st bubble is", o: ["exactly double.", "slightly less than 4 times.", "slightly less than double.", "slightly more than 4 times."], c: "B"},
+      {q: "The pressure exerted by an ideal gas at a particular temperature is directly proportional to", o: ["the square of the mean speed of the gas molecules.", "the mean speed of the gas molecules.", "mean of the square of the speed of the gas molecules.", "the root mean square speed of the gas molecules."], c: "D"},
+      {q: "The side of a copper cube is 1 m at 0°C. What will be the change in its volume, when it is heated to 100°C? [α_copper = 18 × 10⁻⁶/°C]", o: ["0.54 cm³", "5.4 cm³", "54 cm³", "540 cm³"], c: "B"},
+      {q: "Two uniform brass rods A and B of length 'l' and '2l' and their radii '2r' and 'r' respectively are heated to same temperature. The ratio of the increase in the volume of rod A to that of rod B is", o: ["1:1", "1:2", "2:1", "4:1"], c: "C"},
+      {q: "The volume of a metal sphere increases by 0.30%, when its temperature is raised by 50°C. The coefficient of linear expansion of the metal is", o: ["2.0 × 10⁻⁵/°C", "3.0 × 10⁻⁵/°C", "6.0 × 10⁻⁵/°C", "9.0 × 10⁻⁵/°C"], c: "A"},
+      {q: "Heat energy is incident on the surface at the rate of 1000 J/min. If coefficient of absorption is 0.8 and coefficient of reflection is 0.1, then heat energy transmitted by the surface in 5 minute is", o: ["500 J", "1000 J", "1500 J", "2000 J"], c: "A"},
+      {q: "Three discs x, y and z having radii 2m, 2m and 6m respectively are coated on outer surfaces. The wavelength corresponding to maximum are power radiated by them respectively then", o: ["λ_x = λ_y > λ_z", "λ_x = λ_y < λ_z", "λ_x < λ_y = λ_z", "λ_x > λ_y = λ_z"], c: "B"},
+      {q: "22 g of carbon dioxide at 27°C is mixed in closed container with 16 g of oxygen at 37°C. If both gases are considered as ideal gases, then the temperature of the mixture is nearly", o: ["31°C", "32°C", "33°C", "34°C"], c: "B"},
+      {q: "About black body radiation, which one of the following is the WRONG statement?", o: ["For longer wavelengths, intensity is less.", "All wavelengths are emitted by a black body", "For shorter wavelengths, intensity is more.", "For all wavelengths, intensity is the same."], c: "D"},
+      {q: "Two metal slabs of same cross-sectional area have thicknesses d₁ and d₂ and thermal conductivities K₁ and K₂ respectively, are connected in series. The free ends of the two slabs are kept at temperatures T₁ and T₂(T₁ > T₂). The temperature T of their common junction is", o: ["(K₁T₁d₂ + K₂T₂d₁)/(K₁d₂ + K₂d₁)", "(K₁T₁d₁ + K₂T₂d₂)/(K₁d₁ + K₂d₂)", "(K₂T₁d₁ + K₁T₂d₂)/(K₂d₁ + K₁d₂)", "(K₁T₂d₁ + K₂T₁d₂)/(K₁d₁ + K₂d₂)"], c: "A"},
+      {q: "A star (P) behaves like a perfectly black body emitting radiant energy at temperature 'T'. Another star (Q) also behaves like perfectly black body emitting radiant energy at temperature 'T/4' and has radius eight times the radius of star (P). The ratio of radiant energy emitted by (P) to that by (Q) is", o: ["1:1", "1:4", "1:16", "1:64"], c: "A"},
+      {q: "Two metal rods P and Q have same length and same temperature difference between their ends. Their thermal conductivities are K₁ and K₂, also cross-sectional areas A₁ and A₂ respectively. If the rate of flow of heat through rod Q is three times that in rod P, then", o: ["A₁K₁ = 3A₂K₂", "3A₁K₁ = A₂K₂", "A₁K₁ = A₂K₂/3", "A₁K₁/3 = A₂K₂"], c: "B"},
+      {q: "Two bodies A and B radiate maximum energy with wavelength difference 4μm. The absolute temperature of body A is 3 times that of B. The wavelength at which body B radiates maximum energy is:", o: ["2 μm", "3 μm", "4 μm", "6 μm"], c: "D"},
+      {q: "The coefficient of thermal conductivity of a rod depends on its", o: ["length", "material", "area of cross-section", "density"], c: "B"},
+      {q: "At 273°C, the emissive power of a perfectly black body is R. It emissive power at 0°C is", o: ["R/16", "R/4", "R", "16R"], c: "A"},
+      {q: "The black discs have radii 1m, 2m and 3m respectively. The wavelength corresponding to maximum intensity are 200 nm, 300 nm and 400 nm respectively. The relation between emissive power E_x, E_y and E_z is", o: ["E_x > E_y > E_z", "E_x < E_y < E_z", "E_x = E_y = E_z", "E_x < E_y = E_z"], c: "B"},
+      {q: "Two solid spheres of radii R₁ and R₂ made of same material and have similar surfaces. The spheres are raised to the same temperature and then allowed to cool under identical conditions. Assuming spheres to be perfect conductors of heat, then the ratio of initial rates of cooling are", o: ["R₁:R₂", "R₂:R₁", "R₁²:R₂²", "R₂²:R₁²"], c: "B"},
+      {q: "A cylindrical metallic rod in thermal contact with two reservoirs of heat at its two end conduct an amount of heat 'Q₁' in time 't' the metallic rod is melted and the material is formed into a rod of length four times the length of original rod. The amount of heat conducted by the new rod when placed in thermal contact with the same two reservoirs in time t is 'Q₂'. Then Q₁/Q₂ is", o: ["1/2", "1/4", "1/8", "1/16"], c: "B"},
+      {q: "A black sphere has radius 'R' whose rate of radiation is 'E' at temperature 'T'. if radius is made 'R/3' and temperature '3T', the rate of radiation will be", o: ["E", "3E", "9E", "27E"], c: "A"},
+      {q: "If the temperature of black body is doubled, the frequency at which the spectral intensity becomes maximum, will be", o: ["doubled", "halved", "quadrupled", "unchanged"], c: "A"},
+      {q: "An object is cooled from 75°C to 65°C in2 min. The time, it takes to cool from 55°C to 45°C is [The temperature of surrounding is 30°C]", o: ["2 min", "2.5 min", "3 min", "3.5 min"], c: "C"},
+      {q: "For a perfectly black body, the graph is plotted between the frequency of radiation with maximum intensity (ν_m) and the absolute temperature 'T'. Out of the following which is the correct graph?", o: ["ν_m ∝ T", "ν_m ∝ T²", "ν_m ∝ T³", "ν_m ∝ √T"], c: "A"},
+      {q: "A clock with iron pendulum keeps correct time at 15°C. If the room temperature is 20°C, the error in second per day will be nearly (coefficient of linear expansion of iron is α = 1.2 × 10⁻⁵/°C)", o: ["2.6 s", "5.2 s", "10.4 s", "20.8 s"], c: "A"},
+      {q: "Two spheres 'S₁' and 'S₂' have same radii but temperatures are 'T₁' and 'T₂' respectively. Their emissive power is same and emissivity is in the ratio 1 : 4. Then the ratio 'T₁' to 'T₂' is", o: ["1:2", "2:1", "1:√2", "√2:1"], c: "B"},
+      {q: "Assume that for solar radiation, surface temperature of the sum is 6000 K. If Wien's constant 'b' is 2.897 × 10⁻³ m-K, the value of maximum wavelength will be", o: ["483 nm", "580 nm", "725 nm", "967 nm"], c: "A"},
+      {q: "A metal sphere cools at the rate of 1.5°C/min when its temperature is 80°C. At what rate will it cool when its temperature falls to 50°C. [Temperature of surrounding is 30°C]", o: ["0.5°C/min", "0.75°C/min", "1.0°C/min", "1.25°C/min"], c: "B"},
+      {q: "A cylindrical rod has temperature 'T₁' and 'T₂' at its ends. The rate of flow of heat is 'Q₁' cals⁻¹. If length and radius of the rod are doubled keeping temperature constant, then the rate of flow of heat 'Q₂' will be", o: ["Q₁", "2Q₁", "4Q₁", "8Q₁"], c: "B"},
+      {q: "For a perfectly black body, coefficient of emission is", o: ["0", "1", "∞", "between 0 and 1"], c: "B"},
+      {q: "Two rods of different metals have coefficients of linear expansion 'α₁' and 'α₂' respectively. Their respective lengths are 'L₁' and 'L₂'. At all temperatures (L₂ - L₁) is same. The correct relation is", o: ["L₁/L₂ = α₁/α₂", "L₁/L₂ = α₂/α₁", "L₁α₁ = L₂α₂", "L₁α₂ = L₂α₁"], c: "C"},
+      {q: "The temperature of a black body is increased by 50%, then the percentage increase in the rate of radiation by the body is approximated", o: ["50%", "100%", "200%", "400%"], c: "C"},
+      {q: "The temperature difference between two sides of an iron plate, 1.8 cm thick is 9°C. Heat is transmitted through the plate 10 kcal/s·m² at steady state. The thermal conductivity of iron is", o: ["0.2 kcal/m·s·°C", "0.5 kcal/m·s·°C", "1.0 kcal/m·s·°C", "2.0 kcal/m·s·°C"], c: "A"},
+      {q: "The emissive power of sphere of area 0.04 m² is 0.7 kcal s⁻¹ m⁻². The amount of heat radiated in 20 second is", o: ["0.56 kcal", "0.28 kcal", "0.14 kcal", "0.07 kcal"], c: "A"},
+      {q: "The rate of flow of heat through a copper rod with temperature difference 28°C is 1400 cals⁻¹. The thermal resistance of copper rod will be", o: ["0.02 °C s/cal", "0.04 °C s/cal", "0.06 °C s/cal", "0.08 °C s/cal"], c: "A"},
+      {q: "A cylindrical rod is having temperatures θ₁ and θ₂ at its ends. The rate of heat flow is 'Q' Js⁻¹. All the linear dimensions of the rod are doubled by keeping the temperatures constant. What is the new rate of flow of heat?", o: ["Q/2", "2Q", "4Q", "8Q"], c: "B"},
+      {q: "If the temperature of the sun is doubled, the rate of energy received by the earth will be increased by a factor", o: ["2", "4", "8", "16"], c: "D"},
+      {q: "A black body has maximum wavelength 'λₘ' at temperature 2000 K. Its corresponding wavelength at temperature 3000 K will be", o: ["(2/3)λₘ", "(3/2)λₘ", "(4/9)λₘ", "(9/4)λₘ"], c: "A"},
+      {q: "Find the value of -197°C temperature in Kelvin.", o: ["76 K", "470 K", "-76 K", "197 K"], c: "A"},
+      {q: "The temperature difference between two sides of metal plate, 3 cm thick is 15°C. Heat is transmitted through plate at the rate of 900 kcal per minute per m² at steady state. The thermal conductivity of metal is", o: ["0.2 kcal/m·s·°C", "0.3 kcal/m·s·°C", "0.4 kcal/m·s·°C", "0.5 kcal/m·s·°C"], c: "B"},
+      {q: "A black rectangular surface of area 'a' emits energy 'E' per second at 27°C. If length and breadth is reduced to (1/3)rd of initial value and temperature is raised to 327°C then energy emitted per second becomes", o: ["E", "4E", "9E", "16E"], c: "B"},
+      {q: "Find the value of -197°C temperature in Kelvin.", o: ["76 K", "470 K", "-76 K", "197 K"], c: "A"},
+      {q: "A perfectly black body emits a radiation at temperature 'T₁' K. If it is to radiate at 16 times this power, its temperature 'T₂' K should be", o: ["T₁/16", "T₁/4", "2T₁", "4T₁"], c: "C"},
+      {q: "On an imaginary linear scale of temperature (called 'W' scale) the freezing and boiling points of water are 39°W and 239°W respectively. The temperature on the new scale corresponding to 39°C temperature on Celsius scale will be", o: ["78°W", "117°W", "200°W", "139°W"], c: "B"},
+      {q: "A black rectangular surface of area 'A' emits energy 'E' per second at 27°C. If length and breadth is reduced to (1/3)rd of its initial value and temperature is raised to 327°C then energy emitted per second becomes", o: ["E", "4E", "9E", "16E"], c: "B"},
+      {q: "Two stars 'P' and 'Q' emit yellow and blue light respectively. The relation between their temperatures (Tp and TQ) is", o: ["Tp > TQ", "Tp < TQ", "Tp = TQ", "Cannot be determined"], c: "B"},
+      {q: "Three black discs 'x', 'y', 'z' have radii 1 m, 2 m and 3 m respectively. The wavelengths corresponding to maximum intensity are 200, 300 and 400 nm respectively. The relation between emissive powers 'Ex', 'Ey' and 'Ez' is", o: ["Ex > Ey > Ez", "Ex < Ey < Ez", "Ex = Ey = Ez", "Ex < Ey = Ez"], c: "B"},
+      {q: "For athermanous substances, coefficient of transmission is", o: ["less than one but greater than zero.", "greater than one.", "equal to one.", "zero."], c: "D"},
+      {q: "Two spherical black bodies of radius 'r1' and 'r2' with surface temperature 'T1' and 'T2' respectively, radiate same power, then r1: r2 is", o: ["(T2/T1)²", "(T1/T2)²", "(T2/T1)⁴", "(T1/T2)⁴"], c: "A"},
+      {q: "A steel wire of length 'L' and area of cross-section 'A' is suspended from rigid support. If 'Y' is the Young's modulus of material of the wire and 'α' is the coefficient of linear expansion, then the increase in tension when temperature falls by t°C is", o: ["YAαt", "Yαt/A", "YAαt/L", "YLαt/A"], c: "A"},
+      {q: "A black rectangular surface of area A emits energy E per second at 27°C. If length and breadth is reduced to (1/3)rd of initial value and temperature is raised to 327°C then energy emitted per second becomes", o: ["E", "4E", "9E", "16E"], c: "B"},
+      {q: "A metal rod of length L and cross-sectional area A is heated through T°C. What is the force required to prevent the expansion of the rod lengthwise? (Y= Young's modulus of material of the rod, α = coefficient of linear expansion of the rod.)", o: ["YAαT", "YαT/A", "YAαT/L", "YLαT/A"], c: "A"},
+      {q: "Two spheres 'S1' and 'S2' have same radii but temperatures T1 and T2 respectively. If they are coated with a material of same emissivity, rate of radiation of 'S1' is E then rate of radiation of S2' is (spheres are of the same material)", o: ["E(T2/T1)⁴", "E(T1/T2)⁴", "E", "Cannot be determined"], c: "A"},
+      {q: "A metal rod of Young's modulus 'Y' and coefficient of linear expansion 'α' has its temperature raised by 'Δθ'. The linear stress to prevent the expansion of rod is (L and ℓ is original length of rod and expansion respectively)", o: ["YαΔθ", "YαΔθ/L", "YLαΔθ", "YαΔθ/ℓ"], c: "A"},
+      {q: "A metal rod of cross-sectional area 3 × 10⁻⁶ m² is suspended vertically from one end has a length 0.4 m at 100°C. Now the rod is cooled upto 0°C, but prevented from contracting by attaching a mass 'm' at the lower end. The value of 'm' is (Y = 10¹¹ N/m², coefficient of linear expansion = 10⁻⁵/K, g = 10 m/s²)", o: ["3 kg", "6 kg", "9 kg", "12 kg"], c: "A"},
+      {q: "A black body has maximum wavelength λₘ at temperature 2200 K. Its corresponding wavelength at temperature 3300 K will be", o: ["(2/3)λₘ", "(3/2)λₘ", "(4/9)λₘ", "(9/4)λₘ"], c: "A"},
+      {q: "Two black spheres P and Q have radii in the ratio 3:4. The wavelengths of maximum intensity radiation are in the ratio 3:4 respectively. The ratio of radiated power by 'P' to 'Q' is", o: ["1:1", "3:4", "9:16", "27:64"], c: "A"},
+      {q: "About black body radiation, which one of the following is 'WRONG' statement?", o: ["All wavelengths are emitted by a black body.", "For all wavelengths, intensity is same.", "For longer wavelengths, intensity is less.", "For shorter wavelengths, intensity is more."], c: "B"},
+      {q: "Two spheres 'S₁' and 'S₂' have same radii but temperatures T₁ and T₂ respectively. Their emissive power is same and emissivity is in the ratio 1 : 4. Then the ratio of T₁ to T₂ is", o: ["1:2", "2:1", "1:√2", "√2:1"], c: "B"},
+      {q: "Ordinary bodies 'A' and 'B' radiate maximum energy with wavelength difference 4μm. The absolute temperature of body 'A' is 3 times that of 'B'. The wavelength at which body 'B' radiates maximum energy is", o: ["2 μm", "3 μm", "4 μm", "6 μm"], c: "D"},
+      {q: "A clock pendulum having coefficient of linear expansion, α = 9 × 10⁻⁷/°C has a period of 0.5s at 20°C. If the clock is used in a climate where the temperature is 30°C, how much time does the clock lose in each oscillation? (g = constant)", o: ["2.25 × 10⁻⁶ s", "4.5 × 10⁻⁶ s", "9 × 10⁻⁶ s", "1.8 × 10⁻⁵ s"], c: "A"},
+      {q: "The maximum wavelength of radiation emitted by a star is 289.8 nm. Then intensity of radiation for the star is (Given: Stefan's constant = 5.67 × 10⁻⁸ Wm⁻² K⁻⁴, Wien's constant, b = 2898 μm K)", o: ["10.67 × 10¹⁴ Wm⁻²", "10.67 × 10⁷ Wm⁻²", "5.67 × 10⁸ Wm⁻²", "5.67 × 10⁻¹² Wm⁻²"], c: "C"},
+      {q: "Heat energy is incident on the surface of a material at the rate of 1000 J min⁻¹. If the coefficient of absorption is 0.8 and the coefficient of reflection is 0.1, then the amount of heat energy transmitted through the material in 5 minutes is", o: ["500 J", "1000 J", "1500 J", "2000 J"], c: "A"},
+      {q: "Two spherical black bodies have radii r₁ and r₂. Their surface temperatures are T₁ and T₂ if they radiate same power then r₂/r₁ is", o: ["(T₁/T₂)²", "(T₂/T₁)²", "(T₁/T₂)⁴", "(T₂/T₁)⁴"], c: "A"},
+      {q: "A black rectangular surface of area A emits energy E per second at 27°C. If length and breadth are reduced to 1/3rd of initial value and temperature is raised to 327°C, then energy emitted per second becomes", o: ["E", "4E", "9E", "16E"], c: "B"},
+      {q: "We consider the radiation emitted by the human body, which of the following statements is true?", o: ["The radiation is emitted during the summers and absorbed during the winters.", "The radiation is emitted only during the day.", "The radiation emitted lies in the ultraviolet region and hence is not visible.", "The radiation emitted is in the infrared region."], c: "D"},
+      {q: "A black body at a temperature of 227°C radiates heat energy at the rate 5 cal/cm²-s. At a temperature of 727°C, the rate of heat radiated per unit area in cal/cm² will be", o: ["80", "160", "320", "640"], c: "A"},
+      {q: "The tourmaline crystal", o: ["is a uniaxial crystal", "is a biaxial crystal", "has no optic axis", "has multiple optic axes"], c: "A"},
+      {q: "If the temperature of cold junction decreases, then neutral temperature", o: ["increases", "decreases", "remains same", "may increase or decrease"], c: "C"},
+      {q: "With an increase in temperature, surface tension of liquid (except molten copper and cadmium)", o: ["first decreases then increases", "decreases", "increases", "remain same"], c: "B"},
+      {q: "The sphere of radii 8 cm and 2 cm are cooling. Their temperatures are 127°C and 527°C respectively. Find the ratio of energy radiated by them in the same time", o: ["1:1", "1:2", "1:4", "1:8"], c: "A"},
+      {q: "For an opaque body coefficient of transmission is", o: ["0", "1", "between 0 and 1", "greater than 1"], c: "A"},
+      {q: "For a thermocouple, the inversion temperature is 600°C and the neutral temperature is 320°C. Find the temperature of the cold junction?", o: ["20°C", "40°C", "80°C", "160°C"], c: "B"},
+      {q: "The temperature at which thermoemf is zero is", o: ["temperature of inversion", "None of the above", "neutral temperature", "temperature of cold junction"], c: "A"},
+      {q: "The unit of Wien's constant b is", o: ["m K", "m/K", "K/m", "m² K"], c: "A"},
+      {q: "If 150 J of energy is incident on area 2 m². If Q_r = 15 J, coefficient of absorption is 0.6, then amount of energy transmitted is", o: ["45 J", "60 J", "75 J", "90 J"], c: "A"},
+      {q: "Which of the following statements is true/correct?", o: ["The total energy emitted by a black body per unit time per unit area is proportional to the square of its temperature in the Kelvin scale", "Two spheres of the same material have radii 1 m and 4 m and temperatures 4000 K and 2000 K respectively. The energy radiated per second by the first sphere is greater than that radiated per second by the second sphere", "Newton's law of cooling, an approximate form of Stefan's law, is valid only for natural convection", "During clear nights, the temperature rises steadily upward near the ground level"], c: "B"},
+      {q: "Absorption coefficient of an open window is", o: ["0", "1", "between 0 and 1", "greater than 1"], c: "B"},
+      {q: "If the temperature of cold junction of thermocouple is lowered, then the neutral temperature", o: ["increases", "decreases", "remains same", "may increase or decrease"], c: "C"},
+      {q: "In an adiabatic change, the pressure and temperature of a monoatomic gas are related with relation p ∝ T^C, where C is equal to", o: ["3/2", "5/2", "5/3", "7/5"], c: "B"},
+      {q: "Two plane mirrors are perpendicular to each other. A ray after suffering reflection from the two mirrors will be", o: ["perpendicular to the original ray", "parallel to the original ray", "parallel to the first mirror", "at 45° to the original ray"], c: "B"},
+      {q: "A boat at anchor is rocked by waves whose crests are 100 m apart and velocity is 25 m/s. The boat bounces up once in every", o: ["2 s", "4 s", "6 s", "8 s"], c: "B"}
+    ];
+
+    // Convert compressed data to full question objects
+    const questions = questionData.map((data, index) => ({
+      number: `Question ${(index + 1).toString().padStart(3, '0')}`,
+      text: data.q,
+      options: data.o,
+      correct: data.c
+    }));
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      
+      // Generate test name with timestamp
+      const now = new Date();
+      const testName = `MHT-CET Thermal Properties Test ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      // Create result object
+      const resultData = {
+        testName: testName,
+        total: questions.length,
+        correct: correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        timestamp: now.toISOString(),
+        details: results
+      };
+
+      // Save to localStorage
+      try {
+        let scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+        scores.push(resultData);
+        localStorage.setItem("quizScores", JSON.stringify(scores));
+        localStorage.setItem("quizResults", JSON.stringify(resultData));
+        
+        showNotification();
+        
+        setTimeout(() => {
+          window.location.href = "MCCW-PRC12.html";
+        }, 1500);
+      } catch (e) {
+        console.error("Error saving results:", e);
+        alert("Error saving results. Please try again.");
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "flex";
+    }
+
+    function hideNotification() {
+      const notification = document.getElementById("saveNotification");
+      notification.style.display = "none";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
