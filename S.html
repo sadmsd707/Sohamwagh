@@ -1,1 +1,1567 @@
-say hello 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Tracking - Parent Dashboard - Soham</title>
+  <style>
+    /* Base styles matching performance dashboard */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Header styles */
+    header {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Hamburger Menu */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+      z-index: 1001;
+      position: relative;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: center;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Side Navigation */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: slideInRight 0.5s forwards;
+    }
+
+    .side-nav.active ul li {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .side-nav ul li:nth-child(1) { animation-delay: 0.1s; }
+    .side-nav ul li:nth-child(2) { animation-delay: 0.15s; }
+    .side-nav ul li:nth-child(3) { animation-delay: 0.2s; }
+    .side-nav ul li:nth-child(4) { animation-delay: 0.25s; }
+    .side-nav ul li:nth-child(5) { animation-delay: 0.3s; }
+    .side-nav ul li:nth-child(6) { animation-delay: 0.35s; }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 70px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      margin: 0;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+      transform: translateX(5px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Dashboard Styles */
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    /* Stats Container */
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      border-left: 4px solid #2563eb;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    }
+
+    .stat-card:nth-child(1) { border-left-color: #3b82f6; animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { border-left-color: #10b981; animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { border-left-color: #f59e0b; animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { border-left-color: #ef4444; animation-delay: 0.4s; }
+
+    .stat-card h3 {
+      font-size: 2.5rem;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
+
+    .stat-card p {
+      color: #555;
+      font-weight: 600;
+    }
+
+    /* Dashboard Sections */
+    .dashboard-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      animation: fadeInUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .dashboard-section:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-section:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-section:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-section:nth-child(4) { animation-delay: 0.4s; }
+
+    .dashboard-section h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dashboard-section h3 .icon {
+      font-size: 1.5rem;
+    }
+
+    /* Attendance Summary */
+    .attendance-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .attendance-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 25px;
+      flex: 1;
+      min-width: 250px;
+      text-align: center;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .attendance-card:nth-child(1) { animation-delay: 0.1s; }
+    .attendance-card:nth-child(2) { animation-delay: 0.2s; }
+    .attendance-card:nth-child(3) { animation-delay: 0.3s; }
+    .attendance-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .attendance-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+
+    .attendance-card h4 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
+    .attendance-percentage {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .attendance-good {
+      color: #10b981;
+    }
+
+    .attendance-average {
+      color: #f59e0b;
+    }
+
+    .attendance-poor {
+      color: #ef4444;
+    }
+
+    .attendance-trend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .trend-up, .trend-down, .trend-neutral {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .trend-up {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .trend-down {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .trend-neutral {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    /* Calendar View */
+    .calendar-container {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 10px;
+    }
+
+    .calendar-nav button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .calendar-nav button:hover {
+      background: #1e3a8a;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .calendar-day-header {
+      text-align: center;
+      font-weight: bold;
+      color: #1e3a8a;
+      padding: 10px;
+    }
+
+    .calendar-day {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .day-number {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
+
+    .attendance-status {
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .status-present {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-absent {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-holiday {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-leave {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .empty-day {
+      background: #f8fafc;
+      border-radius: 8px;
+      min-height: 100px;
+    }
+
+    .current-day {
+      border: 2px solid #2563eb;
+    }
+
+    /* Attendance History */
+    .attendance-history {
+      margin-top: 20px;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .attendance-table th {
+      background: #f1f5f9;
+      color: #1e3a8a;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .attendance-table td {
+      padding: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #475569;
+    }
+
+    .attendance-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+
+    .badge-present {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-absent {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-late {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-holiday {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    /* Attendance Trends */
+    .attendance-trends {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .trend-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 20px;
+      border-left: 4px solid #10b981;
+      transition: all 0.3s ease;
+    }
+
+    .trend-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .trend-card h4 {
+      color: #1e3a8a;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
+    .trend-stats {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .trend-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
+
+    .trend-label {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Filters */
+    .attendance-filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #333;
+      font-size: 1rem;
+      min-width: 200px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary {
+      background: #f59e0b;
+    }
+
+    .btn-secondary:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    /* Legend */
+    .attendance-legend {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #475569;
+    }
+
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+    }
+
+    /* Footer */
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 50px;
+      animation: fadeInUp 0.6s ease;
+      border-radius: 15px 15px 0 0;
+    }
+
+    footer p {
+      font-size: 1rem;
+    }
+
+    .last-updated {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .stat-card {
+        min-width: 100%;
+      }
+      
+      .attendance-summary {
+        flex-direction: column;
+      }
+      
+      .attendance-card {
+        min-width: 100%;
+      }
+      
+      .calendar-grid {
+        gap: 5px;
+      }
+      
+      .calendar-day {
+        min-height: 80px;
+        padding: 10px;
+      }
+      
+      .day-number {
+        font-size: 1.1rem;
+      }
+      
+      .attendance-trends {
+        grid-template-columns: 1fr;
+      }
+      
+      .attendance-table {
+        font-size: 0.9rem;
+      }
+      
+      .attendance-table th,
+      .attendance-table td {
+        padding: 10px;
+      }
+      
+      .attendance-filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-select {
+        min-width: 100%;
+      }
+      
+      .side-nav {
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-section {
+        padding: 20px;
+      }
+      
+      .welcome-section {
+        padding: 20px;
+      }
+      
+      .calendar-day {
+        min-height: 70px;
+        padding: 8px;
+      }
+      
+      .day-number {
+        font-size: 1rem;
+      }
+      
+      .attendance-status {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham - Parent Dashboard</h1>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="parent-dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+      <li><a href="parent-performance.html"><span class="nav-icon">📈</span>Performance</a></li>
+      <li><a href="parent-attendance.html" class="nav-active"><span class="nav-icon">📅</span>Attendance</a></li>
+      <li><a href="parent-announcements.html"><span class="nav-icon">📢</span>Announcements</a></li>
+      <li><a href="parent-fees.html"><span class="nav-icon">💰</span>Fee Status</a></li>
+      <li><a href="role-selection.html" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <main class="dashboard">
+    <section class="welcome-section">
+      <h2>Attendance Tracking</h2>
+      <p>Monitor your child's attendance, track patterns, and view attendance history.</p>
+    </section>
+
+    <div class="stats-container" id="statsContainer">
+      <!-- Stats will be populated by JavaScript -->
+    </div>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📊</span> Attendance Overview</h3>
+      <div class="attendance-summary">
+        <div class="attendance-card">
+          <h4>Overall Attendance</h4>
+          <div class="attendance-percentage attendance-good">94%</div>
+          <p>This Month</p>
+          <div class="attendance-trend">
+            <div class="trend-up">↑ 2% from last month</div>
+          </div>
+        </div>
+        <div class="attendance-card">
+          <h4>Classes Attended</h4>
+          <div class="attendance-percentage">141</div>
+          <p>Out of 150 total classes</p>
+          <div class="attendance-trend">
+            <div class="trend-neutral">9 absences</div>
+          </div>
+        </div>
+        <div class="attendance-card">
+          <h4>Punctuality</h4>
+          <div class="attendance-percentage attendance-average">88%</div>
+          <p>On-time arrival rate</p>
+          <div class="attendance-trend">
+            <div class="trend-up">↑ 5% improvement</div>
+          </div>
+        </div>
+        <div class="attendance-card">
+          <h4>Streak</h4>
+          <div class="attendance-percentage">18 days</div>
+          <p>Current attendance streak</p>
+          <div class="attendance-trend">
+            <div class="trend-up">↑ 3 days</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📅</span> Monthly Attendance Calendar</h3>
+      <div class="attendance-filters">
+        <select class="filter-select" id="monthFilter">
+          <option value="1">January 2026</option>
+          <option value="12" selected>December 2025</option>
+          <option value="11">November 2025</option>
+          <option value="10">October 2025</option>
+        </select>
+        <select class="filter-select" id="subjectFilter">
+          <option value="all">All Subjects</option>
+          <option value="mathematics">Mathematics</option>
+          <option value="physics">Physics</option>
+          <option value="chemistry">Chemistry</option>
+        </select>
+        <button class="btn btn-small btn-secondary" onclick="downloadAttendanceReport()">📥 Download Report</button>
+      </div>
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <h4>December 2025</h4>
+          <div class="calendar-nav">
+            <button id="prevMonth">‹</button>
+            <button id="nextMonth">›</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Calendar will be populated by JavaScript -->
+        </div>
+      </div>
+      <div class="attendance-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #d1fae5;"></div>
+          <span>Present</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #fee2e2;"></div>
+          <span>Absent</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #fef3c7;"></div>
+          <span>Holiday</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #e0e7ff;"></div>
+          <span>Leave</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #e5e7eb;"></div>
+          <span>No Class</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📝</span> Recent Attendance History</h3>
+      <div class="attendance-history">
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Day</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            <!-- Attendance data will be populated by JavaScript -->
+          </tbody>
+        </table>
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn btn-small" onclick="loadMoreAttendance()">Load More History</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h3><span class="icon">📈</span> Attendance Trends & Insights</h3>
+      <div class="attendance-trends">
+        <div class="trend-card">
+          <h4>Weekly Pattern</h4>
+          <div class="trend-stats">
+            <div class="trend-value">92%</div>
+            <div class="trend-up">Best: Friday</div>
+          </div>
+          <div class="trend-label">Highest attendance on Fridays</div>
+        </div>
+        <div class="trend-card">
+          <h4>Subject-wise</h4>
+          <div class="trend-stats">
+            <div class="trend-value">98%</div>
+            <div class="trend-up">Mathematics</div>
+          </div>
+          <div class="trend-label">Highest attendance in Mathematics</div>
+        </div>
+        <div class="trend-card">
+          <h4>Improvement</h4>
+          <div class="trend-stats">
+            <div class="trend-value">+6%</div>
+            <div class="trend-up">This quarter</div>
+          </div>
+          <div class="trend-label">Attendance improvement over last quarter</div>
+        </div>
+      </div>
+      <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px; border-left: 4px solid #3b82f6;">
+        <h4 style="color: #1e3a8a; margin-bottom: 10px;">💡 Attendance Insights</h4>
+        <p style="color: #475569;">Your child has maintained excellent attendance this month with only 2 absences. The attendance rate has improved by 2% compared to last month. Regular attendance correlates with better academic performance as seen in the performance dashboard.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Soham - Entrance Exam Practice. All rights reserved.</p>
+    <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+    <p class="last-updated" id="lastUpdated"></p>
+  </footer>
+
+  <script>
+    // Check if user is logged in and is a parent
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("userRole") !== "parent") {
+      window.location.href = "role-selection.html";
+    }
+
+    // Logout function
+    function logout() {
+      const logoutBtn = event?.target || document.querySelector('.btn-logout');
+      const originalText = logoutBtn.innerHTML;
+      logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
+      logoutBtn.disabled = true;
+      
+      setTimeout(() => {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("currentParent");
+        window.location.href = "role-selection.html";
+      }, 1000);
+    }
+
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (link.getAttribute('href') === 'role-selection.html' && link.onclick) {
+          return;
+        }
+        
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        
+        if (link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+          window.location.href = link.getAttribute('href');
+        }
+      });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+        hamburger.classList.remove('active');
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Load attendance data
+    function loadAttendanceData() {
+      const parentData = JSON.parse(localStorage.getItem('currentParent'));
+      
+      // Update stats container
+      document.getElementById('statsContainer').innerHTML = `
+        <div class="stat-card">
+          <h3>94%</h3>
+          <p>Overall Attendance</p>
+        </div>
+        <div class="stat-card">
+          <h3>18</h3>
+          <p>Current Streak</p>
+        </div>
+        <div class="stat-card">
+          <h3>9</h3>
+          <p>Total Absences</p>
+        </div>
+        <div class="stat-card">
+          <h3>98%</h3>
+          <p>Best Subject (Math)</p>
+        </div>
+      `;
+
+      // Generate calendar
+      generateCalendar();
+
+      // Load attendance history
+      loadAttendanceHistory();
+
+      // Update last updated time
+      updateLastUpdated();
+    }
+
+    // Generate calendar
+    function generateCalendar() {
+      const calendarGrid = document.getElementById('calendarGrid');
+      calendarGrid.innerHTML = '';
+      
+      // Add day headers
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      days.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+      });
+      
+      // Generate calendar days for December 2025
+      const year = 2025;
+      const month = 11; // December (0-indexed)
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = 31;
+      const today = new Date();
+      
+      // Add empty cells for days before the first of the month
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'empty-day';
+        calendarGrid.appendChild(emptyDay);
+      }
+      
+      // Sample attendance data for December
+      const attendanceData = {
+        1: { status: 'present', subject: 'Mathematics' },
+        2: { status: 'present', subject: 'Physics' },
+        3: { status: 'present', subject: 'Chemistry' },
+        4: { status: 'absent', subject: 'Mathematics', reason: 'Sick' },
+        5: { status: 'present', subject: 'Physics' },
+        6: { status: 'holiday', subject: 'Holiday' },
+        7: { status: 'leave', subject: 'All', reason: 'Family function' },
+        8: { status: 'present', subject: 'Mathematics' },
+        9: { status: 'present', subject: 'Physics' },
+        10: { status: 'present', subject: 'Chemistry' },
+        11: { status: 'present', subject: 'Mathematics' },
+        12: { status: 'present', subject: 'Physics' },
+        13: { status: 'present', subject: 'Chemistry' },
+        14: { status: 'present', subject: 'Mathematics' },
+        15: { status: 'present', subject: 'Physics' },
+        16: { status: 'absent', subject: 'Chemistry', reason: 'Doctor appointment' },
+        17: { status: 'present', subject: 'Mathematics' },
+        18: { status: 'present', subject: 'Physics' },
+        19: { status: 'present', subject: 'Chemistry' },
+        20: { status: 'present', subject: 'Mathematics' },
+        21: { status: 'present', subject: 'Physics' },
+        22: { status: 'present', subject: 'Chemistry' },
+        23: { status: 'holiday', subject: 'Holiday' },
+        24: { status: 'holiday', subject: 'Holiday' },
+        25: { status: 'holiday', subject: 'Holiday' },
+        26: { status: 'present', subject: 'Mathematics' },
+        27: { status: 'present', subject: 'Physics' },
+        28: { status: 'present', subject: 'Chemistry' },
+        29: { status: 'present', subject: 'Mathematics' },
+        30: { status: 'present', subject: 'Physics' },
+        31: { status: 'present', subject: 'Chemistry' }
+      };
+      
+      // Add days of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        
+        // Check if it's today
+        if (day === 15 && month === 11 && year === 2025) {
+          dayElement.classList.add('current-day');
+        }
+        
+        const dayData = attendanceData[day];
+        
+        let statusText = '';
+        let statusClass = '';
+        
+        if (dayData) {
+          switch(dayData.status) {
+            case 'present':
+              statusText = 'Present';
+              statusClass = 'status-present';
+              break;
+            case 'absent':
+              statusText = 'Absent';
+              statusClass = 'status-absent';
+              break;
+            case 'holiday':
+              statusText = 'Holiday';
+              statusClass = 'status-holiday';
+              break;
+            case 'leave':
+              statusText = 'Leave';
+              statusClass = 'status-leave';
+              break;
+            default:
+              statusText = 'No Class';
+          }
+        } else {
+          statusText = 'No Class';
+        }
+        
+        dayElement.innerHTML = `
+          <div class="day-number">${day}</div>
+          ${statusText ? `<div class="attendance-status ${statusClass}">${statusText}</div>` : ''}
+        `;
+        
+        // Add hover tooltip
+        if (dayData) {
+          dayElement.title = `${dayData.subject} - ${statusText}${dayData.reason ? `: ${dayData.reason}` : ''}`;
+        }
+        
+        calendarGrid.appendChild(dayElement);
+      }
+    }
+
+    // Load attendance history
+    function loadAttendanceHistory() {
+      const attendanceHistory = [
+        {
+          date: '2025-12-15',
+          day: 'Monday',
+          subject: 'Mathematics',
+          status: 'present',
+          time: '9:00 AM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-15',
+          day: 'Monday',
+          subject: 'Physics',
+          status: 'present',
+          time: '11:00 AM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-15',
+          day: 'Monday',
+          subject: 'Chemistry',
+          status: 'present',
+          time: '2:00 PM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-14',
+          day: 'Sunday',
+          subject: 'All',
+          status: 'holiday',
+          time: '-',
+          remarks: 'Weekly holiday'
+        },
+        {
+          date: '2025-12-13',
+          day: 'Saturday',
+          subject: 'Mathematics',
+          status: 'present',
+          time: '9:00 AM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-13',
+          day: 'Saturday',
+          subject: 'Physics',
+          status: 'present',
+          time: '11:00 AM',
+          remarks: 'Late by 5 mins'
+        },
+        {
+          date: '2025-12-12',
+          day: 'Friday',
+          subject: 'Chemistry',
+          status: 'present',
+          time: '2:00 PM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-12',
+          day: 'Friday',
+          subject: 'Mathematics',
+          status: 'present',
+          time: '9:00 AM',
+          remarks: 'On time'
+        },
+        {
+          date: '2025-12-11',
+          day: 'Thursday',
+          subject: 'Physics',
+          status: 'absent',
+          time: '-',
+          remarks: 'Sick leave'
+        },
+        {
+          date: '2025-12-10',
+          day: 'Wednesday',
+          subject: 'Chemistry',
+          status: 'present',
+          time: '2:00 PM',
+          remarks: 'On time'
+        }
+      ];
+      
+      const tableBody = document.getElementById('attendanceTableBody');
+      tableBody.innerHTML = '';
+      
+      attendanceHistory.forEach(record => {
+        let statusBadgeClass = '';
+        let statusText = '';
+        
+        switch(record.status) {
+          case 'present':
+            statusBadgeClass = 'badge-present';
+            statusText = 'Present';
+            break;
+          case 'absent':
+            statusBadgeClass = 'badge-absent';
+            statusText = 'Absent';
+            break;
+          case 'late':
+            statusBadgeClass = 'badge-late';
+            statusText = 'Late';
+            break;
+          case 'holiday':
+            statusBadgeClass = 'badge-holiday';
+            statusText = 'Holiday';
+            break;
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+          <td>${record.day}</td>
+          <td>${record.subject}</td>
+          <td><span class="status-badge ${statusBadgeClass}">${statusText}</span></td>
+          <td>${record.time}</td>
+          <td>${record.remarks}</td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Download attendance report
+    function downloadAttendanceReport() {
+      showNotification('Attendance report download started...', 'success');
+      
+      // Simulate download delay
+      setTimeout(() => {
+        showNotification('Attendance report downloaded successfully!', 'success');
+      }, 1500);
+    }
+
+    // Load more attendance history
+    function loadMoreAttendance() {
+      showNotification('Loading more attendance records...', 'info');
+      
+      setTimeout(() => {
+        showNotification('Additional records loaded successfully!', 'success');
+      }, 1000);
+    }
+
+    // Update last updated time
+    function updateLastUpdated() {
+      const now = new Date();
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      document.getElementById('lastUpdated').textContent = 
+        `Last updated: ${now.toLocaleDateString('en-US', options)}`;
+    }
+
+    // Filter functionality
+    document.getElementById('monthFilter').addEventListener('change', function() {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthName = months[parseInt(this.value) - 1];
+      showNotification(`Viewing attendance for ${monthName} 2025`, 'info');
+      
+      // Update calendar header
+      document.querySelector('.calendar-header h4').textContent = `${monthName} 2025`;
+    });
+
+    document.getElementById('subjectFilter').addEventListener('change', function() {
+      showNotification(`Filtering by subject: ${this.options[this.selectedIndex].text}`, 'info');
+    });
+
+    // Calendar navigation
+    document.getElementById('prevMonth').addEventListener('click', function() {
+      showNotification('Navigating to previous month...', 'info');
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', function() {
+      showNotification('Navigating to next month...', 'info');
+    });
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <span class="notification-message">${message}</span>
+          <button class="notification-close">×</button>
+        </div>
+      `;
+      
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
+        min-width: 300px;
+        max-width: 400px;
+      `;
+      
+      notification.querySelector('.notification-content').style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
+      
+      notification.querySelector('.notification-message').style.cssText = `
+        margin-right: 20px;
+      `;
+      
+      notification.querySelector('.notification-close').style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+      
+      notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+      });
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }
+
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+      }
+      
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize attendance page when loaded
+    document.addEventListener('DOMContentLoaded', loadAttendanceData);
+  </script>
+</body>
+</html>
