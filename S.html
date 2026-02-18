@@ -8,7 +8,158 @@
     /* Base styles matching performance dashboard */
     * {
       margin: 0;
-      padding: 0;
+      padding: 0;r header
+      document.querySelector('.calendar-header h4').textContent = `${monthName} 2025`;
+    });
+
+    document.getElementById('subjectFilter').addEventListener('change', function() {
+      showNotification(`Filtering by subject: ${this.options[this.selectedIndex].text}`, 'info');
+    });
+
+    // Calendar navigation
+    document.getElementById('prevMonth').addEventListener('click', function() {
+      showNotification('Navigating to previous month...', 'info');
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', function() {
+      showNotification('Navigating to next month...', 'info');
+    });
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <span class="notification-message">${message}</span>
+          <button class="notification-close">×</button>
+        </div>
+      `;
+      
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
+        min-width: 300px;
+        max-width: 400px;
+      `;
+      
+      notification.querySelector('.notification-content').style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
+      
+      notification.querySelector('.notification-message').style.cssText = `
+        margin-right: 20px;
+      `;
+      
+      notification.querySelector('.notification-close').style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+      
+      notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+      });
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }
+
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+      }
+      
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize attendance page when loaded
+    document.addEventListener('DOMContentLoaded', loadAttendanceData);
+  </script>
+</body>
+</html>html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0f2fe;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items:
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
