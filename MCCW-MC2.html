@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quadratic Equation Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+      line-height: 1.5;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Formula styling */
+    .formula {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Quadratic Equation</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰ Questions</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions (1-21)</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    // ALL 21 QUESTIONS FROM THE PDF
+    const questions = [
+      // Page 1
+      {
+        number: "Question 01",
+        text: "With usual notations in △ABC, if ∠B = π/2, and tan(A/2), tan(C/2) are roots of equation px² + qx + r = 0, p≠0, then",
+        options: ["a + b = c", "b + c = a", "a + c = b", "r = p"],
+        correct: "C"
+      },
+      // Page 2
+      {
+        number: "Question 02",
+        text: "If x = –2 + √–3, then the value of 2x⁴ + 5x³ + 7x² – x + 38 is equal to",
+        options: ["–5", "0", "7", "12"],
+        correct: "B"
+      },
+      // Page 3
+      {
+        number: "Question 03",
+        text: "If f(x) = 2x³ + mx² – 13x + n and 2,3 are the roots of f(x)=0, then the value of 4m + 5n is",
+        options: ["48", "–32", "64", "–48"],
+        correct: "A"
+      },
+      // Page 4
+      {
+        number: "Question 04",
+        text: "If triangle ABC is right angled at A and tan(B/2), tan(C/2) are roots of ax² + bx + c = 0, a≠0, then",
+        options: ["b = a + c", "b = a – c", "a = b + c", "c = a + b"],
+        correct: "C"
+      },
+      // Page 5
+      {
+        number: "Question 05",
+        text: "The value of 'a' so that the sum of squares of the roots of x² – (a–2)x – a + 1 = 0 assumes the least value is",
+        options: ["0", "1", "2", "3"],
+        correct: "B"
+      },
+      // Page 6
+      {
+        number: "Question 06",
+        text: "The Number of values of C that satisfy the conclusion of Rolle's theorem in case of following function f(x) = sin 2πx, x ∈ [–1, 1] is",
+        options: ["0", "1", "2", "3"],
+        correct: "D"
+      },
+      // Page 7
+      {
+        number: "Question 07",
+        text: "The equation e^(sin x) – e^(–sin x) = 4 has solutions.",
+        options: ["no solution", "one solution", "two solutions", "infinite solutions"],
+        correct: "A"
+      },
+      // Page 8
+      {
+        number: "Question 08",
+        text: "In △PQR, m∠R = π/2. If tan(P/2) and tan(Q/2) are the roots of the equation ax² + bx + c = 0 (a≠0), then",
+        options: ["a + b = c", "b + c = 0", "a + c = b", "b = c"],
+        correct: "B"
+      },
+      // Page 9
+      {
+        number: "Question 09",
+        text: "Let α, β be the roots of the equation x² – px + r = 0 and α/2, 2β be the roots of the equation x² – qx + r = 0. Then the value of r is",
+        options: ["(2/9)(p – q)(2q – p)", "(p – q)(p + q)", "pq/9", "2pq/9"],
+        correct: "A"
+      },
+      // Page 10
+      {
+        number: "Question 10",
+        text: "The equation (cos p – 1)x² + (cos p)x + sin p = 0 in the variable x, has real roots. Then p can take any value in the interval",
+        options: ["(0, π)", "(–π, 0)", "(–π/2, π/2)", "(0, 2π)"],
+        correct: "A"
+      },
+      // Page 11 (duplicate of 10 in PDF, but we include as per PDF)
+      {
+        number: "Question 11",
+        text: "The equation (cos p – 1)x² + (cos p)x + sin p = 0 in the variable x, has real roots. Then p can take any value in the interval",
+        options: ["(0, π)", "(–π, 0)", "(–π/2, π/2)", "(0, 2π)"],
+        correct: "A"
+      },
+      // Page 12
+      {
+        number: "Question 12",
+        text: "Let α and β be two real roots of the equation (k + 1)tan²x – √2λ tan x = (1 – k) where k(≠ –1) and λ are real numbers. If tan²(α + β) = 50, then a value of λ is",
+        options: ["2√2", "3√3", "5√2", "10"],
+        correct: "C"
+      },
+      // Page 13
+      {
+        number: "Question 13",
+        text: "The number of roots of the equation, (81)^(sin²x) + (81)^(cos²x) = 30 in the interval [0, π], is equal to",
+        options: ["2", "3", "4", "6"],
+        correct: "C"
+      },
+      // Page 14
+      {
+        number: "Question 14",
+        text: "The equation x³ + x – 1 = 0 has",
+        options: ["all three real roots", "one real and two complex", "three complex", "one negative real root"],
+        correct: "B"
+      },
+      // Page 15
+      {
+        number: "Question 15",
+        text: "In △ABC, with usual notations, m∠C = π/2, if tan(A/2) and tan(B/2) are the roots of the equation a₁x² + b₁x + c₁ = 0 (a₁ ≠ 0), then",
+        options: ["a₁ + b₁ = c₁", "b₁ = a₁ + c₁", "a₁ = b₁ + c₁", "c₁ = a₁ + b₁"],
+        correct: "D"
+      },
+      // Page 16
+      {
+        number: "Question 16",
+        text: "If f(x) = ax² + bx + 2 and f(1) = 4, f(3) = 38, then a – b =",
+        options: ["–2", "2", "5", "7"],
+        correct: "B"
+      },
+      // Page 17
+      {
+        number: "Question 17",
+        text: "The quadratic equation whose roots are the numbers having arithmetic mean 34 and geometric mean 16 is",
+        options: ["x² – 68x + 256 = 0", "x² – 64x + 256 = 0", "x² – 34x + 16 = 0", "x² – 32x + 256 = 0"],
+        correct: "A"
+      },
+      // Page 18
+      {
+        number: "Question 18",
+        text: "If the A.M. and G.M. of the roots of a quadratic equation in x are p and q respectively, then its equation is",
+        options: ["x² – 2px + q² = 0", "x² – 2px – q² = 0", "x² – p²x + q² = 0", "x² – 2p x + (p² – q²) = 0"],
+        correct: "A"
+      },
+      // Page 19
+      {
+        number: "Question 19",
+        text: "If m₁ and m₂ are slopes of the lines represented by (sec²θ – sin²θ)x² – 2tanθ xy + sin²θ y² = 0, then tan |m₁ – m₂| =",
+        options: ["2√2 secθ", "2√2 cosecθ", "2√2 sinθ", "2√2 cosθ"],
+        correct: "B"
+      },
+      // Page 20
+      {
+        number: "Question 20",
+        text: "If A = {x ∈ R : x² + 5|x| + 6 = 0} then n(A) =",
+        options: ["0", "2", "4", "infinite"],
+        correct: "A"
+      },
+      // Page 21
+      {
+        number: "Question 21",
+        text: "If α and β are roots of the equation x² + 5|x| – 6 = 0 then the value of |tan⁻¹α – tan⁻¹β| is",
+        options: ["π/2", "π/3", "π/4", "π/6"],
+        correct: "A"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      questions.forEach((q, i) => {
+        if (userAnswers[i] === q.correct) correct++;
+      });
+
+      alert(`Quiz completed!\nTime: ${timeTakenMin} min ${timeTakenSec} sec\nCorrect answers: ${correct}/${questions.length}`);
+    }
+
+    // Initialize
+    renderQuestion(current);
+
+    // Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    window.toggleNavPanel = toggleNavPanel;
+    window.nextQuestion = nextQuestion;
+    window.prevQuestion = prevQuestion;
+    window.submitQuiz = submitQuiz;
+  </script>
+</body>
+</html>
