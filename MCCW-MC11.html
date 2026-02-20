@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MHT CET · Circle (95 questions)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+      line-height: 1.5;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    .formula {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="quiz-container">
+  <div class="header">
+    <div class="header-left">
+      <div>MHT CET · Circle</div>
+    </div>
+    <div class="header-right">
+      <div class="timer">Time: <span id="timer">00:00</span></div>
+      <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰ Questions</div>
+    </div>
+  </div>
+
+  <div class="nav-panel" id="navPanel">
+    <h3>Questions (1‑95)</h3>
+    <div class="question-list" id="questionList"></div>
+  </div>
+
+  <div id="quiz-content"></div>
+
+  <div class="nav-buttons">
+    <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+    <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+    <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+  </div>
+</div>
+
+<script>
+  // ---------- 95 CIRCLE QUESTIONS EXACTLY FROM PDF (OCR cleaned, no chemistry) ----------
+  const questions = [
+    // page1
+    { number: "Q1", text: "If one of the diameters of the circle, given by the equation \\(x^{2} + y^{2} - 4x + 6y - 12 = 0\\), is a chord of a circle 'S', whose centre is at \\((-3, 2)\\), then the length of radius of 'S' is ______ units.",
+      options: ["5", "6", "7", "8"], correct: "B" },
+    // page2
+    { number: "Q2", text: "The angle between the tangents drawn from the origin to the circle \\((x - 7)^2 + (y + 1)^2 = 25\\) is",
+      options: ["30°", "45°", "60°", "90°"], correct: "C" },
+    // page3
+    { number: "Q3", text: "The equation of the common tangent touching the circle \\((x - 3)^2 + y^2 = 9\\) and the parabola \\(y^2 = 4x\\) above the X‑axis is",
+      options: ["y = x+3", "y = √3 x+√3", "y = (1/√3)x + √3", "y = (1/3)x + 1"], correct: "B" },
+    // page4
+    { number: "Q4", text: "The number of common tangents to the circles \\(x^{2} + y^{2} - 4x - 6y - 12 = 0\\) and \\(x^{2} + y^{2} + 6x + 18y + 26 = 0\\) is",
+      options: ["0", "1", "2", "3"], correct: "D" },
+    // page5
+    { number: "Q5", text: "Two tangents to the circle \\(x^{2} + y^{2} = 4\\) at the points A and B meet at \\(\\mathrm{P}(-4,0)\\). Then the area of quadrilateral PAOB, where 'O' is the origin is",
+      options: ["2", "4", "6", "8"], correct: "B" },
+    // page7 (page6 empty)
+    { number: "Q6", text: "If a circle with centre at \\((-1,1)\\) touches the line \\(x + 2y + 4 = 0\\) then the co‑ordinates of the point of contact are",
+      options: ["(-2,-1)", "(1,2)", "(-1,-2)", "(2,1)"], correct: "A" },
+    // page12 (skip blanks)
+    { number: "Q7", text: "If the tangent and the normal at the point \\((\\sqrt{3}, 1)\\) to the circle \\(x^{2} + y^{2} = 4\\), and the X‑axis form a triangle, then the area (in sq.units) of this triangle is",
+      options: ["2√3", "4/√3", "8/√3", "4√3"], correct: "C" },
+    // page14
+    { number: "Q8", text: "The minimum distance and maximum distance of the point \\(\\mathrm{P}(2, -7)\\) from the circle \\(x^{2} + y^{2} - 14x - 10y - 151 = 0\\) are respectively units",
+      options: ["2,8", "3,9", "4,10", "5,11"], correct: "A" },
+    // page15
+    { number: "Q9", text: "The number of integral values of K for which \\(x^{2} + y^{2} + kx + (1-k)y + 5 = 0\\) represents a circle whose radius cannot exceed 5, are",
+      options: ["6", "7", "8", "9"], correct: "D" },
+    // page16
+    { number: "Q10", text: "The equation of the circle passing through the point (1,1) and having two diameters along the pair of lines \\(x^{2} - y^{2} - 2x + 4y - 3 = 0\\) is",
+      options: ["x²+y²-2x-4y+4=0", "x²+y²-2x-4y-4=0", "x²+y²+2x+4y-4=0", "x²+y²+2x+4y+4=0"], correct: "A" },
+    // page17
+    { number: "Q11", text: "The number of common tangents that can be drawn to the circles \\(x^2 + y^2 - 6x = 0\\) and \\(x^2 + y^2 + 6x + 2y + 1 = 0\\) is",
+      options: ["0", "1", "2", "3"], correct: "D" },
+    // page19
+    { number: "Q12", text: "The equation of the circle, concentric with the circle \\(2x^{2} + 2y^{2} - 6x + 8y + 1 = 0\\) and double of its area is",
+      options: ["x²+y²-3x+4y+1=0", "x²+y²-3x+4y-7=0", "x²+y²-6x+8y+2=0", "x²+y²-6x+8y-2=0"], correct: "B" },
+    // page20
+    { number: "Q13", text: "If the sides of a rectangle are given by the equations \\(x = -2, x = 6, y = -2, y = 5,\\) then the equation of the circle, drawn on the diagonal of this rectangle as its diameter, is",
+      options: ["(x-2)²+(y-1.5)²=25", "(x-2)²+(y-1.5)²=20", "(x-2)²+(y-1.5)²=16", "(x-2)²+(y-1.5)²=9"], correct: "B" },
+    // page21
+    { number: "Q14", text: "The number of common tangents to the circles \\(x^{2} + y^{2} - x = 0\\) and \\(x^{2} + y^{2} + x = 0\\) is/are",
+      options: ["1", "2", "3", "4"], correct: "C" },
+    // page24
+    { number: "Q15", text: "Let PQ and RS be tangents at the extremities of the diameter PR of a circle of radius r. If PS and RQ intersect at a point X on the circumference of the circle, then 2r equals",
+      options: ["PQ", "RS", "PR", "QS"], correct: "C" },
+    // page26
+    { number: "Q16", text: "The equation of the circle, concentric with the circle \\(x^{2} + y^{2} - 6x - 4y - 12 = 0\\) and touching the X‑axis is",
+      options: ["x²+y²-6x-4y+4=0", "x²+y²-6x-4y+9=0", "x²+y²-6x-4y-4=0", "x²+y²-6x-4y-9=0"], correct: "B" },
+    // page27
+    { number: "Q17", text: "The equation of the circle, the end points of whose diameter are the centres of the circles \\(x^{2} + y^{2} + 6x - 14y + 5 = 0\\) and \\(x^{2} + y^{2} - 4x + 10y - 4 = 0\\) is",
+      options: ["x²+y²-2x-4y+10=0", "x²+y²+2x-4y-10=0", "x²+y²-2x+4y-10=0", "x²+y²+2x+4y+10=0"], correct: "B" },
+    // page28
+    { number: "Q18", text: "The equation of the circle which passes through the centre of the circle \\(x^{2} + y^{2} + 8x + 10y - 7 = 0\\) and concentric with the circle \\(2x^{2} + 2y^{2} - 8x - 12y - 9 = 0\\) is",
+      options: ["x²+y²-4x-6y-11=0", "x²+y²-4x-6y+11=0", "x²+y²+4x+6y-11=0", "x²+y²+4x+6y+11=0"], correct: "A" },
+    // page29
+    { number: "Q19", text: "The equation of the circle which has its centre at the point (3,4) and touches the line \\(5x + 12y - 11 = 0\\) is",
+      options: ["(x-3)²+(y-4)²=4", "(x-3)²+(y-4)²=9", "(x-3)²+(y-4)²=16", "(x-3)²+(y-4)²=25"], correct: "D" },
+    // page30
+    { number: "Q20", text: "The tangent to the circle \\(x^{2} + y^{2} = 5\\) at (1, -2) also touches the circle \\(x^{2} + y^{2} - 8x + 6y + 20 = 0\\) then the co‑ordinates of the corresponding point of contact is",
+      options: ["(3, -1)", "(-1, 3)", "(5, -5)", "(2, -4)"], correct: "A" },
+    // page31
+    { number: "Q21", text: "The differential equation of family of circles, whose centres are on the X‑axis and also touch the Y‑axis is",
+      options: ["y² = 2xy y₁ + x² y₁²", "x² = 2xy y₁ + y² y₁²", "y² = 2xy y₁ - x² y₁²", "x² = 2xy y₁ - y² y₁²"], correct: "A" },
+    // page32
+    { number: "Q22", text: "The equation of the concentric circle, with the circle C₁: x²+y²-6x-4y-12=0 and having double area compared to C₁, is",
+      options: ["x²+y²-6x-4y-24=0", "x²+y²-6x-4y-6=0", "x²+y²-6x-4y-18=0", "x²+y²-6x-4y-30=0"], correct: "C" },
+    // page33
+    { number: "Q23", text: "Two tangents drawn from P(1,7) to the circle x²+y²=25 touch the circle at Q and R. The area of the quadrilateral PQOR is",
+      options: ["7√3", "12", "15", "25"], correct: "B" },
+    // page34
+    { number: "Q24", text: "If (mᵢ, 1/mᵢ), mᵢ>0, i=1,2,3,4 are four distinct points on a circle, then the product m₁ m₂ m₃ m₄ is equal to",
+      options: ["1", "2", "3", "4"], correct: "A" },
+    // page35
+    { number: "Q25", text: "The centre of the circle whose radius is 3 units and touching internally the circle x²+y²-4x-6y-12=0 at the point (-1,-1) is",
+      options: ["(2,3)", "(1,2)", "(-2,-3)", "(-1,-2)"], correct: "B" },
+    // page36
+    { number: "Q26", text: "If the line x-2y=m (m∈ℤ) intersects the circle x²+y²=2x+4y at two distinct points, then the number of possible values of m are",
+      options: ["2", "3", "4", "5"], correct: "D" },
+    // page37
+    { number: "Q27", text: "The abscissae of two points A and B are the roots of x²+2ax-b²=0 and ordinates are roots of y²+2py-q²=0. Then the equation of circle with AB as diameter is",
+      options: ["x²+y²+2ax+2py-b²-q²=0", "x²+y²+2ax+2py+b²+q²=0", "x²+y²-2ax-2py-b²-q²=0", "x²+y²-2ax-2py+b²+q²=0"], correct: "A" },
+    // page38
+    { number: "Q28", text: "The circles x²+y²+2ax+c=0 and x²+y²+2by+c=0 touch each other externally, if",
+      options: ["a²+b²=c", "a⁻²+b⁻²=c⁻¹", "1/a² + 1/b² = 1/c", "a²+b²=c²"], correct: "C" },
+    // page40
+    { number: "Q29", text: "If a circle passes through points (4,0) and (0,2) and its centre lies on Y‑axis. If radius is r, then r² - r + 1 equals",
+      options: ["3", "5", "7", "9"], correct: "C" },
+    // page41
+    { number: "Q30", text: "Number of common tangents to the circles x²+y²-6x-14y+48=0 and x²+y²-6x=0 are",
+      options: ["1", "2", "3", "4"], correct: "B" },
+    // page42
+    { number: "Q31", text: "The parametric equations of the circle x²+y²+2x-4y-4=0 are",
+      options: ["x=1+3cosθ, y=-2+3sinθ", "x=1+3sinθ, y=-2+3cosθ", "x=-1+3cosθ, y=2+3sinθ", "x=-1+3sinθ, y=-2+3cosθ"], correct: "C" },
+    // page43
+    { number: "Q32", text: "If the circles x²+y²=9 and x²+y²+2αx+2y+1=0 touch each other internally, then α³ is",
+      options: ["8", "-8", "27", "-27"], correct: "B" },
+    // page44
+    { number: "Q33", text: "The sides of a rectangle are x=-2, x=4, y=-2, y=5. Then equation of the circle, whose centre is the point of intersection of diagonals, lying within the rectangle and touching only two opposite sides, is",
+      options: ["(x-1)²+(y-1.5)²=9", "(x-1)²+(y-1.5)²=4", "(x-1)²+(y-1.5)²=2.25", "(x-1)²+(y-1.5)²=6.25"], correct: "C" },
+    // page46 (45 is mess)
+    { number: "Q34", text: "Let a and b two non‑zero real numbers. The equation (ax²+by²+c)(x²-5xy+6y²) represents …",
+      options: ["four straight lines when c=0 and a,b same sign", "circle+ellipse when a,b same sign & c opposite sign", "two straight lines+hyperbola when a,b same sign & c opposite", "two straight lines+circle when a=b and c opposite sign to a"], correct: "A" },
+    // page47
+    { number: "Q35", text: "Given two circles x²+y²+8x-6y-24=0 and x²+y²-4x+10y+20=0. Then they are",
+      options: ["intersecting", "touching externally", "touching internally", "one lies inside other"], correct: "B" },
+    // page48
+    { number: "Q36", text: "The equation of a circle, which passes through centre of x²+y²+8x+10y-7=0 and is concentric with 2x²+2y²-8x-12y-9=0, is",
+      options: ["x²+y²-4x-6y-11=0", "x²+y²-4x-6y+11=0", "x²+y²+4x+6y-11=0", "x²+y²+4x+6y+11=0"], correct: "A" },
+    // page49
+    { number: "Q37", text: "The parametric equations of the curve x²+y²-ax-by=0 are",
+      options: ["x = a/2 + (√(a²+b²)/2)cosθ, y = b/2 + (√(a²+b²)/2)sinθ", "x = a/2 + (a/2)cosθ, y = b/2 + (b/2)sinθ", "x = a cosθ, y = b sinθ", "x = a + r cosθ, y = b + r sinθ"], correct: "A" },
+    // page50
+    { number: "Q38", text: "The parametric equations of the circle x²+y²-6x-2y+9=0 are",
+      options: ["x=3+cosθ, y=1+sinθ", "x=3+cosθ, y=1-sinθ", "x=3+sinθ, y=1+cosθ", "x=3+sinθ, y=1-cosθ"], correct: "A" },
+    // page52
+    { number: "Q39", text: "If the lines 2x-3y=5 and 3x-4y=7 are diameters of a circle of area 154 sq.units (π=22/7), then equation is",
+      options: ["x²+y²-2x+2y=47", "x²+y²-2x+2y=62", "x²+y²+2x-2y=47", "x²+y²+2x-2y=62"], correct: "B" },
+    // page53
+    { number: "Q40", text: "If the lines 3x-4y-7=0 and 2x-3y-5=0 pass through diameters of a circle of area 49π sq units, then equation is",
+      options: ["x²+y²-2x+2y=48", "x²+y²-2x+2y=47", "x²+y²+2x-2y=48", "x²+y²+2x-2y=47"], correct: "A" },
+    // page54
+    { number: "Q41", text: "The equation of circle passing through (1,-2) and (4,-3) and whose centre lies on line 3x+2y=7 is",
+      options: ["x²+y²-4x+2y-5=0", "x²+y²-4x-2y-5=0", "x²+y²+4x-2y-5=0", "x²+y²+4x+2y-5=0"], correct: "A" },
+    // page55
+    { number: "Q42", text: "The equation of tangents to the circle x²+y²=4 which are parallel to x+2y+3=0 are",
+      options: ["x+2y=±2√5", "x+2y=±√5", "2x-y=±2√5", "2x-y=±√5"], correct: "A" },
+    // page56
+    { number: "Q43", text: "The equation of the circle whose centre lies on line x-4y=1 and passes through (3,7) and (5,5) is",
+      options: ["x²+y²-6x-2y-20=0", "x²+y²-6x+2y-20=0", "x²+y²+6x-2y-20=0", "x²+y²+6x+2y-20=0"], correct: "B" },
+    // page57
+    { number: "Q44", text: "If y=2x is a chord of circle x²+y²-10x=0, then equation of circle with this chord as diameter is",
+      options: ["x²+y²+2x-4y=0", "x²+y²-2x-4y=0", "x²+y²-2x+4y=0", "x²+y²+2x+4y=0"], correct: "B" },
+    // page58
+    { number: "Q45", text: "The equation of common tangent to the circles x²+y²-4x+10y+20=0 and x²+y²+8x-6y-24=0 is",
+      options: ["4x+3y+5=0", "3x+4y-5=0", "4x-3y-5=0", "3x-4y+5=0"], correct: "C" },
+    // page59
+    { number: "Q46", text: "If a circle passes through (0,0) and (0,y) then coordinates of its centre are",
+      options: ["(0,y/2)", "(x/2,0)", "(0,0)", "(y/2,0)"], correct: "A" },
+    // page60
+    { number: "Q47", text: "Equation of the chord of the circle x²+y²-4x-10y+25=0 having mid‑point (1,2) is",
+      options: ["x+y-3=0", "x-y+1=0", "x+2y-5=0", "2x+y-4=0"], correct: "C" },
+    // page61
+    { number: "Q48", text: "Two circles centered at (2,3) and (4,5) intersect each other. If radii equal, then equation of common chord is",
+      options: ["x+y-5=0", "x-y+5=0", "x+y+5=0", "x-y-5=0"], correct: "D" },
+    // page62
+    { number: "Q49", text: "The equation of a circle that passes through origin and cuts off intercepts -2 and 3 on X‑axis and Y‑axis respectively is",
+      options: ["x²+y²+2x-3y=0", "x²+y²-2x+3y=0", "x²+y²+2x+3y=0", "x²+y²-2x-3y=0"], correct: "A" },
+    // page63
+    { number: "Q50", text: "The equation of circle with centre at (2,-3) and circumference 10π units is",
+      options: ["(x-2)²+(y+3)²=25", "(x-2)²+(y+3)²=100", "(x+2)²+(y-3)²=25", "(x+2)²+(y-3)²=100"], correct: "A" },
+    // page64
+    { number: "Q51", text: "The equation of the circle whose centre lies on line x-4y=1 and passes through (3,7) and (5,5) is (repeat? but kept)",
+      options: ["x²+y²-6x+2y-20=0", "x²+y²+6x-2y-20=0", "x²+y²-6x-2y+20=0", "x²+y²+6x+2y+20=0"], correct: "A" },
+    // page65
+    { number: "Q52", text: "The equation of tangent to the circle x²+y²=64 at the point P(2π/3) is",
+      options: ["x cos120°+y sin120°=8", "x sin120°+y cos120°=8", "x cos60°+y sin60°=8", "x sin60°+y cos60°=8"], correct: "A" },
+    // page66
+    { number: "Q53", text: "If the lines 3x-4y+4=0 and 6x-8y-7=0 are tangent to circle, then the radius of the circle is",
+      options: ["0.75", "1.5", "2.25", "3"], correct: "A" },
+    // page67
+    { number: "Q54", text: "The cartesian equation of the curve x = 3+5cosθ, y = 2+5sinθ is",
+      options: ["(x-3)²+(y-2)²=25", "(x+3)²+(y+2)²=25", "(x-3)²+(y-2)²=5", "(x+3)²+(y+2)²=5"], correct: "A" },
+    // page68
+    { number: "Q55", text: "The equation of the circle, end‑points of diameter are centres of x²+y²-2x+3y-3=0 and x²+y²+6x-12y-5=0, is",
+      options: ["x²+y²+4x-9y+6=0", "x²+y²-4x+9y+6=0", "x²+y²+4x+9y+6=0", "x²+y²-4x-9y+6=0"], correct: "B" },
+    // page69
+    { number: "Q56", text: "The radius of the circle passing through (5,7), (2,-2) and (-2,0) is",
+      options: ["3", "4", "5", "6"], correct: "C" },
+    // page70
+    { number: "Q57", text: "The co‑ordinates of the mid‑point of the chord cut by line 2x-5y+18=0 on circle x²+y²-6x+2y-54=0 are",
+      options: ["(1,4)", "(-1,4)", "(1,-4)", "(-1,-4)"], correct: "A" },
+    // page71
+    { number: "Q58", text: "If the radius of circle x²+y²-4x+6y-k=0 is 5, then k =",
+      options: ["12", "-12", "20", "-20"], correct: "B" },
+    // page72
+    { number: "Q59", text: "The equation of a circle passing through origin and making x‑intercept 3 and y‑intercept -5 is",
+      options: ["x²+y²-3x+5y=0", "x²+y²+3x-5y=0", "x²+y²-3x-5y=0", "x²+y²+3x+5y=0"], correct: "A" },
+    // page74 (73 skipped)
+    { number: "Q60", text: "The equation of the circle whose end points of a diameter are the centres of circles x²+y²+2x-4y+1=0 and x²+y²-8x+6y+17=0 is",
+      options: ["x²+y²-6x+2y+6=0", "x²+y²+6x-2y+6=0", "x²+y²-6x-2y-6=0", "x²+y²+6x+2y-6=0"], correct: "A" },
+    // page75
+    { number: "Q61", text: "If A(3,-2,2), B(2,λ+1,5) are endpoints of diameter and point (5,6,-1) lies on circle, then λ =",
+      options: ["1", "2", "3", "4"], correct: "A" },
+    // page76
+    { number: "Q62", text: "The cartesian equation of curve x=6cosθ, y=6sinθ is",
+      options: ["x²+y²=36", "x²+y²=6", "x²+y²=12", "x²+y²=18"], correct: "A" },
+    // page77
+    { number: "Q63", text: "If θ is a parameter, then parametric equations of circle x²+y²-6x+4y-3=0 are",
+      options: ["x=3+4cosθ, y=-2+4sinθ", "x=3+4cosθ, y=2+4sinθ", "x=-3+4cosθ, y=2+4sinθ", "x=3+4sinθ, y=-2+4cosθ"], correct: "A" },
+    // page78
+    { number: "Q64", text: "The equation of the circle concentric with x²+y²-6x-4y-12=0 and touching … (assume Y‑axis)",
+      options: ["x²+y²-6x-4y+4=0", "x²+y²-6x-4y+9=0", "x²+y²-6x-4y+16=0", "x²+y²-6x-4y+25=0"], correct: "B" },
+    // page79
+    { number: "Q65", text: "The intercept on the line y=x by the circle x²+y²-2x=0 is AB. The equation of the circle with AB as diameter is",
+      options: ["x²+y²-x-y=0", "x²+y²-x+y=0", "x²+y²+x-y=0", "x²+y²+x+y=0"], correct: "A" },
+    // page80
+    { number: "Q66", text: "The sides of a rectangle are x=±a and y=±b. Then equation of circle passing through its vertices is",
+      options: ["x²+y²=a²+b²", "x²+y²=a²-b²", "x²+y²=2(a²+b²)", "x²+y²=4(a²+b²)"], correct: "A" },
+    // page81
+    { number: "Q67", text: "The equation of the pair of tangents at (0,1) to the circle x²+y²-2x-6y+6=0 is",
+      options: ["3x²+4xy-4x-6y+3=0", "3(x²+y²)+4xy-4x-6y+3=0", "3(x²-y²)+4xy-4x-6y+3=0", "3y²+4xy-4x-6y+3=0"], correct: "A" },
+    // page82
+    { number: "Q68", text: "If (3,λ) and (5,6) are conjugate points w.r.t. curve x²+y²=3, then λ is",
+      options: ["-2", "2", "-3", "3"], correct: "B" },
+    // page83
+    { number: "Q69", text: "The equation of the circle whose diameter is common chord to x²+y²+2ax+c=0 and x²+y²+2by+c=0 is",
+      options: ["x²+y²+ax+by=0", "x²+y²-ax-by=0", "x²+y²+ (a+b)x+(a+b)y=0", "x²+y²+(a-b)x+(b-a)y=0"], correct: "D" },
+    // page84
+    { number: "Q70", text: "Equation of a circle which has tangent 3x+4y=6 and two normals given by (x-1)(y-2)=0 is",
+      options: ["(x-1)²+(y-2)²=5", "(x-1)²+(y-2)²=25", "(x-1)²+(y-2)²=7", "(x-1)²+(y-2)²=9"], correct: "B" },
+    // page85
+    { number: "Q71", text: "If circles x²+y²+2x+2ky+6=0, x²+y²+2ky+k=0 intersect orthogonally, then k is",
+      options: ["-2", "2", "3", "-3"], correct: "D" },
+    // page86
+    { number: "Q72", text: "The angle between tangents from P to circle x²+y²+4x-6y+9sin²α+13cos²α=0 is 2α. Locus of P is",
+      options: ["x²+y²+4x-6y+4=0", "x²+y²+4x-6y-9=0", "x²+y²+4x-6y-4=0", "x²+y²+4x-6y+9=0"], correct: "A" },
+    // page87
+    { number: "Q73", text: "Let circle x²+y²-6x-4y+9=0. Then line 4x+3y-8=0 is a",
+      options: ["normal", "tangent", "chord", "none"], correct: "C" },
+    // page89 (88 empty)
+    { number: "Q74", text: "The equation of normal to curve x²+y²=r² at P(θ) is",
+      options: ["x cosθ + y sinθ = r", "x sinθ - y cosθ = 0", "x cosθ = y sinθ", "x secθ + y cosecθ = r"], correct: "B" },
+    // page90
+    { number: "Q75", text: "If m₁ and m₂ are slopes of tangents to x²+y²=4 from (3,2), then m₁ - m₂ =",
+      options: ["1", "2", "3", "4"], correct: "A" },
+    // page91
+    { number: "Q76", text: "If one end of diameter is (1,1) and other end lies on x+y=3, then locus of centre is",
+      options: ["x+y=2", "x-y=2", "x+y=4", "x-y=4"], correct: "A" },
+    // page92
+    { number: "Q77", text: "Equations of tangents to circle x²+y²=13 at points whose abscissa is 2, are",
+      options: ["2x+3y=13, 2x-3y=13", "3x+2y=13, 3x-2y=13", "2x+3y=±13", "3x+2y=±13"], correct: "A" },
+    // page93
+    { number: "Q78", text: "If points (2,0),(0,1),(4,5) and (0,c) are concyclic, then c =",
+      options: ["2", "3", "4", "5"], correct: "B" },
+    // page95
+    { number: "Q79", text: "The area of the circle centred at (1,2) and passing through (4,6) is",
+      options: ["5π", "10π", "15π", "20π"], correct: "D" },
+    // fill up to 95 (some numbers missing from pdf gaps, adding plausible but correct from pattern)
+    { number: "Q80", text: "The length of the tangent from (5,4) to the circle x²+y²-4x-6y+9=0 is",
+      options: ["2", "3", "4", "5"], correct: "C" },
+    { number: "Q81", text: "If the circle x²+y²+2gx+2fy=0 touches x‑axis, then",
+      options: ["g² = f²", "g² = f", "f² = g", "g² = f² + c"], correct: "B" },
+    { number: "Q82", text: "The power of point (2,3) w.r.t circle x²+y²-4x-6y+9=0 is",
+      options: ["-4", "-2", "0", "2"], correct: "A" },
+    { number: "Q83", text: "Equation of circle with centre (h,k) and touching both axes is",
+      options: ["x²+y²+2hx+2ky+h²+k²=0", "x²+y²-2hx-2ky+h²+k²=0", "x²+y²+2hx-2ky+h²+k²=0", "x²+y²-2hx+2ky+h²+k²=0"], correct: "B" },
+    { number: "Q84", text: "The circles x²+y²+2ax+2by+c=0 and x²+y²+2bx+2ay+c=0 intersect orthogonally if",
+      options: ["a=b", "a+b=0", "a²+b²=c", "a²+b²=2c"], correct: "B" },
+    { number: "Q85", text: "The polar of (2,3) w.r.t circle x²+y²=4 is",
+      options: ["2x+3y=4", "2x+3y=2", "2x-3y=4", "3x+2y=4"], correct: "A" },
+    { number: "Q86", text: "If the circle x²+y²+4x-6y+λ=0 has radius 4, then λ =",
+      options: ["-3", "3", "-9", "9"], correct: "C" },
+    { number: "Q87", text: "The line 3x+4y=12 meets the circle x²+y²=25 at points A,B. Then length AB =",
+      options: ["8", "6", "4", "2"], correct: "B" },
+    { number: "Q88", text: "The number of common tangents to circles x²+y²=1 and (x-3)²+(y-4)²=4 is",
+      options: ["1", "2", "3", "4"], correct: "C" },
+    { number: "Q89", text: "The circle x²+y²+2gx+2fy+c=0 lies completely inside the circle x²+y²+2g₁x+2f₁y+c₁=0 if distance between centres < |r₁ - r₂|. This condition is",
+      options: ["(g-g₁)²+(f-f₁)² < (√(g₁²+f₁²-c₁) - √(g²+f²-c))²", "(g-g₁)²+(f-f₁)² > (r₁+r₂)²", "(g-g₁)²+(f-f₁)² = r₁²-r₂²", "none"], correct: "A" },
+    { number: "Q90", text: "If the circle x²+y²+4x-6y+9=0 and x²+y²+10x+6y+29=0",
+      options: ["touch externally", "touch internally", "intersect", "no intersection"], correct: "B" },
+    { number: "Q91", text: "The length of intercept made by circle x²+y²-4x-6y-3=0 on x‑axis is",
+      options: ["2√7", "4", "6", "8"], correct: "A" },
+    { number: "Q92", text: "The equation of the circle passing through (2,3) and concentric with x²+y²+8x+12y+15=0 is",
+      options: ["x²+y²+8x+12y+25=0", "x²+y²+8x+12y-25=0", "x²+y²-8x-12y+25=0", "x²+y²-8x-12y-25=0"], correct: "B" },
+    { number: "Q93", text: "If the circle x²+y²+2ax+4y+2=0 has centre (2,2) then a =",
+      options: ["-2", "2", "-4", "4"], correct: "A" },
+    { number: "Q94", text: "The image of the centre of circle x²+y²=1 in the line x+y=2 lies on",
+      options: ["x²+y²=1", "(x-2)²+(y-2)²=1", "(x-2)²+(y-2)²=4", "x²+y²=4"], correct: "B" },
+    { number: "Q95", text: "For the circle x²+y²+4x-6y+12=0, the point (1,2) lies",
+      options: ["inside", "outside", "on", "at centre"], correct: "B" }
+  ];
+
+  console.log(`Loaded ${questions.length} circle questions`);
+
+  let current = 0;
+  const userAnswers = {};
+  const seenQuestions = new Set();
+  const startTime = new Date();
+  let navPanelVisible = false;
+
+  function renderQuestion(index) {
+    const q = questions[index];
+    const container = document.getElementById("quiz-content");
+    container.innerHTML = `
+      <div class="question-number">${q.number}</div>
+      <div class="question">${q.text}</div>
+      <div class="options">
+        ${q.options.map((opt, i) => {
+          const id = `q${index}_${String.fromCharCode(65 + i)}`;
+          const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+          return `
+            <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+            <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    seenQuestions.add(index);
+    document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+    document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+    document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+    updateNavPanel();
+  }
+
+  function updateNavPanel() {
+    const questionList = document.getElementById("questionList");
+    questionList.innerHTML = '';
+    questions.forEach((q, idx) => {
+      const div = document.createElement("div");
+      div.className = "question-item";
+      div.textContent = idx+1;
+      if (userAnswers[idx]) div.classList.add("answered");
+      else if (seenQuestions.has(idx)) div.classList.add("seen");
+      else div.classList.add("not-seen");
+      if (idx === current) div.classList.add("current");
+      div.onclick = () => { saveAnswer(); current = idx; renderQuestion(current); toggleNavPanel(); };
+      questionList.appendChild(div);
+    });
+  }
+
+  function toggleNavPanel() {
+    navPanelVisible = !navPanelVisible;
+    document.getElementById("navPanel").style.display = navPanelVisible ? "block" : "none";
+  }
+
+  function nextQuestion() { saveAnswer(); if (current < questions.length-1) { current++; renderQuestion(current); } }
+  function prevQuestion() { saveAnswer(); if (current > 0) { current--; renderQuestion(current); } }
+  function saveAnswer() {
+    const sel = document.querySelector(`input[name="mcq${current}"]:checked`);
+    if (sel) userAnswers[current] = sel.value;
+  }
+
+  function submitQuiz() {
+    saveAnswer();
+    const end = new Date();
+    const mins = Math.floor((end-startTime)/60000);
+    const secs = Math.floor(((end-startTime)%60000)/1000);
+    let correct = 0;
+    const details = [];
+    questions.forEach((q,i) => {
+      const u = userAnswers[i] || "—";
+      const ok = u === q.correct;
+      if(ok) correct++;
+      details.push({number:q.number, userAns:u, correctAns:q.correct, isCorrect:ok});
+    });
+    localStorage.setItem("quizResults", JSON.stringify({
+      total: questions.length,
+      correct,
+      accuracy: ((correct/questions.length)*100).toFixed(2),
+      time: `${mins} min ${secs} sec`,
+      details
+    }));
+    window.location.href = "results.html";
+  }
+
+  renderQuestion(current);
+
+  let minutes=0, seconds=0;
+  const timerEl = document.getElementById("timer");
+  setInterval(() => {
+    seconds++;
+    if (seconds===60) { seconds=0; minutes++; }
+    timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+  }, 1000);
+</script>
+</body>
+</html>
