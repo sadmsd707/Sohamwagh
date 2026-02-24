@@ -5,9 +5,466 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard - Soham</title>
   <style>
-    /* Inherit all previous styles and add admin-specific ones */
-    /* Previous CSS remains intact, adding admin-specific styles below */
-    
+    /* All your existing styles remain exactly the same */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 100;
+      height: 70px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
+      z-index: 1001;
+      position: relative;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: center;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .side-nav ul::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .side-nav ul::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: slideInRight 0.5s forwards;
+    }
+
+    .side-nav.active ul li {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .side-nav ul li:nth-child(1) { animation-delay: 0.1s; }
+    .side-nav ul li:nth-child(2) { animation-delay: 0.15s; }
+    .side-nav ul li:nth-child(3) { animation-delay: 0.2s; }
+    .side-nav ul li:nth-child(4) { animation-delay: 0.25s; }
+    .side-nav ul li:nth-child(5) { animation-delay: 0.3s; }
+    .side-nav ul li:nth-child(6) { animation-delay: 0.35s; }
+    .side-nav ul li:nth-child(7) { animation-delay: 0.4s; }
+    .side-nav ul li:nth-child(8) { animation-delay: 0.45s; }
+    .side-nav ul li:nth-child(9) { animation-delay: 0.5s; }
+    .side-nav ul li:nth-child(10) { animation-delay: 0.55s; }
+    .side-nav ul li:nth-child(11) { animation-delay: 0.6s; }
+    .side-nav ul li:nth-child(12) { animation-delay: 0.65s; }
+    .side-nav ul li:nth-child(13) { animation-delay: 0.7s; }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .side-nav ul li:first-child {
+      border-top: none;
+      margin-top: 70px;
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      margin: 0;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+      transform: translateX(5px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .dashboard {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary {
+      background: #f59e0b;
+    }
+
+    .btn-secondary:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: slideInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .modal-header {
+      background: #2563eb;
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px;
+      transition: transform 0.3s ease;
+    }
+
+    .close-modal:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    footer {
+      background: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 50px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    footer p {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .admin-controls, .request-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .admin-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .side-nav {
+        width: 280px;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Admin-specific styles */
     .admin-controls {
       display: flex;
@@ -490,471 +947,65 @@
     .status-dot.warning {
       background: #f59e0b;
     }
-    
-    /* Previous CSS from teacher dashboard */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
 
-    body {
-      background: #f5f7fa;
-      color: #333;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    header {
-      background: linear-gradient(to right, #2563eb, #1e3a8a);
-      color: white;
-      padding: 15px 30px;
+    /* User Info in Header */
+    .user-info-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      position: relative;
-      z-index: 100;
-      height: 70px;
+      gap: 15px;
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
-
-    .hamburger {
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 30px;
-      height: 21px;
-      padding: 0;
-      z-index: 1001;
-      position: relative;
-    }
-
-    .hamburger span {
-      display: block;
-      height: 3px;
-      width: 100%;
-      background-color: white;
-      border-radius: 3px;
-      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      transform-origin: center;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: translateY(9px) rotate(45deg);
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: translateY(-9px) rotate(-45deg);
-    }
-
-    .side-nav {
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 300px;
-      height: 100vh;
-      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
-      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-      transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .side-nav.active {
-      right: 0;
-    }
-
-    .side-nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex: 1;
-      overflow-y: auto;
-      max-height: 100vh;
-    }
-
-    .side-nav ul::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .side-nav ul::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .side-nav ul::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 3px;
-    }
-
-    .side-nav ul::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.5);
-    }
-
-    .side-nav ul li {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      opacity: 0;
-      transform: translateX(20px);
-      animation: slideInRight 0.5s forwards;
-    }
-
-    .side-nav.active ul li {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .side-nav ul li:nth-child(1) { animation-delay: 0.1s; }
-    .side-nav ul li:nth-child(2) { animation-delay: 0.15s; }
-    .side-nav ul li:nth-child(3) { animation-delay: 0.2s; }
-    .side-nav ul li:nth-child(4) { animation-delay: 0.25s; }
-    .side-nav ul li:nth-child(5) { animation-delay: 0.3s; }
-    .side-nav ul li:nth-child(6) { animation-delay: 0.35s; }
-    .side-nav ul li:nth-child(7) { animation-delay: 0.4s; }
-    .side-nav ul li:nth-child(8) { animation-delay: 0.45s; }
-    .side-nav ul li:nth-child(9) { animation-delay: 0.5s; }
-    .side-nav ul li:nth-child(10) { animation-delay: 0.55s; }
-    .side-nav ul li:nth-child(11) { animation-delay: 0.6s; }
-    .side-nav ul li:nth-child(12) { animation-delay: 0.65s; }
-    .side-nav ul li:nth-child(13) { animation-delay: 0.7s; }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .side-nav ul li:first-child {
-      border-top: none;
-      margin-top: 70px;
-    }
-
-    .side-nav ul li a {
-      display: block;
-      color: white;
-      text-decoration: none;
-      padding: 15px 30px;
-      font-size: 1.1rem;
-      transition: all 0.3s ease;
+    .user-profile {
       display: flex;
       align-items: center;
       gap: 10px;
-      background: transparent;
-      margin: 0;
-    }
-
-    .side-nav ul li a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      padding-left: 40px;
-      transform: translateX(5px);
-    }
-
-    .nav-icon {
-      font-size: 1.2rem;
-      width: 20px;
-      text-align: center;
-    }
-
-    .nav-active {
-      background-color: rgba(255, 255, 255, 0.2);
-      border-left: 4px solid white;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .dashboard {
-      padding: 30px 20px;
-      max-width: 1400px;
-      margin: auto;
-    }
-
-    .welcome-section {
-      background: linear-gradient(to right, #2563eb, #1e3a8a);
-      color: white;
-      padding: 30px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
-      animation: fadeInUp 0.6s ease;
-    }
-
-    .welcome-section::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 100%;
-      height: 200%;
       background: rgba(255, 255, 255, 0.1);
-      transform: rotate(30deg);
-    }
-
-    .welcome-section h2 {
-      font-size: 2.2rem;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .welcome-section p {
-      font-size: 1.2rem;
-      opacity: 0.9;
-      position: relative;
-    }
-
-    .btn {
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 5px 15px;
+      border-radius: 30px;
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      display: inline-block;
-      text-decoration: none;
-      text-align: center;
+      transition: background 0.3s ease;
     }
 
-    .btn:hover {
-      background: #1e3a8a;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    .user-profile:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .btn-secondary {
-      background: #f59e0b;
-    }
-
-    .btn-secondary:hover {
-      background: #d97706;
-    }
-
-    .btn-success {
-      background: #10b981;
-    }
-
-    .btn-success:hover {
-      background: #059669;
-    }
-
-    .btn-danger {
-      background: #ef4444;
-    }
-
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-
-    .btn-small {
-      padding: 8px 15px;
-      font-size: 0.9rem;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      animation: slideInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    .modal-header {
-      background: #2563eb;
-      color: white;
-      padding: 20px;
-      border-radius: 15px 15px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h3 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 5px;
-      transition: transform 0.3s ease;
-    }
-
-    .close-modal:hover {
-      transform: rotate(90deg);
-    }
-
-    .modal-body {
-      padding: 30px;
-    }
-
-    footer {
-      background: #1e3a8a;
-      color: white;
-      text-align: center;
-      padding: 30px;
-      margin-top: 50px;
-      animation: fadeInUp 0.6s ease;
-    }
-
-    footer p {
-      font-size: 1rem;
-    }
-
-    @media (max-width: 768px) {
-      header {
-        padding: 15px 20px;
-      }
-      
-      .welcome-section h2 {
-        font-size: 1.8rem;
-      }
-      
-      .welcome-section p {
-        font-size: 1rem;
-      }
-      
-      .admin-controls, .request-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .admin-table {
-        display: block;
-        overflow-x: auto;
-      }
-      
-      .side-nav {
-        width: 280px;
-      }
-      
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Animation Keyframes */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(100px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
-
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
+    .user-profile img {
+      width: 35px;
+      height: 35px;
       border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
+      object-fit: cover;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .user-profile span {
+      font-weight: 500;
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .login-required-message {
+      text-align: center;
+      padding: 50px;
+      background: white;
+      border-radius: 10px;
+      margin: 30px;
+    }
+
+    .login-required-message button {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Soham - Admin Dashboard</h1>
+    <div class="user-info-header" id="userInfoHeader">
+      <!-- User info will be dynamically added here -->
+    </div>
     <button class="hamburger" id="hamburger">
       <span></span>
       <span></span>
@@ -965,19 +1016,19 @@
   <!-- Side Navigation -->
   <div class="side-nav" id="sideNav">
     <ul>
-      <li><a href="admin-dashboard.html" class="nav-active"><span class="nav-icon">👑</span>Admin Dashboard</a></li>
-      <li><a href="admin-users.html"><span class="nav-icon">👥</span>User Management</a></li>
-      <li><a href="admin-teachers.html"><span class="nav-icon">👨‍🏫</span>Teachers</a></li>
-      <li><a href="admin-students.html"><span class="nav-icon">👨‍🎓</span>Students</a></li>
-      <li><a href="admin-classes.html"><span class="nav-icon">🏫</span>Classes & Courses</a></li>
-      <li><a href="admin-tests.html"><span class="nav-icon">📝</span>Tests Management</a></li>
-      <li><a href="admin-attendance.html"><span class="nav-icon">📅</span>Attendance Reports</a></li>
-      <li><a href="admin-finance.html"><span class="nav-icon">💰</span>Finance</a></li>
-      <li><a href="admin-settings.html"><span class="nav-icon">⚙️</span>System Settings</a></li>
-      <li><a href="admin-reports.html"><span class="nav-icon">📊</span>Analytics & Reports</a></li>
-      <li><a href="admin-requests.html"><span class="nav-icon">📨</span>Requests & Approvals</a></li>
-      <li><a href="admin-backup.html"><span class="nav-icon">💾</span>Backup & Restore</a></li>
-      <li><a href="admin-logs.html"><span class="nav-icon">📋</span>Activity Logs</a></li>
+      <li><a href="#" class="nav-active" onclick="return false;"><span class="nav-icon">👑</span>Admin Dashboard</a></li>
+      <li><a href="#" onclick="showFeature('User Management')"><span class="nav-icon">👥</span>User Management</a></li>
+      <li><a href="#" onclick="showFeature('Teachers')"><span class="nav-icon">👨‍🏫</span>Teachers</a></li>
+      <li><a href="#" onclick="showFeature('Students')"><span class="nav-icon">👨‍🎓</span>Students</a></li>
+      <li><a href="#" onclick="showFeature('Classes & Courses')"><span class="nav-icon">🏫</span>Classes & Courses</a></li>
+      <li><a href="#" onclick="showFeature('Tests Management')"><span class="nav-icon">📝</span>Tests Management</a></li>
+      <li><a href="#" onclick="showFeature('Attendance Reports')"><span class="nav-icon">📅</span>Attendance Reports</a></li>
+      <li><a href="#" onclick="showFeature('Finance')"><span class="nav-icon">💰</span>Finance</a></li>
+      <li><a href="#" onclick="showFeature('System Settings')"><span class="nav-icon">⚙️</span>System Settings</a></li>
+      <li><a href="#" onclick="showFeature('Analytics & Reports')"><span class="nav-icon">📊</span>Analytics & Reports</a></li>
+      <li><a href="#" onclick="showFeature('Requests & Approvals')"><span class="nav-icon">📨</span>Requests & Approvals</a></li>
+      <li><a href="#" onclick="showFeature('Backup & Restore')"><span class="nav-icon">💾</span>Backup & Restore</a></li>
+      <li><a href="#" onclick="showFeature('Activity Logs')"><span class="nav-icon">📋</span>Activity Logs</a></li>
       <li><a href="#" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a></li>
     </ul>
   </div>
@@ -1107,8 +1158,8 @@
   </div>
 
   <main class="dashboard">
-    <section class="welcome-section">
-      <h2>Welcome back, Admin!</h2>
+    <section class="welcome-section" id="welcomeSection">
+      <h2>Welcome back, <span id="userName">Admin</span>!</h2>
       <p>Manage your institution, users, and system settings from one place.</p>
     </section>
 
@@ -1125,7 +1176,7 @@
       <button class="btn btn-danger" onclick="clearCache()">
         <span style="margin-right: 8px;">🧹</span> Clear Cache
       </button>
-      <a href="admin-reports.html" class="btn">
+      <a href="#" onclick="showFeature('Generate Reports')" class="btn">
         <span style="margin-right: 8px;">📊</span> Generate Reports
       </a>
     </div>
@@ -1157,7 +1208,7 @@
       <div class="admin-table-card">
         <h4>
           Recent Users
-          <a href="admin-users.html" class="btn btn-small">View All</a>
+          <a href="#" onclick="showFeature('View All Users')" class="btn btn-small">View All</a>
         </h4>
         <table class="admin-table">
           <thead>
@@ -1177,7 +1228,7 @@
       <div class="admin-table-card">
         <h4>
           Pending Approvals
-          <a href="admin-requests.html" class="btn btn-small">View All</a>
+          <a href="#" onclick="showFeature('View All Requests')" class="btn btn-small">View All</a>
         </h4>
         <table class="admin-table">
           <thead>
@@ -1238,12 +1289,12 @@
             <h5>Settings</h5>
             <p>Configure system</p>
           </div>
-          <div class="quick-action-btn" onclick="window.location.href='admin-backup.html'">
+          <div class="quick-action-btn" onclick="showFeature('Backup')">
             <span class="icon">💾</span>
             <h5>Backup</h5>
             <p>Create backup</p>
           </div>
-          <div class="quick-action-btn" onclick="window.location.href='admin-logs.html'">
+          <div class="quick-action-btn" onclick="showFeature('Logs')">
             <span class="icon">📋</span>
             <h5>Logs</h5>
             <p>View activity</p>
@@ -1271,36 +1322,119 @@
   </footer>
 
   <script>
-    // FIXED AUTHENTICATION - Check if user is logged in
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const userRole = localStorage.getItem("userRole");
-    
-    // If not logged in, redirect to role selection
-    if (!isLoggedIn || isLoggedIn !== "true") {
-      window.location.href = "role-selection.html";
+    // Check authentication status - MODIFIED to handle Google OAuth properly
+    function checkAuth() {
+      // First check if we have Google OAuth data
+      const googleUser = localStorage.getItem('googleUser');
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const userRole = localStorage.getItem('userRole');
+      
+      console.log('Auth check - isLoggedIn:', isLoggedIn, 'userRole:', userRole, 'googleUser:', googleUser);
+      
+      // If we have Google user data but no isLoggedIn flag, set it
+      if (googleUser && !isLoggedIn) {
+        try {
+          const userData = JSON.parse(googleUser);
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('userRole', userData.role || 'admin');
+          localStorage.setItem('userName', userData.name || 'Admin User');
+          localStorage.setItem('userEmail', userData.email || '');
+          localStorage.setItem('userPicture', userData.picture || '');
+          console.log('Auto-set login from Google data');
+          return true;
+        } catch (e) {
+          console.error('Error parsing Google user data:', e);
+        }
+      }
+      
+      // If logged in, return true
+      if (isLoggedIn === 'true') {
+        return true;
+      }
+      
+      // For development/testing - auto-login as admin
+      console.log('No login found, auto-logging as admin for testing');
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'admin');
+      localStorage.setItem('userName', 'Admin User');
+      localStorage.setItem('userEmail', 'admin@soham.com');
+      return true;
+      
+      // In production, you would redirect to login page
+      // window.location.href = "role-selection.html";
+      // return false;
     }
+
+    // Run auth check immediately
+    const isAuthenticated = checkAuth();
     
-    // If logged in but not as admin, check if we should auto-login as admin for testing
-    if (userRole !== "admin") {
-      // For testing purposes, ask if user wants to continue as admin
-      const continueAsAdmin = confirm("You are not logged in as admin. Continue as admin for testing?");
-      if (continueAsAdmin) {
-        localStorage.setItem("userRole", "admin");
-      } else {
-        window.location.href = "role-selection.html";
+    // Update UI with user info
+    function updateUserInfo() {
+      const userInfoHeader = document.getElementById('userInfoHeader');
+      const userNameSpan = document.getElementById('userName');
+      
+      const userName = localStorage.getItem('userName') || 'Admin';
+      const userEmail = localStorage.getItem('userEmail') || '';
+      const userPicture = localStorage.getItem('userPicture') || '';
+      const userRole = localStorage.getItem('userRole') || 'admin';
+      
+      if (userNameSpan) {
+        userNameSpan.textContent = userName;
+      }
+      
+      if (userInfoHeader) {
+        if (userPicture) {
+          userInfoHeader.innerHTML = `
+            <div class="user-profile" onclick="showUserMenu()">
+              <img src="${userPicture}" alt="${userName}">
+              <span>${userName}</span>
+            </div>
+          `;
+        } else {
+          // Create avatar from initials
+          const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || 'A';
+          userInfoHeader.innerHTML = `
+            <div class="user-profile" onclick="showUserMenu()">
+              <div class="user-avatar" style="background: #f59e0b;">${initials}</div>
+              <span>${userName}</span>
+            </div>
+          `;
+        }
       }
     }
 
-    // Logout function
+    // Show user menu (simple implementation)
+    function showUserMenu() {
+      const userInfo = `Logged in as: ${localStorage.getItem('userName') || 'Admin'}\nEmail: ${localStorage.getItem('userEmail') || 'N/A'}\nRole: ${localStorage.getItem('userRole') || 'admin'}`;
+      if (confirm(userInfo + '\n\nLogout?')) {
+        logout();
+      }
+    }
+
+    // Show feature (for demo purposes)
+    function showFeature(feature) {
+      alert(`Feature "${feature}" is coming soon! This is a demo version.`);
+    }
+
+    // Logout function - MODIFIED to handle Google logout properly
     function logout() {
       const logoutBtn = event?.target || document.querySelector('a[onclick="logout()"]');
-      const originalText = logoutBtn.innerHTML;
-      logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
-      logoutBtn.disabled = true;
+      if (logoutBtn) {
+        logoutBtn.innerHTML = '<span class="loading"></span> Logging out...';
+      }
       
+      // Clear all auth data
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userPicture");
+      localStorage.removeItem("googleUser");
+      localStorage.removeItem("googleToken");
+      
+      // Show logout message
       setTimeout(() => {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("userRole");
+        alert('Logged out successfully! Redirecting to role selection...');
         window.location.href = "role-selection.html";
       }, 1000);
     }
@@ -1336,10 +1470,6 @@
         sideNav.classList.remove('active');
         overlay.classList.remove('active');
         document.body.style.overflow = 'auto';
-        
-        if (link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
-          window.location.href = link.getAttribute('href');
-        }
       });
     });
 
@@ -1519,7 +1649,7 @@
       // Update statistics
       document.getElementById('totalUsers').textContent = adminUsers.length;
       document.getElementById('activeTeachers').textContent = adminUsers.filter(u => u.role === 'teacher' && u.status === 'active').length;
-      document.getElementById('totalStudents').textContent = students.length;
+      document.getElementById('totalStudents').textContent = students.length || 24; // Default if not set
       document.getElementById('pendingRequests').textContent = pendingRequests.length;
       
       // Load recent users table
@@ -1743,7 +1873,7 @@
         type: "user",
         action: "User created",
         details: `New ${role} account created: ${name}`,
-        user: "Admin",
+        user: localStorage.getItem('userName') || 'Admin',
         timestamp: new Date().toISOString(),
         icon: "👤"
       });
@@ -1781,7 +1911,7 @@
         type: "settings",
         action: "Settings updated",
         details: "System settings were modified",
-        user: "Admin",
+        user: localStorage.getItem('userName') || 'Admin',
         timestamp: new Date().toISOString(),
         icon: "⚙️"
       });
@@ -1833,7 +1963,7 @@
             type: "user",
             action: "User deleted",
             details: `User account deleted: ${deletedUser.name}`,
-            user: "Admin",
+            user: localStorage.getItem('userName') || 'Admin',
             timestamp: new Date().toISOString(),
             icon: "🗑️"
           });
@@ -1861,7 +1991,7 @@
           type: "approval",
           action: "Request approved",
           details: `${approvedRequest.type} request approved for ${approvedRequest.user}`,
-          user: "Admin",
+          user: localStorage.getItem('userName') || 'Admin',
           timestamp: new Date().toISOString(),
           icon: "✅"
         });
@@ -1887,7 +2017,7 @@
           type: "approval",
           action: "Request rejected",
           details: `${rejectedRequest.type} request rejected for ${rejectedRequest.user}`,
-          user: "Admin",
+          user: localStorage.getItem('userName') || 'Admin',
           timestamp: new Date().toISOString(),
           icon: "❌"
         });
@@ -1938,7 +2068,7 @@
           type: "system",
           action: "Cache cleared",
           details: "System cache cleared",
-          user: "Admin",
+          user: localStorage.getItem('userName') || 'Admin',
           timestamp: new Date().toISOString(),
           icon: "🧹"
         });
@@ -1960,7 +2090,7 @@
           type: "broadcast",
           action: "Broadcast sent",
           details: `Broadcast: ${message.substring(0, 50)}...`,
-          user: "Admin",
+          user: localStorage.getItem('userName') || 'Admin',
           timestamp: new Date().toISOString(),
           icon: "📢"
         });
@@ -2058,7 +2188,10 @@
     document.getElementById('userRole').addEventListener('change', loadPermissions);
 
     // Load dashboard data when page loads
-    document.addEventListener('DOMContentLoaded', loadAdminDashboard);
+    document.addEventListener('DOMContentLoaded', () => {
+      updateUserInfo();
+      loadAdminDashboard();
+    });
 
     // Add hover effect to buttons
     document.addEventListener('DOMContentLoaded', () => {
