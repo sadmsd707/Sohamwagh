@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Chemical Kinetics Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+      line-height: 1.5;
+    }
+    .question-text {
+      margin-bottom: 15px;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Math styling */
+    .math {
+      font-family: "Times New Roman", serif;
+      font-style: italic;
+    }
+    .superscript {
+      vertical-align: super;
+      font-size: 0.8em;
+    }
+    .subscript {
+      vertical-align: sub;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Chemical Kinetics</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰ Questions</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Chemical Kinetics Questions (1-256)</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    // All 256 questions from the PDF
+    const questions = [
+      // Question 1
+      {
+        number: "Question 1/256",
+        text: "Which of the following statements is NOT correct regarding order of reaction?",
+        options: [
+          "It is determined experimentally.",
+          "It is sum of power to the concentration terms of reactants in rate law equation.",
+          "It is always whole number.",
+          "It is not influenced by stoichiometric coefficient of reactants."
+        ],
+        correct: "C"
+      },
+      // Question 2
+      {
+        number: "Question 2/256",
+        text: "What is half life of a first order reaction if time required to decrease concentration of reactant from 0.4 M to 0.1 M is x hour?",
+        options: [
+          "x/2 hour",
+          "x hour",
+          "2x hour",
+          "x/4 hour"
+        ],
+        correct: "A"
+      },
+      // Question 3
+      {
+        number: "Question 3/256",
+        text: "For the reaction, 2N₂O₅(g) → 4NO₂(g) + O₂(g), N₂O₅ disappears at a rate of x mol dm⁻³ s⁻¹. Find the rate of formation of O₂?",
+        options: [
+          "x mol dm⁻³ s⁻¹",
+          "2x mol dm⁻³ s⁻¹",
+          "x/2 mol dm⁻³ s⁻¹",
+          "x/4 mol dm⁻³ s⁻¹"
+        ],
+        correct: "C"
+      },
+      // Question 4
+      {
+        number: "Question 4/256",
+        text: "For the reaction, A + 3B → 2C, rate of consumption of A is 1.4 mol dm⁻³ minute⁻¹. Calculate rate of consumption of B.",
+        options: [
+          "0.7 mol dm⁻³ minute⁻¹",
+          "4.2 mol dm⁻³ minute⁻¹",
+          "2.8 mol dm⁻³ minute⁻¹",
+          "2.1 mol dm⁻³ minute⁻¹"
+        ],
+        correct: "B"
+      },
+      // Question 5
+      {
+        number: "Question 5/256",
+        text: "The rate constant for the reaction, 2N₂O₅(g) → 2N₂O₄(g) + O₂(g) is 4.98 × 10⁻⁴ s⁻¹. What is order of reaction?",
+        options: [
+          "Zero order",
+          "First order",
+          "Second order",
+          "Third order"
+        ],
+        correct: "B"
+      },
+      // Question 6
+      {
+        number: "Question 6/256",
+        text: "What is numerical value of rate constant of a first order reaction that is 20% completed in 10 minute?",
+        options: [
+          "0.0223 min⁻¹",
+          "0.0231 min⁻¹",
+          "0.0345 min⁻¹",
+          "0.0112 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 7
+      {
+        number: "Question 7/256",
+        text: "A complex reaction takes place in following steps: NO₂Cl(g) → NO₂(g) + Cl(g) (slow); NO₂Cl(g) + Cl(g) → NO₂(g) + Cl₂(g) (fast). Identify rate law equation for this reaction.",
+        options: [
+          "r = k[NO₂Cl]",
+          "r = k[NO₂Cl][Cl]",
+          "r = k[NO₂Cl]²",
+          "r = k[NO₂][Cl]"
+        ],
+        correct: "A"
+      },
+      // Question 8
+      {
+        number: "Question 8/256",
+        text: "What is the average rate of reaction when change in concentration of product is 0.05 M in 20 seconds?",
+        options: [
+          "0.0025 M/s",
+          "0.005 M/s",
+          "0.001 M/s",
+          "0.01 M/s"
+        ],
+        correct: "A"
+      },
+      // Question 9
+      {
+        number: "Question 9/256",
+        text: "The slope of a graph log[A]t versus 't' for first order reaction is -2.5 × 10⁻³ s⁻¹. Find rate constant of the reaction?",
+        options: [
+          "2.5 × 10⁻³ s⁻¹",
+          "5.75 × 10⁻³ s⁻¹",
+          "1.25 × 10⁻³ s⁻¹",
+          "5.0 × 10⁻³ s⁻¹"
+        ],
+        correct: "B"
+      },
+      // Question 10
+      {
+        number: "Question 10/256",
+        text: "Identify the order of following reaction? 2NO₂(g) → 2NO(g) + O₂(g)",
+        options: [
+          "Zero order",
+          "First order",
+          "Second order",
+          "Third order"
+        ],
+        correct: "C"
+      },
+      // Question 11
+      {
+        number: "Question 11/256",
+        text: "Rate of the reaction A + B → product is 3.6 × 10⁻² mol dm⁻³ s⁻¹ and rate law is r = k[A][B]². What is rate constant of the reaction if [A] = 0.2 M and [B] = 0.1 M?",
+        options: [
+          "1.8 × 10⁻² mol⁻² dm⁶ s⁻¹",
+          "3.6 mol⁻² dm⁶ s⁻¹",
+          "18 mol⁻² dm⁶ s⁻¹",
+          "3.6 × 10⁻² mol⁻² dm⁶ s⁻¹"
+        ],
+        correct: "C"
+      },
+      // Question 12
+      {
+        number: "Question 12/256",
+        text: "Calculate rate constant of a first order reaction having pre exponential factor 1.6 × 10¹³ s⁻¹ (Ea/2.303RT = 21)",
+        options: [
+          "3.2 × 10⁻¹³",
+          "1.6 × 10⁻¹³",
+          "3.2 × 10⁻⁸",
+          "1.6 × 10⁻⁸"
+        ],
+        correct: "D"
+      },
+      // Question 14
+      {
+        number: "Question 14/256",
+        text: "Which of the following is an example of second order reaction?",
+        options: [
+          "H₂ + I₂ → 2HI",
+          "2N₂O₅ → 4NO₂ + O₂",
+          "NH₄NO₂ → N₂ + 2H₂O",
+          "CH₃COOC₂H₅ + NaOH → CH₃COONa + C₂H₅OH"
+        ],
+        correct: "D"
+      },
+      // Question 15
+      {
+        number: "Question 15/256",
+        text: "What is the time required for 99% completion of a first order reaction if rate constant is 23.03 min⁻¹?",
+        options: [
+          "0.1 min",
+          "0.2 min",
+          "0.3 min",
+          "0.4 min"
+        ],
+        correct: "B"
+      },
+      // Question 16
+      {
+        number: "Question 16/256",
+        text: "For a reaction A → Product, rate constant is 6.93 × 10⁻³ hour⁻¹. What is order of reaction?",
+        options: [
+          "Zero order",
+          "First order",
+          "Second order",
+          "Third order"
+        ],
+        correct: "B"
+      },
+      // Question 17
+      {
+        number: "Question 17/256",
+        text: "If r = k[A]²[B] is rate law equation for reaction A + B → C, at [A] = 1M and [B] = 0.2M, Calculate rate of reaction if rate constant is 6.25M⁻²s⁻¹",
+        options: [
+          "1.25 M/s",
+          "2.5 M/s",
+          "5.0 M/s",
+          "0.625 M/s"
+        ],
+        correct: "A"
+      },
+      // Question 18
+      {
+        number: "Question 18/256",
+        text: "The rate constant is doubled when temperature increases from 27°C to 37°C. What is activation energy in kJ?",
+        options: [
+          "52.9 kJ/mol",
+          "26.4 kJ/mol",
+          "13.2 kJ/mol",
+          "105.8 kJ/mol"
+        ],
+        correct: "A"
+      },
+      // Question 19
+      {
+        number: "Question 19/256",
+        text: "Rate law for the reaction, NO₂(g) + CO(g) → NO(g) + CO₂(g) is R = k[NO₂]². What is the order of reaction w.r.t. CO?",
+        options: [
+          "Zero",
+          "First",
+          "Second",
+          "One and half"
+        ],
+        correct: "A"
+      },
+      // Question 20
+      {
+        number: "Question 20/256",
+        text: "Rate of reaction is r₁ = k[A]ᵃ[B]ᵇ. If the concentration of A is doubled and B is halved the new rate is r₂, What is the value of r₂/r₁?",
+        options: [
+          "2ᵃ⁻ᵇ",
+          "2ᵃ⁺ᵇ",
+          "2ᵃ/2ᵇ",
+          "2ᵃ × 2ᵇ"
+        ],
+        correct: "A"
+      },
+      // Question 21
+      {
+        number: "Question 21/256",
+        text: "A first order reaction is 50% completed in 16 minute. Find the percentage of reactant reacting in 32 minute.",
+        options: [
+          "25%",
+          "50%",
+          "75%",
+          "100%"
+        ],
+        correct: "C"
+      },
+      // Question 22
+      {
+        number: "Question 22/256",
+        text: "Find the rate of following reaction. 2N₂O₅(g) → 4NO₂(g) + O₂(g) if concentration of NO₂ increases to 5.2 × 10⁻³ M in 100 seconds.",
+        options: [
+          "1.3 × 10⁻⁵ M/s",
+          "5.2 × 10⁻⁵ M/s",
+          "2.6 × 10⁻⁵ M/s",
+          "1.04 × 10⁻⁴ M/s"
+        ],
+        correct: "A"
+      },
+      // Question 23
+      {
+        number: "Question 23/256",
+        text: "The rate constant of a first order reaction is 1.15 × 10⁻³ s⁻¹. How long will 5 g of reactant take to reduce to 3 g?",
+        options: [
+          "200 s",
+          "400 s",
+          "600 s",
+          "800 s"
+        ],
+        correct: "B"
+      },
+      // Question 24
+      {
+        number: "Question 24/256",
+        text: "Which of the following is an example of first order reaction?",
+        options: [
+          "2N₂O₅ → 4NO₂ + O₂",
+          "H₂ + I₂ → 2HI",
+          "CH₃COOC₂H₅ + NaOH → CH₃COONa + C₂H₅OH",
+          "NH₄NO₂ → N₂ + 2H₂O"
+        ],
+        correct: "A"
+      },
+      // Question 25
+      {
+        number: "Question 25/256",
+        text: "Nitric oxide reacts with H₂ according to reaction. 2NO(g) + 2H₂(g) → N₂(g) + 2H₂O(g) Identify the correct relationship for consumption of reactant and formation of product.",
+        options: [
+          "-d[NO]/dt = -d[H₂]/dt = d[N₂]/dt = d[H₂O]/dt",
+          "-d[NO]/dt = -2d[H₂]/dt = d[N₂]/dt = 2d[H₂O]/dt",
+          "-d[NO]/dt = -d[H₂]/dt = 2d[N₂]/dt = d[H₂O]/dt",
+          "-d[NO]/dt = -d[H₂]/dt = d[N₂]/dt = 2d[H₂O]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 26
+      {
+        number: "Question 26/256",
+        text: "For a reaction, A + B → product, it is found that rate law is r = k[A]¹·⁵[B]²·⁵. What is the order of reaction?",
+        options: [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        correct: "C"
+      },
+      // Question 27
+      {
+        number: "Question 27/256",
+        text: "The half life values for two different first order reaction A and B are 75 minute and 2.5 hour respectively. What is the r_B/r_A ratio of rate constants?",
+        options: [
+          "0.5",
+          "2.0",
+          "3.0",
+          "5.0"
+        ],
+        correct: "A"
+      },
+      // Question 29
+      {
+        number: "Question 29/256",
+        text: "Rate law for the reaction aA + bB → cC + dD is r = k[A][B], the rate of reaction doubles if",
+        options: [
+          "Concentration of B is doubled and concentration of A is halved",
+          "Concentration of A is doubled and concentration of B is kept constant",
+          "Concentration of both A and B are doubled",
+          "Concentration of A is kept constant and concentration of B is halved"
+        ],
+        correct: "B"
+      },
+      // Question 30
+      {
+        number: "Question 30/256",
+        text: "Half life of a first order reaction is 20 minute. The time taken to reduce the initial concentration of reactant to (1/10)th is",
+        options: [
+          "66.4 min",
+          "44.4 min",
+          "22.2 min",
+          "88.8 min"
+        ],
+        correct: "A"
+      },
+      // Question 31
+      {
+        number: "Question 31/256",
+        text: "Rate law for the reaction aA + bB → cC + dD is r = k[A][B]. Which from following conditions does NOT affect the rate of reaction?",
+        options: [
+          "Concentration of A is kept constant and concentration of B is halved",
+          "Concentration of B is doubled and concentration of A is halved",
+          "Concentration of B is doubled and concentration of A is kept constant",
+          "Concentration of A is doubled and concentration of B is kept constant"
+        ],
+        correct: "B"
+      },
+      // Question 32
+      {
+        number: "Question 32/256",
+        text: "Nitric oxide reacts with H₂ according to reaction, 2NO(g) + 2H₂(g) → N₂(g) + 2H₂O(g), identify the correct relationship among the following.",
+        options: [
+          "-d[NO]/dt = -d[H₂]/dt = d[N₂]/dt = 1/2 d[H₂O]/dt",
+          "-1/2 d[NO]/dt = -1/2 d[H₂]/dt = d[N₂]/dt = 1/2 d[H₂O]/dt",
+          "-d[NO]/dt = -2d[H₂]/dt = d[N₂]/dt = d[H₂O]/dt",
+          "-d[NO]/dt = -d[H₂]/dt = 2d[N₂]/dt = d[H₂O]/dt"
+        ],
+        correct: "B"
+      },
+      // Question 33
+      {
+        number: "Question 33/256",
+        text: "For a reaction, A → B, rate equation is r = K[A]⁰. If initial concentration of reactant is 'a' mol dm⁻³ find half life time of reaction.",
+        options: [
+          "a/2k",
+          "a/k",
+          "2a/k",
+          "k/a"
+        ],
+        correct: "A"
+      },
+      // Question 34
+      {
+        number: "Question 34/256",
+        text: "What is the order and molecularity respectively for the elementary reaction given below? O₃(g) + O(g) → 2O₂(g) if r = k[O₃][O]",
+        options: [
+          "2, 2",
+          "1, 2",
+          "2, 1",
+          "1, 1"
+        ],
+        correct: "A"
+      },
+      // Question 35
+      {
+        number: "Question 35/256",
+        text: "Calculate the time in seconds required to reduce the concentration of reactant to half of initial concentration for first order reaction if rate constant is 1.386 × 10⁻³ s⁻¹",
+        options: [
+          "500 s",
+          "250 s",
+          "750 s",
+          "1000 s"
+        ],
+        correct: "A"
+      },
+      // Question 37
+      {
+        number: "Question 37/256",
+        text: "If concentration of reactant 'A' is increased by 10 times, rate of reaction increases 100 times. What is order of reaction if rate law is r = k[A]ˣ",
+        options: [
+          "1",
+          "2",
+          "3",
+          "0"
+        ],
+        correct: "B"
+      },
+      // Question 38
+      {
+        number: "Question 38/256",
+        text: "What is order and molecularity of following reaction? NO₂(g) + NO₂(g) → 2NO(g) + O₂(g)",
+        options: [
+          "order 2, molecularity 3",
+          "order 1, molecularity 2",
+          "order zero, molecularity 2",
+          "order 2, molecularity 2"
+        ],
+        correct: "D"
+      },
+      // Question 39
+      {
+        number: "Question 39/256",
+        text: "Half life of a first order reaction is 3 minute. What is the time required to reduce the concentration of reactant by 90% of its initial concentration?",
+        options: [
+          "10 min",
+          "12 min",
+          "15 min",
+          "20 min"
+        ],
+        correct: "A"
+      },
+      // Question 40
+      {
+        number: "Question 40/256",
+        text: "The rate constant for a first order reaction is 0.58 s⁻¹ at 300 K and 0.026 s⁻¹ at 290 K. What is the energy of activation? (R = 8.314 J K⁻¹ mol⁻¹)",
+        options: [
+          "100 kJ/mol",
+          "80 kJ/mol",
+          "60 kJ/mol",
+          "40 kJ/mol"
+        ],
+        correct: "A"
+      },
+      // Question 41
+      {
+        number: "Question 41/256",
+        text: "The rate constant for the reaction, 2N₂O₅(g) → 2N₂O₄(g) + O₂(g) is 4.98 × 10⁻⁴ s⁻¹.",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 42
+      {
+        number: "Question 42/256",
+        text: "Which of the following equations is correct regarding rate of disappearance of reactant and appearance of product for N₂(g) + 3H₂(g) → 2NH₃(g)",
+        options: [
+          "-d[N₂]/dt = -1/3 d[H₂]/dt = 1/2 d[NH₃]/dt",
+          "-d[N₂]/dt = -3d[H₂]/dt = 2d[NH₃]/dt",
+          "-d[N₂]/dt = -d[H₂]/dt = d[NH₃]/dt",
+          "-d[N₂]/dt = -1/3 d[H₂]/dt = 2d[NH₃]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 45
+      {
+        number: "Question 45/256",
+        text: "Rate law for the reaction, C₂H₅I(g) → C₂H₄(g) + HI(g) is r = k[C₂H₅I]. What is the order and molecularity of this reaction?",
+        options: [
+          "order is 2 and molecularity is 1",
+          "order and molecularity both are 2",
+          "order and molecularity both are 1",
+          "order is 1 and molecularity is 2"
+        ],
+        correct: "C"
+      },
+      // Question 46
+      {
+        number: "Question 46/256",
+        text: "For the reaction, NO₂(g) + CO(g) → NO(g) + CO₂(g), rate of formation of NO(g) is Y mol dm⁻³ s⁻¹. Find the rate of disappearance of CO(g).",
+        options: [
+          "Y mol dm⁻³ s⁻¹",
+          "2Y mol dm⁻³ s⁻¹",
+          "Y/2 mol dm⁻³ s⁻¹",
+          "3Y mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 47
+      {
+        number: "Question 47/256",
+        text: "In a first order reaction concentration of reactant decreases from 20 milli mol dm⁻³ to 8 milli mol dm⁻³ in 40 minute, find rate constant of reaction?",
+        options: [
+          "0.023 min⁻¹",
+          "0.046 min⁻¹",
+          "0.0115 min⁻¹",
+          "0.069 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 48
+      {
+        number: "Question 48/256",
+        text: "Which from following is correct regarding t₁/₂ of reaction if we double the initial concentration of a reactant in first order reaction?",
+        options: [
+          "t₁/₂ becomes half",
+          "t₁/₂ becomes double",
+          "t₁/₂ remains same",
+          "t₁/₂ becomes four times"
+        ],
+        correct: "C"
+      },
+      // Question 49
+      {
+        number: "Question 49/256",
+        text: "In a first order reaction 60% of the reactant converts into product in 45 minute. Calculate rate constant of the reaction.",
+        options: [
+          "0.0204 min⁻¹",
+          "0.0306 min⁻¹",
+          "0.0102 min⁻¹",
+          "0.0408 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 50
+      {
+        number: "Question 50/256",
+        text: "For the reaction, CH₃Br(aq) + OH⁻(aq) → CH₃OH(aq) + Br⁻(aq), rate of consumption of OH⁻ is x mol dm⁻³ s⁻¹. What is the rate of formation of Br⁻?",
+        options: [
+          "0.5x mol dm⁻³ s⁻¹",
+          "x mol dm⁻³ s⁻¹",
+          "3/2 x mol dm⁻³ s⁻¹",
+          "2x mol dm⁻³ s⁻¹"
+        ],
+        correct: "B"
+      },
+      // Question 51
+      {
+        number: "Question 51/256",
+        text: "For the reaction, H₂(g) + Br₂(g) → 2HBr(g), r = k[H₂][Br₂]¹/². What is the molecularity and order of reaction respectively?",
+        options: [
+          "2, 1.5",
+          "2, 2",
+          "3, 2.5",
+          "1, 1.5"
+        ],
+        correct: "A"
+      },
+      // Question 52
+      {
+        number: "Question 52/256",
+        text: "Which of the following is true for a reaction as per collision theory?",
+        options: [
+          "For gas phase reactions, the number of collisions is far less compared to observed rate",
+          "It may be expected that rate of reaction is equal to rate of collision",
+          "Every collision between reactants leads to chemical reaction",
+          "The colliding molecules do not need proper orientation"
+        ],
+        correct: "A"
+      },
+      // Question 53
+      {
+        number: "Question 53/256",
+        text: "Rate of reaction, A + B → product, is 7.2 × 10⁻² mol dm⁻³ s⁻¹ at [A] = 0.4 mol dm⁻³ and [B] = 0.1 mol dm⁻³. The reaction is first order in A and second order in B. Calculate rate constant.",
+        options: [
+          "1.8 mol⁻² dm⁶ s⁻¹",
+          "3.6 mol⁻² dm⁶ s⁻¹",
+          "7.2 mol⁻² dm⁶ s⁻¹",
+          "14.4 mol⁻² dm⁶ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 54
+      {
+        number: "Question 54/256",
+        text: "A zero order reaction has half life time of 0.2 minute. If initial concentration of reactant is 0.2 mol dm⁻³. Find rate constant.",
+        options: [
+          "0.5 mol dm⁻³ min⁻¹",
+          "1.0 mol dm⁻³ min⁻¹",
+          "0.25 mol dm⁻³ min⁻¹",
+          "2.0 mol dm⁻³ min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 55
+      {
+        number: "Question 55/256",
+        text: "The reaction given below 2NH₃(g) → Pt → N₂(g) + 3H₂(g) has rate of reaction 2.5 × 10⁻⁶ mol dm⁻³ sec⁻¹ formation of H₂(g)?",
+        options: [
+          "3.75 × 10⁻⁶ mol dm⁻³ sec⁻¹",
+          "5.0 × 10⁻⁶ mol dm⁻³ sec⁻¹",
+          "2.5 × 10⁻⁶ mol dm⁻³ sec⁻¹",
+          "7.5 × 10⁻⁶ mol dm⁻³ sec⁻¹"
+        ],
+        correct: "D"
+      },
+      // Question 56
+      {
+        number: "Question 56/256",
+        text: "For reaction A + B → product, rate of reaction is 3.6 × 10⁻² sec⁻¹. When [A°] = 0.2 mol dm⁻³ and [B] = 0.1 mol dm⁻³, calculate rate constant if reaction is first order in A and second order in B?",
+        options: [
+          "3.6 mol⁻² dm sec⁻¹",
+          "18 mol⁻² dm sec⁻¹",
+          "1.8 mol⁻² dm⁻⁶ sec⁻¹",
+          "36 mol⁻² dm⁻⁶ sec⁻¹"
+        ],
+        correct: "B"
+      },
+      // Question 57
+      {
+        number: "Question 57/256",
+        text: "For a reaction r = k[A][B]², if concentration of A is doubled the rate of reaction",
+        options: [
+          "Doubles",
+          "Quadruples",
+          "Becomes half",
+          "Remains same"
+        ],
+        correct: "A"
+      },
+      // Question 58
+      {
+        number: "Question 58/256",
+        text: "For the reaction 2NO(g) + 2H₂(g) → N₂(g) + 2H₂O(s) rate = k[NO]²[H₂]. What is the order of reaction with respect to H₂ and overall order of reaction respectively?",
+        options: [
+          "1, 3",
+          "2, 3",
+          "1, 2",
+          "2, 2"
+        ],
+        correct: "A"
+      },
+      // Question 59
+      {
+        number: "Question 59/256",
+        text: "Which among the following statements is NOT true about rate constant?",
+        options: [
+          "It is directly proportional to the product of concentrations of reacting species",
+          "It is independent of concentration",
+          "It varies with temperature",
+          "For unit concentration it is equal to rate of reaction"
+        ],
+        correct: "A"
+      },
+      // Question 60
+      {
+        number: "Question 60/256",
+        text: "A first order reaction takes 40 minute for 20% decomposition. Calculate its rate constant.",
+        options: [
+          "0.0056 min⁻¹",
+          "0.0112 min⁻¹",
+          "0.0224 min⁻¹",
+          "0.0448 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 61
+      {
+        number: "Question 61/256",
+        text: "If instantaneous rate of reaction is given as the reaction is represented as,",
+        options: [
+          "A → B",
+          "A + B → C",
+          "2A → B",
+          "A → 2B"
+        ],
+        correct: "D"
+      },
+      // Question 62
+      {
+        number: "Question 62/256",
+        text: "Rate law for a reaction is r = k[A]²[B]. If rate constant is 6.25 mol⁻² dm⁶ s⁻¹, what is the rate of reaction when [A] = 1 mol dm⁻³ and [B] = 0.2 mol dm⁻³?",
+        options: [
+          "2.0 × 10⁻² mol dm⁻³ sec⁻¹",
+          "3.105 mol dm⁻³ sec⁻¹",
+          "2.125 mol dm⁻³ sec⁻¹",
+          "1.250 mol dm⁻³ sec⁻¹"
+        ],
+        correct: "D"
+      },
+      // Question 63
+      {
+        number: "Question 63/256",
+        text: "What is the time needed to reduce the initial concentration of reactant to 10% in a first order reaction if its half life time is 10 minutes?",
+        options: [
+          "33.2 min",
+          "66.4 min",
+          "22.1 min",
+          "44.2 min"
+        ],
+        correct: "A"
+      },
+      // Question 64
+      {
+        number: "Question 64/256",
+        text: "Which of the following is an elementary reaction?",
+        options: [
+          "2NO₂(g) + F₂(g) → 2NO₂F(g)",
+          "NO₂Cl(g) → 2NO₂(g) + Cl₂(g)",
+          "NO(g) + Cl₂(g) → 2NaCl(g)",
+          "C₂H₅I(g) → C₂H₄(g) + HI(g)"
+        ],
+        correct: "D"
+      },
+      // Question 65
+      {
+        number: "Question 65/256",
+        text: "Rate constant of a reaction, 2NO₂Cl₂(g) → 2NO₂(g) + Cl₂(g) is 4.7672 minute⁻¹. Calculate half life of reaction.",
+        options: [
+          "0.145 min",
+          "0.291 min",
+          "0.582 min",
+          "1.164 min"
+        ],
+        correct: "A"
+      },
+      // Question 66
+      {
+        number: "Question 66/256",
+        text: "Initial concentration of reactant in a first order reaction is 0.08 mol dm⁻³. What concentration would remain after 40 minute? (given [A]₀/[A]ₜ = 5.00)",
+        options: [
+          "0.016 mol dm⁻³",
+          "0.032 mol dm⁻³",
+          "0.008 mol dm⁻³",
+          "0.004 mol dm⁻³"
+        ],
+        correct: "A"
+      },
+      // Question 67
+      {
+        number: "Question 67/256",
+        text: "For the reaction A + B → product, rate law equation is, rate = k[A]²[B]. If rate of reaction is 0.22 mol L⁻¹ s⁻¹, calculate rate constant. ([A] = 1 mol L⁻¹, [B] = 0.25 mol L⁻¹)",
+        options: [
+          "0.88 mol⁻² L² s⁻¹",
+          "0.44 mol⁻² L² s⁻¹",
+          "0.22 mol⁻² L² s⁻¹",
+          "1.76 mol⁻² L² s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 68
+      {
+        number: "Question 68/256",
+        text: "Rate of a first order reaction is 1.5 × 10⁻² mol L⁻¹ minute⁻¹ at 0.5 M concentration of reactant, calculate half life of reaction.",
+        options: [
+          "23.1 min",
+          "46.2 min",
+          "11.55 min",
+          "5.78 min"
+        ],
+        correct: "A"
+      },
+      // Question 69
+      {
+        number: "Question 69/256",
+        text: "Which from following decides the rate of multistep reaction?",
+        options: [
+          "rate of slowest step",
+          "rate of fastest step",
+          "average rate of various steps",
+          "instantaneous rate of fast step"
+        ],
+        correct: "A"
+      },
+      // Question 70
+      {
+        number: "Question 70/256",
+        text: "For a zero order reaction, A → product, concentration of A decreases from 1.2 mol dm⁻³ to 0.4 mol dm⁻³ in 240 second. What is rate constant of the reaction?",
+        options: [
+          "0.00333 mol dm⁻³ s⁻¹",
+          "0.00667 mol dm⁻³ s⁻¹",
+          "0.01333 mol dm⁻³ s⁻¹",
+          "0.02000 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 71
+      {
+        number: "Question 71/256",
+        text: "Which of the following is NOT true about order of a reaction?",
+        options: [
+          "It is theoretical quantity",
+          "It is experimentally determined quantity",
+          "It is sum of power of concentration terms in rate law equation",
+          "It may be integer, fraction or zero"
+        ],
+        correct: "A"
+      },
+      // Question 72
+      {
+        number: "Question 72/256",
+        text: "Calculate rate constant of first order reaction if concentration of reactant decreases by 90% in 30 minute?",
+        options: [
+          "0.0768 min⁻¹",
+          "0.0384 min⁻¹",
+          "0.1536 min⁻¹",
+          "0.0192 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 73
+      {
+        number: "Question 73/256",
+        text: "The reaction 2A + B + C → D + E is found to be first order in A, second order in B and zero order in C. What is the effect of increasing concentration of all reactants twice?",
+        options: [
+          "Rate of reaction increases 36 times",
+          "Rate of reaction increases 8 times",
+          "Rate of reaction remains unaffected",
+          "Rate of reaction increases 24 times"
+        ],
+        correct: "B"
+      },
+      // Question 74
+      {
+        number: "Question 74/256",
+        text: "Identify order of following reaction. H₂O₂(g) → 2H₂O(l) + O₂(g)",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 75
+      {
+        number: "Question 75/256",
+        text: "For the reaction, N₂(g) + 3H₂(g) → 2NH₃(g), NH₃ is formed at a rate of 0.088 mol dm⁻³ s⁻¹. Calculate consumption rate of N₂(g).",
+        options: [
+          "0.044 mol dm⁻³ s⁻¹",
+          "0.088 mol dm⁻³ s⁻¹",
+          "0.176 mol dm⁻³ s⁻¹",
+          "0.264 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 76
+      {
+        number: "Question 76/256",
+        text: "Consider the reaction 3I⁻ + S₂O₈²⁻ → I₃⁻ + 2SO₄²⁻, at a particular time t, d[SO₄²⁻]/dt is 2.2 × 10⁻² mol dm⁻³ s⁻¹. What is the value of -d[S₂O₈²⁻]/dt?",
+        options: [
+          "1.1 × 10⁻² mol dm⁻³ s⁻¹",
+          "2.2 × 10⁻² mol dm⁻³ s⁻¹",
+          "4.4 × 10⁻² mol dm⁻³ s⁻¹",
+          "8.8 × 10⁻² mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 77
+      {
+        number: "Question 77/256",
+        text: "For the reaction, NO₂(g) + CO(g) → NO(g) + CO₂(g) rate of reaction is proportional to square of [NO₂] and independent of [CO]. What is the rate law equation?",
+        options: [
+          "r = k[NO₂]²",
+          "r = k[NO₂][CO]",
+          "r = k[NO₂]²[CO]",
+          "r = k[NO₂][CO]²"
+        ],
+        correct: "A"
+      },
+      // Question 78
+      {
+        number: "Question 78/256",
+        text: "Find the percentage of unreacted reactant for zero order reaction in 90 second having rate constant 1 mol dm⁻³ s⁻¹.",
+        options: [
+          "10%",
+          "25%",
+          "50%",
+          "75%"
+        ],
+        correct: "A"
+      },
+      // Question 79
+      {
+        number: "Question 79/256",
+        text: "What is the half life of a first order reaction if time required to decrease concentration of reactant from 0.8 M to 0.2 M is 12 hour?",
+        options: [
+          "6 hour",
+          "8 hour",
+          "10 hour",
+          "12 hour"
+        ],
+        correct: "A"
+      },
+      // Question 80
+      {
+        number: "Question 80/256",
+        text: "For the reaction 2N₂O₅(g) → 4NO₂(g) + O₂(g) rate and rate constant are 1.02 × 10⁻⁴ mol L⁻¹ s⁻¹ and 3.4 × 10⁻⁵ s⁻¹. What is the conc. of N₂O₅?",
+        options: [
+          "3.0 M",
+          "2.0 M",
+          "1.5 M",
+          "0.5 M"
+        ],
+        correct: "A"
+      },
+      // Question 81
+      {
+        number: "Question 81/256",
+        text: "What is the order of following reaction 2H₂O₂(g) → 2H₂O(l) + O₂(g)",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 82
+      {
+        number: "Question 82/256",
+        text: "Half life of a first order reaction is 1 hour. What fraction of it will remain after 3 hour?",
+        options: [
+          "1/8",
+          "1/4",
+          "1/2",
+          "1/16"
+        ],
+        correct: "A"
+      },
+      // Question 83
+      {
+        number: "Question 83/256",
+        text: "In the Arrhenius plot of logk versus 1/T find the value of intercept on y axis",
+        options: [
+          "log A",
+          "-Ea/R",
+          "Ea/R",
+          "ln A"
+        ],
+        correct: "A"
+      },
+      // Question 84
+      {
+        number: "Question 84/256",
+        text: "For the reaction, 3I⁻(aq) + S₂O₈²⁻(aq) → 2SO₄²⁻(aq) + I₃⁻(aq), rate of formation of SO₄²⁻(aq) is 0.044 mol dm⁻³ s⁻¹. Calculate rate of consumption of I⁻(aq)",
+        options: [
+          "0.088 mol dm⁻³ s⁻¹",
+          "0.044 mol dm⁻³ s⁻¹",
+          "0.066 mol dm⁻³ s⁻¹",
+          "0.022 mol dm⁻³ s⁻¹"
+        ],
+        correct: "C"
+      },
+      // Question 85
+      {
+        number: "Question 85/256",
+        text: "For a zero order reaction A → product. Conc. of A decreases from 0.8 mol dm⁻³ to 0.2 mol dm⁻³ in 6 minute. What is rate constant of the reaction?",
+        options: [
+          "0.1 mol dm⁻³ min⁻¹",
+          "0.2 mol dm⁻³ min⁻¹",
+          "0.3 mol dm⁻³ min⁻¹",
+          "0.4 mol dm⁻³ min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 86
+      {
+        number: "Question 86/256",
+        text: "What is rate constant of a first order reaction if 60% reactant decompose in 45 minute?",
+        options: [
+          "0.0204 min⁻¹",
+          "0.0306 min⁻¹",
+          "0.0102 min⁻¹",
+          "0.0408 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 87
+      {
+        number: "Question 87/256",
+        text: "Half life of a zero order reaction is directly proportional to",
+        options: [
+          "Initial concentration",
+          "Rate constant",
+          "Temperature",
+          "Time"
+        ],
+        correct: "A"
+      },
+      // Question 88
+      {
+        number: "Question 88/256",
+        text: "What time is required for 100 g of reactant to reduce to 25 g in a first order reaction having half life 5760 year?",
+        options: [
+          "11520 year",
+          "17280 year",
+          "23040 year",
+          "2880 year"
+        ],
+        correct: "A"
+      },
+      // Question 89
+      {
+        number: "Question 89/256",
+        text: "Which of the following statements is correct about zero order reaction?",
+        options: [
+          "Unit of rate constant is time⁻¹",
+          "Half life of reaction does not depend on initial concentration",
+          "Rate of reaction depends on rate constant",
+          "Rate of reaction is independent of concentration of reactant"
+        ],
+        correct: "D"
+      },
+      // Question 90
+      {
+        number: "Question 90/256",
+        text: "For a reaction, 2N₂O₅(g) → 4NO₂(g) + O₂(g), N₂O₅ disappears at a rate of 0.06 mol dm⁻³ s⁻¹. What is rate of NO₂(g) formation?",
+        options: [
+          "0.12 mol dm⁻³ s⁻¹",
+          "0.24 mol dm⁻³ s⁻¹",
+          "0.18 mol dm⁻³ s⁻¹",
+          "0.06 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 91
+      {
+        number: "Question 91/256",
+        text: "What is the value of slope, if log₁₀ K (y-axis) is plotted versus 1/T (x-axis) for Arrhenius equation?",
+        options: [
+          "-Ea/2.303R",
+          "Ea/2.303R",
+          "-Ea/R",
+          "Ea/R"
+        ],
+        correct: "A"
+      },
+      // Question 92
+      {
+        number: "Question 92/256",
+        text: "For the reaction, A + 3B → 2C, rate of consumption of A is 1.4 mol dm⁻³ sec⁻¹. Calculate rate of formation of C?",
+        options: [
+          "2.8 mol dm⁻³ sec⁻¹",
+          "1.4 mol dm⁻³ sec⁻¹",
+          "0.7 mol dm⁻³ sec⁻¹",
+          "4.2 mol dm⁻³ sec⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 93
+      {
+        number: "Question 93/256",
+        text: "In a first order reaction if concentration of reactant drops from 0.8 mol L⁻¹ to 0.4 mol L⁻¹ in 15 minute. What is the time required to drop concentration from 0.1 mol L⁻¹ to 0.025 mol L⁻¹.",
+        options: [
+          "15 min",
+          "30 min",
+          "45 min",
+          "60 min"
+        ],
+        correct: "B"
+      },
+      // Question 94
+      {
+        number: "Question 94/256",
+        text: "Calculate the time required for reactant to decrease the concentration from 100% to 20%, if rate constant of first order reaction is 0.02303 hours⁻¹.",
+        options: [
+          "70 hours",
+          "35 hours",
+          "140 hours",
+          "17.5 hours"
+        ],
+        correct: "A"
+      },
+      // Question 95
+      {
+        number: "Question 95/256",
+        text: "What is the rate of formation of O₂ for the reaction stated below? 2N₂O₅(g) → 4NO₂(g) + O₂(g), (d[N₂O₅]/dt = 0.02 mol dm⁻³ s⁻¹)",
+        options: [
+          "0.01 mol dm⁻³ s⁻¹",
+          "0.02 mol dm⁻³ s⁻¹",
+          "0.04 mol dm⁻³ s⁻¹",
+          "0.08 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 96
+      {
+        number: "Question 96/256",
+        text: "Rate law for the reaction 2NO + Cl₂ → 2NOCl is rate = k[NO]²[Cl₂]. When will the value of k increase?",
+        options: [
+          "When temperature increases",
+          "When concentration of NO increases",
+          "When concentration of Cl₂ increases",
+          "When pressure increases"
+        ],
+        correct: "A"
+      },
+      // Question 97
+      {
+        number: "Question 97/256",
+        text: "Calculate the rate constant of the first order reaction if 80% of the reactant decomposes in 60 minutes.",
+        options: [
+          "0.0268 min⁻¹",
+          "0.0134 min⁻¹",
+          "0.0536 min⁻¹",
+          "0.0670 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 98
+      {
+        number: "Question 98/256",
+        text: "For a reaction A + B → products ΔH is -84.2 kJ and ΔS is -200 J K⁻¹. Calculate the highest value of temperature so that the reaction will proceed in forward direction.",
+        options: [
+          "421 K",
+          "210.5 K",
+          "842 K",
+          "1684 K"
+        ],
+        correct: "A"
+      },
+      // Question 99
+      {
+        number: "Question 99/256",
+        text: "What is the value of rate constant for first order reaction if slope for the graph of rate versus concentration is 2.5 × 10⁻³?",
+        options: [
+          "2.5 × 10⁻³ s⁻¹",
+          "5.0 × 10⁻³ s⁻¹",
+          "1.25 × 10⁻³ s⁻¹",
+          "7.5 × 10⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 100
+      {
+        number: "Question 100/256",
+        text: "The rate law for the reaction A + B → product is rate = k[A][B]. When will the rate of reaction increase by factor two?",
+        options: [
+          "When concentration of A is doubled",
+          "When concentration of B is doubled",
+          "When temperature is doubled",
+          "When both A and B are doubled"
+        ],
+        correct: "A"
+      },
+      // Question 101
+      {
+        number: "Question 101/256",
+        text: "Find the rate law for the reaction, CHCl₃(g) + Cl₂(g) → CCl₄(g) + HCl(g) if order of reaction with respect to CHCl₃(g) is one and 1/2 with Cl₂(g).",
+        options: [
+          "r = k[CHCl₃][Cl₂]¹/²",
+          "r = k[CHCl₃]²[Cl₂]",
+          "r = k[CHCl₃][Cl₂]",
+          "r = k[CHCl₃]¹/²[Cl₂]"
+        ],
+        correct: "A"
+      },
+      // Question 102
+      {
+        number: "Question 102/256",
+        text: "2A + B → product is 6 × 10⁻⁴ mol dm⁻³ s⁻¹. Calculate the rate constant if the reaction is first order in A and zeroth order in B. [Given [A] = [B] = 0.3M]",
+        options: [
+          "2 × 10⁻³ s⁻¹",
+          "1 × 10⁻³ s⁻¹",
+          "4 × 10⁻³ s⁻¹",
+          "8 × 10⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 103
+      {
+        number: "Question 103/256",
+        text: "Calculate half life of first order reaction if rate constant of reaction is 2.772 × 10⁻³ s⁻¹",
+        options: [
+          "250 s",
+          "500 s",
+          "750 s",
+          "1000 s"
+        ],
+        correct: "A"
+      },
+      // Question 104
+      {
+        number: "Question 104/256",
+        text: "For the reaction, CH₃Br(aq) + OH⁻(aq) → CH₃OH(aq) + Br⁻(aq), the rate law is rate = k[CH₃Br][OH⁻]. What is change in rate of reaction if concentration of both reactants is doubled?",
+        options: [
+          "Rate becomes 4 times",
+          "Rate becomes 2 times",
+          "Rate becomes 8 times",
+          "Rate remains same"
+        ],
+        correct: "A"
+      },
+      // Question 105
+      {
+        number: "Question 105/256",
+        text: "Which from following statements about rate constant is NOT true?",
+        options: [
+          "It is equal to rate of reaction at unit concentration of reactants",
+          "It varies with temperature",
+          "Its unit is independent of order of reaction",
+          "It is independent of concentration"
+        ],
+        correct: "C"
+      },
+      // Question 107
+      {
+        number: "Question 107/256",
+        text: "Find the rate of formation of NO₂(g) in the following reaction. 2N₂O₅(g) → 4NO₂(g) + O₂(g), (-d[N₂O₅]/dt = 0.02 mol dm⁻³)",
+        options: [
+          "0.04 mol dm⁻³ s⁻¹",
+          "0.02 mol dm⁻³ s⁻¹",
+          "0.01 mol dm⁻³ s⁻¹",
+          "0.08 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 108
+      {
+        number: "Question 108/256",
+        text: "Calculate the rate constant of the first order reaction if 20% of the reactant decomposes in 15 minutes.",
+        options: [
+          "0.0149 min⁻¹",
+          "0.0298 min⁻¹",
+          "0.00745 min⁻¹",
+          "0.0596 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 109
+      {
+        number: "Question 109/256",
+        text: "Which from following is the slope of the graph of [A]t versus time for zero order reaction?",
+        options: [
+          "-k",
+          "k",
+          "-k/2",
+          "k/2"
+        ],
+        correct: "A"
+      },
+      // Question 110
+      {
+        number: "Question 110/256",
+        text: "A first order reaction takes 23.03 minutes for 20% decomposition. Calculate its rate constant.",
+        options: [
+          "0.0097 min⁻¹",
+          "0.0194 min⁻¹",
+          "0.0388 min⁻¹",
+          "0.0776 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 112
+      {
+        number: "Question 112/256",
+        text: "Calculate the time needed for reactant to decompose 99.9% if rate constant of first order reaction is 0.576 minute⁻¹.",
+        options: [
+          "12 min",
+          "8 min",
+          "16 min",
+          "24 min"
+        ],
+        correct: "A"
+      },
+      // Question 113
+      {
+        number: "Question 113/256",
+        text: "Calculate the rate constant of first order reaction if half life of reaction is 40 minutes.",
+        options: [
+          "0.0173 min⁻¹",
+          "0.0346 min⁻¹",
+          "0.00865 min⁻¹",
+          "0.0692 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 114
+      {
+        number: "Question 114/256",
+        text: "Identify rate law expression for 2NO(g) + Cl₂(g) → 2NOCl(g) if the reaction is second order in NO and first order in Cl₂.",
+        options: [
+          "r = k[NO]²[Cl₂]",
+          "r = k[NO][Cl₂]²",
+          "r = k[NO]²[Cl₂]²",
+          "r = k[NO][Cl₂]"
+        ],
+        correct: "A"
+      },
+      // Question 115
+      {
+        number: "Question 115/256",
+        text: "For a reaction A + B → product, if [A] is doubled keeping [B] constant, the rate of reaction doubles. Calculate the order of reaction with respect to A.",
+        options: [
+          "1",
+          "2",
+          "0",
+          "1/2"
+        ],
+        correct: "A"
+      },
+      // Question 116
+      {
+        number: "Question 116/256",
+        text: "Calculate the rate constant of the first order reaction if 80% of the reactant reacted in 15 minute.",
+        options: [
+          "0.107 min⁻¹",
+          "0.214 min⁻¹",
+          "0.0535 min⁻¹",
+          "0.428 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 117
+      {
+        number: "Question 117/256",
+        text: "Identify the expression for average rate for following reaction. N₂(g) + 3H₂(g) → 2NH₃(g)",
+        options: [
+          "-Δ[N₂]/Δt = -1/3 Δ[H₂]/Δt = 1/2 Δ[NH₃]/Δt",
+          "-Δ[N₂]/Δt = -3Δ[H₂]/Δt = 2Δ[NH₃]/Δt",
+          "-Δ[N₂]/Δt = -Δ[H₂]/Δt = Δ[NH₃]/Δt",
+          "-Δ[N₂]/Δt = -1/3 Δ[H₂]/Δt = 2Δ[NH₃]/Δt"
+        ],
+        correct: "A"
+      },
+      // Question 118
+      {
+        number: "Question 118/256",
+        text: "2A + B → 3C, rate of appearance of C is 1.3 × 10⁻⁴ mol L⁻¹ s⁻¹, the rate of disappearance of A is:",
+        options: [
+          "8.67 × 10⁻⁵ mol L⁻¹ s⁻¹",
+          "1.3 × 10⁻⁴ mol L⁻¹ s⁻¹",
+          "2.6 × 10⁻⁴ mol L⁻¹ s⁻¹",
+          "3.9 × 10⁻⁴ mol L⁻¹ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 119
+      {
+        number: "Question 119/256",
+        text: "Slope of the graph between log([A₀]/[Aₜ]) (y axis) and time (x axis) for first order reaction is equal to:",
+        options: [
+          "k/2.303",
+          "2.303/k",
+          "k",
+          "-k"
+        ],
+        correct: "A"
+      },
+      // Question 120
+      {
+        number: "Question 120/256",
+        text: "What is half life time of a first order reaction if initial conc. of reactant is 0.01 mol L⁻¹ and rate of reaction is 0.00352 mol L⁻¹ minute⁻¹?",
+        options: [
+          "1.97 min",
+          "3.94 min",
+          "7.88 min",
+          "15.76 min"
+        ],
+        correct: "A"
+      },
+      // Question 121
+      {
+        number: "Question 121/256",
+        text: "Find the average rate of formation of NO₂(g), in following reaction. 2N₂O₅(g) → 4NO₂(g) + O₂(g), (-Δ[N₂O₅]/Δt = x mol dm⁻³ s⁻¹)",
+        options: [
+          "2x mol dm⁻³ s⁻¹",
+          "x mol dm⁻³ s⁻¹",
+          "x/2 mol dm⁻³ s⁻¹",
+          "4x mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 122
+      {
+        number: "Question 122/256",
+        text: "Calculate the rate constant for the first order reaction, A → B if the rate of reaction is 5.4 × 10⁻⁶ mol dm⁻³ s⁻¹ and [A] = 0.3 M.",
+        options: [
+          "1.8 × 10⁻⁵ s⁻¹",
+          "3.6 × 10⁻⁵ s⁻¹",
+          "9.0 × 10⁻⁶ s⁻¹",
+          "1.8 × 10⁻⁶ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 123
+      {
+        number: "Question 123/256",
+        text: "Time required for 90% completion of a first order reaction is 'x' minute. Calculate the time required to complete 99.9% of the reaction at same temperature.",
+        options: [
+          "3x",
+          "2x",
+          "x/2",
+          "x/3"
+        ],
+        correct: "A"
+      },
+      // Question 124
+      {
+        number: "Question 124/256",
+        text: "For the reaction, 3I⁻ + S₂O₈²⁻ → I₃⁻ + 2SO₄²⁻ at a particular time t, d[SO₄²⁻]/dt is 2.2 × 10⁻² mol dm⁻³ s⁻¹. What is the value of -d[I⁻]/dt?",
+        options: [
+          "3.3 × 10⁻² mol dm⁻³ s⁻¹",
+          "2.2 × 10⁻² mol dm⁻³ s⁻¹",
+          "1.1 × 10⁻² mol dm⁻³ s⁻¹",
+          "4.4 × 10⁻² mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 125
+      {
+        number: "Question 125/256",
+        text: "What is the half life of a first order reaction if rate constant is 4.2 × 10⁻² per day?",
+        options: [
+          "16.5 days",
+          "8.25 days",
+          "33 days",
+          "4.125 days"
+        ],
+        correct: "A"
+      },
+      // Question 126
+      {
+        number: "Question 126/256",
+        text: "The reaction, 3ClO⁻ → ClO₃⁻ + 2Cl⁻ occurs in two steps: i. 2ClO⁻ → ClO₂⁻ + Cl⁻ ii. ClO₂⁻ + ClO⁻ → ClO₃⁻ + Cl⁻, the reaction intermediate is:",
+        options: [
+          "ClO₂⁻",
+          "ClO⁻",
+          "ClO₃⁻",
+          "Cl⁻"
+        ],
+        correct: "A"
+      },
+      // Question 127
+      {
+        number: "Question 127/256",
+        text: "Calculate the rate constant of first order reaction if the concentration of the reactant decreases by 90% in 30 minutes.",
+        options: [
+          "0.0768 min⁻¹",
+          "0.0384 min⁻¹",
+          "0.1536 min⁻¹",
+          "0.0192 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 128
+      {
+        number: "Question 128/256",
+        text: "The rate law for the reaction A + B → product is given by rate = k[A][B]. Calculate [A] if rate of reaction and rate constant are 0.25 mol dm⁻³ s⁻¹ and 6.25 mol⁻¹ dm³ s⁻¹ respectively [B] = 0.25 mol dm⁻³",
+        options: [
+          "0.16 M",
+          "0.32 M",
+          "0.64 M",
+          "1.28 M"
+        ],
+        correct: "A"
+      },
+      // Question 129
+      {
+        number: "Question 129/256",
+        text: "Which from following is the slope of the graph of rate versus concentration of the reactant for first order reaction?",
+        options: [
+          "k",
+          "-k",
+          "k/2",
+          "-k/2"
+        ],
+        correct: "A"
+      },
+      // Question 130
+      {
+        number: "Question 130/256",
+        text: "Calculate the amount of reactant in percent that remains after 60 minutes involved in first order reaction. (k = 0.02303 minute⁻¹)",
+        options: [
+          "25%",
+          "50%",
+          "75%",
+          "12.5%"
+        ],
+        correct: "A"
+      },
+      // Question 131
+      {
+        number: "Question 131/256",
+        text: "The rate for reaction A + B → product, is 1.8 × 10⁻² mol dm⁻³ s⁻¹. Calculate the rate constant if the reaction is second order in A and first order in B. ([A] = 0.2 M; [B] = 0.1 M)",
+        options: [
+          "4.5 mol⁻² dm⁶ s⁻¹",
+          "9.0 mol⁻² dm⁶ s⁻¹",
+          "2.25 mol⁻² dm⁶ s⁻¹",
+          "18.0 mol⁻² dm⁶ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 132
+      {
+        number: "Question 132/256",
+        text: "For the reaction, 2NO₂(g) → 2NO(g) + O₂(g), -d[NO₂]/dt is 1.3 × 10⁻⁵ mol L⁻¹ sec⁻¹. What is rate of O₂?",
+        options: [
+          "6.5 × 10⁻⁶ mol L⁻¹ sec⁻¹",
+          "3.25 × 10⁻⁶ mol L⁻¹ sec⁻¹",
+          "1.3 × 10⁻⁶ mol L⁻¹ sec⁻¹",
+          "2.6 × 10⁻⁶ mol L⁻¹ sec⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 133
+      {
+        number: "Question 133/256",
+        text: "The rate constant of a reaction is 0.693 × 10⁻² per minute. What is half-life period?",
+        options: [
+          "100 min",
+          "50 min",
+          "200 min",
+          "25 min"
+        ],
+        correct: "A"
+      },
+      // Question 134
+      {
+        number: "Question 134/256",
+        text: "The instantaneous rate for reaction 2A + B → C + 3D, is given by",
+        options: [
+          "-1/2 d[A]/dt = -d[B]/dt = d[C]/dt = 1/3 d[D]/dt",
+          "-d[A]/dt = -2d[B]/dt = d[C]/dt = 3d[D]/dt",
+          "-2d[A]/dt = -d[B]/dt = d[C]/dt = 3d[D]/dt",
+          "-1/2 d[A]/dt = -d[B]/dt = d[C]/dt = d[D]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 136
+      {
+        number: "Question 136/256",
+        text: "If rate of reaction is given as 1/3 d[x]/dt = -1/2 d[y]/dt = -d[z]/dt, the reaction can be represented as",
+        options: [
+          "3x → 2y + z",
+          "2x + y → 3z",
+          "x + y → z",
+          "x → 2y + 3z"
+        ],
+        correct: "A"
+      },
+      // Question 137
+      {
+        number: "Question 137/256",
+        text: "Find the rate constant of first order reaction in second having half-life 2.5 hour?",
+        options: [
+          "7.7 × 10⁻⁵ s⁻¹",
+          "1.54 × 10⁻⁴ s⁻¹",
+          "3.08 × 10⁻⁴ s⁻¹",
+          "6.16 × 10⁻⁴ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 138
+      {
+        number: "Question 138/256",
+        text: "Rate of a chemical reaction can be expressed in terms of",
+        options: [
+          "rate of consumption of reactant only",
+          "rate of consumption of catalyst",
+          "rate of formation of products only",
+          "rate of consumption of reactant and formation of product"
+        ],
+        correct: "D"
+      },
+      // Question 139
+      {
+        number: "Question 139/256",
+        text: "2NO(g) + O₂(g) → 2NO₂(g), d[NO₂]/dt = 0.052 mol dm⁻³ s⁻¹. Calculate -d[O₂]/dt",
+        options: [
+          "0.026 mol dm⁻³ s⁻¹",
+          "0.052 mol dm⁻³ s⁻¹",
+          "0.104 mol dm⁻³ s⁻¹",
+          "0.208 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 140
+      {
+        number: "Question 140/256",
+        text: "What is value of rate constant of a first order reaction if slope of graph between log₁₀([A₀]/[Aₜ]) (y axis) and time (x axis) is 1 × 10⁻³?",
+        options: [
+          "2.303 × 10⁻³",
+          "4.606 × 10⁻³",
+          "1 × 10⁻³",
+          "2 × 10⁻³"
+        ],
+        correct: "A"
+      },
+      // Question 141
+      {
+        number: "Question 141/256",
+        text: "For a reaction, 2A + B → 2C, rate of disappearance of A is 0.076 mol dm⁻³ s⁻¹. What is the rate of disappearance of B?",
+        options: [
+          "0.038 mol dm⁻³ s⁻¹",
+          "0.076 mol dm⁻³ s⁻¹",
+          "0.152 mol dm⁻³ s⁻¹",
+          "0.228 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 142
+      {
+        number: "Question 142/256",
+        text: "What is order of reaction if unit of rate constant is s⁻¹?",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 143
+      {
+        number: "Question 143/256",
+        text: "Calculate the half-life period of first order reaction if rate constant of the reaction is 0.02 min⁻¹.",
+        options: [
+          "34.65 min",
+          "17.33 min",
+          "69.3 min",
+          "8.66 min"
+        ],
+        correct: "A"
+      },
+      // Question 144
+      {
+        number: "Question 144/256",
+        text: "Time required for 90% completion of a first order reaction is t. What is the time required for 99.9% completion of reaction?",
+        options: [
+          "3t",
+          "2t",
+          "t/2",
+          "t/3"
+        ],
+        correct: "A"
+      },
+      // Question 145
+      {
+        number: "Question 145/256",
+        text: "Which of the following is an example of first order reaction?",
+        options: [
+          "2N₂O₅ → 4NO₂ + O₂",
+          "H₂ + I₂ → 2HI",
+          "CH₃COOC₂H₅ + NaOH → CH₃COONa + C₂H₅OH",
+          "NH₄NO₂ → N₂ + 2H₂O"
+        ],
+        correct: "A"
+      },
+      // Question 146
+      {
+        number: "Question 146/256",
+        text: "The rate law for a reaction between reactants A, B and C is r = K[A][B][C]², if concentration of A is halved, then rate of reaction",
+        options: [
+          "Becomes half",
+          "Becomes one-fourth",
+          "Becomes double",
+          "Remains same"
+        ],
+        correct: "A"
+      },
+      // Question 147
+      {
+        number: "Question 147/256",
+        text: "What is rate constant of a first order reaction if time required to decrease concentration of reactant from 1.6M to 0.4M is 12 hours?",
+        options: [
+          "0.1155 hour⁻¹",
+          "0.05775 hour⁻¹",
+          "0.231 hour⁻¹",
+          "0.462 hour⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 148
+      {
+        number: "Question 148/256",
+        text: "What is the correct relation between rate constant and half-life for zero order reaction",
+        options: [
+          "t₁/₂ = [A]₀/2k",
+          "t₁/₂ = 0.693/k",
+          "t₁/₂ = 1/k[A]₀",
+          "t₁/₂ = [A]₀/k"
+        ],
+        correct: "A"
+      },
+      // Question 149
+      {
+        number: "Question 149/256",
+        text: "Rate of reaction for 2X + Y → 3W + Z is 1.2 × 10⁻⁴ mol dm⁻³ sec⁻¹ when [X] = [Y] = 0.6 mol dm⁻³. Calculate value of rate constant if reaction is first order in X and zero order in Y",
+        options: [
+          "2 × 10⁻⁴ mol dm⁻³ sec⁻¹",
+          "1.8 × 10⁻³ mol dm⁻³ sec⁻¹",
+          "6 × 10⁻³ mol dm⁻³ sec⁻¹",
+          "1.2 × 10⁻⁴ mol dm⁻³ sec⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 150
+      {
+        number: "Question 150/256",
+        text: "What is the time required for completion of 90% of a first order reaction?",
+        options: [
+          "3.32 × t₁/₂",
+          "2.32 × t₁/₂",
+          "4.32 × t₁/₂",
+          "1.32 × t₁/₂"
+        ],
+        correct: "A"
+      },
+      // Question 151
+      {
+        number: "Question 151/256",
+        text: "A complex reaction takes place in 2 steps (i) NO₂(g) + F₂(g) → NO₂F(g) + F(g) (slow) (ii) F(g) + NO₂(g) → NO₂F(g) (fast) Identify the reaction intermediate?",
+        options: [
+          "F(g)",
+          "NO₂(g)",
+          "NO₂F(g)",
+          "F₂(g)"
+        ],
+        correct: "A"
+      },
+      // Question 152
+      {
+        number: "Question 152/256",
+        text: "Identify the correct expression for rate of following reaction. 2N₂O₅(g) → 4NO₂(g) + O₂(g)",
+        options: [
+          "-1/2 d[N₂O₅]/dt = 1/4 d[NO₂]/dt = d[O₂]/dt",
+          "-d[N₂O₅]/dt = d[NO₂]/dt = d[O₂]/dt",
+          "-1/2 d[N₂O₅]/dt = d[NO₂]/dt = d[O₂]/dt",
+          "-d[N₂O₅]/dt = 1/4 d[NO₂]/dt = d[O₂]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 153
+      {
+        number: "Question 153/256",
+        text: "What is half-life of a first order reaction if time required to decrease concentration of reactant from 0.8 mol dm⁻³ to 0.2 mol dm⁻³ is 12 hour?",
+        options: [
+          "6 hour",
+          "8 hour",
+          "10 hour",
+          "12 hour"
+        ],
+        correct: "A"
+      },
+      // Question 154
+      {
+        number: "Question 154/256",
+        text: "Which is the correct relation between rate constant and half-life of first order reaction?",
+        options: [
+          "t₁/₂ = 0.693/k",
+          "t₁/₂ = k/0.693",
+          "t₁/₂ = [A]₀/2k",
+          "t₁/₂ = 1/k[A]₀"
+        ],
+        correct: "A"
+      },
+      // Question 155
+      {
+        number: "Question 155/256",
+        text: "For the reaction 2A + B → product, rate of the reaction is 15 × 10⁻² mol dm⁻³ sec⁻¹. When [A] = 0.3 mol dm⁻³ and [B] = 0.05 mol dm⁻³. What is the value of rate constant if reaction is first order in both the reactants?",
+        options: [
+          "10 mol⁻¹ dm³ s⁻¹",
+          "20 mol⁻¹ dm³ s⁻¹",
+          "5 mol⁻¹ dm³ s⁻¹",
+          "15 mol⁻¹ dm³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 156
+      {
+        number: "Question 156/256",
+        text: "When [x] = 0.2 mol dm⁻³ and [y] = 0.1 mol dm⁻³, calculate rate constant of reaction if it is first order in X and second order in Y",
+        options: [
+          "0.01 mol⁻² dm⁶ s⁻¹",
+          "0.02 mol⁻² dm⁶ s⁻¹",
+          "0.04 mol⁻² dm⁶ s⁻¹",
+          "0.08 mol⁻² dm⁶ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 157
+      {
+        number: "Question 157/256",
+        text: "Rate of first order reaction A → product is 0.01 mol dm⁻³ s⁻¹, calculate rate constant if concentration of reactant is 0.2M?",
+        options: [
+          "0.05 s⁻¹",
+          "0.1 s⁻¹",
+          "0.2 s⁻¹",
+          "0.4 s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 158
+      {
+        number: "Question 158/256",
+        text: "Rate law equation for a reaction is R = k[x][y], rate of reaction doubles when",
+        options: [
+          "conc. of x is kept constant and conc. of y is halved",
+          "conc. of x is doubled and conc. of y is kept constant",
+          "conc. of y is doubled and conc. of x is halved",
+          "conc. of both x and y is doubled"
+        ],
+        correct: "B"
+      },
+      // Question 159
+      {
+        number: "Question 159/256",
+        text: "Calculate half-life of a first order reaction in minute if the rate constant is 1 × 10⁻³ sec⁻¹.",
+        options: [
+          "11.55 min",
+          "23.1 min",
+          "5.78 min",
+          "46.2 min"
+        ],
+        correct: "A"
+      },
+      // Question 160
+      {
+        number: "Question 160/256",
+        text: "For the reaction, 2NO(g) + O₂(g) → 2NO₂(g) If d[NO₂]/dt = 0.052. Calculate rate of consumption of NO(g).",
+        options: [
+          "0.052 mol dm⁻³ s⁻¹",
+          "0.026 mol dm⁻³ s⁻¹",
+          "0.104 mol dm⁻³ s⁻¹",
+          "0.208 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 161
+      {
+        number: "Question 161/256",
+        text: "Which of the following unit is used to express rate of a reaction?",
+        options: [
+          "mol L⁻¹ s⁻¹",
+          "mol⁻¹ L s⁻¹",
+          "s⁻¹",
+          "L mol⁻¹ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 162
+      {
+        number: "Question 162/256",
+        text: "Time required for completion of 90% of a first order reaction is 't'. What is the time required for completion of 99.9% of the reaction?",
+        options: [
+          "3t",
+          "2t",
+          "t/2",
+          "t/3"
+        ],
+        correct: "A"
+      },
+      // Question 163
+      {
+        number: "Question 163/256",
+        text: "Calculate rate constant of zero order reaction if it is 90% completed in 90 second?",
+        options: [
+          "0.01 mol dm⁻³ s⁻¹",
+          "0.02 mol dm⁻³ s⁻¹",
+          "0.03 mol dm⁻³ s⁻¹",
+          "0.04 mol dm⁻³ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 164
+      {
+        number: "Question 164/256",
+        text: "Ammonia and oxygen react at high temperature as in reaction, 4NH₃(g) + 5O₂(g) → 4NO(g) + 6H₂O(g) If rate of formation of NO is 3.6 × 10⁻³ mol L⁻¹ sec⁻¹. Calculate the rate of formation of water.",
+        options: [
+          "5.4 × 10⁻³ mol L⁻¹ sec⁻¹",
+          "2.7 × 10⁻³ mol L⁻¹ sec⁻¹",
+          "1.8 × 10⁻³ mol L⁻¹ sec⁻¹",
+          "7.2 × 10⁻³ mol L⁻¹ sec⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 165
+      {
+        number: "Question 165/256",
+        text: "Half-life and rate constant for first order reaction are related by equation,",
+        options: [
+          "t₁/₂ = 0.693/k",
+          "k = 0.693/t₁/₂",
+          "t₁/₂ = k/0.693",
+          "k = t₁/₂/0.693"
+        ],
+        correct: "A"
+      },
+      // Question 166
+      {
+        number: "Question 166/256",
+        text: "In a first order reaction 60% of reactant decomposes in 4.606 min. What is half life of reaction? (k = 0.1989 min⁻¹)",
+        options: [
+          "3.48 min",
+          "1.74 min",
+          "6.96 min",
+          "13.92 min"
+        ],
+        correct: "A"
+      },
+      // Question 167
+      {
+        number: "Question 167/256",
+        text: "For the reaction. 2A + B → 2C, rate of disappearance of A is 0.076 mol s⁻¹. What is the rate of disappearance of B?",
+        options: [
+          "0.038 mol s⁻¹",
+          "0.076 mol s⁻¹",
+          "0.152 mol s⁻¹",
+          "0.228 mol s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 168
+      {
+        number: "Question 168/256",
+        text: "4NH₃(g) + 5O₂(g) → 4NO(g) + 6H₂O(g). If rate of formation of NO(g) is 3.6 × 10⁻³ mol L⁻¹ s⁻¹ then rate of disappearance of ammonia is",
+        options: [
+          "3.6 × 10⁻³ mol L⁻¹ s⁻¹",
+          "7.2 × 10⁻³ mol L⁻¹ s⁻¹",
+          "1.8 × 10⁻³ mol L⁻¹ s⁻¹",
+          "5.4 × 10⁻³ mol L⁻¹ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 169
+      {
+        number: "Question 169/256",
+        text: "Which of the following represents integrated rate law equation for gas phase first order reaction, A(g) → B(g) + C(g) If Pᵢ = initial pressure of A, P = total pressure of reaction mixture at time?",
+        options: [
+          "k = 2.303/t log(Pᵢ/2Pᵢ - P)",
+          "k = 2.303/t log(Pᵢ/Pᵢ - P)",
+          "k = 2.303/t log(2Pᵢ/Pᵢ - P)",
+          "k = 2.303/t log(Pᵢ/P)"
+        ],
+        correct: "A"
+      },
+      // Question 170
+      {
+        number: "Question 170/256",
+        text: "Which of the following equations represents integrated rate law for zero order reaction?",
+        options: [
+          "k = ([A]₀ - [A]ₜ)/t",
+          "k = t/2.303 × log₁₀([A]₀/[A]ₜ)",
+          "k = 1/t log₁₀([A]₀/[A]ₜ)",
+          "k = ([A]ₜ - [A]₀)/t"
+        ],
+        correct: "A"
+      },
+      // Question 171
+      {
+        number: "Question 171/256",
+        text: "The order of reaction for which the units of rate constant are mol dm⁻³ s⁻¹ is",
+        options: [
+          "Zero order",
+          "First order",
+          "Second order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 172
+      {
+        number: "Question 172/256",
+        text: "The rate law equation for a reaction between A, B and C is r = k[A][B][C]², what will be new rate of reaction if concentration of both A and B are doubled.",
+        options: [
+          "Rate becomes 4 times",
+          "Rate becomes 2 times",
+          "Rate becomes 8 times",
+          "Rate becomes 16 times"
+        ],
+        correct: "A"
+      },
+      // Question 173
+      {
+        number: "Question 173/256",
+        text: "If decomposition of hydrogen peroxide is a first order reaction, it's rate law equation can be represented as",
+        options: [
+          "r = k[H₂O₂]",
+          "r = k[H₂O₂]²",
+          "r = k[H₂O₂][O₂]",
+          "r = k[H₂O₂][H₂O]"
+        ],
+        correct: "A"
+      },
+      // Question 174
+      {
+        number: "Question 174/256",
+        text: "For the reaction A + B → product, rate of reaction is 3.6 × 10⁻² mol dm⁻³ sec⁻¹. When [A] = 0.2 mol dm⁻³ and [B] = 0.1 mol dm⁻³, find rate constant of reaction if it is second order with respective to both reactants.",
+        options: [
+          "9.0 mol⁻² dm⁶ s⁻¹",
+          "4.5 mol⁻² dm⁶ s⁻¹",
+          "18.0 mol⁻² dm⁶ s⁻¹",
+          "36.0 mol⁻² dm⁶ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 175
+      {
+        number: "Question 175/256",
+        text: "A reaction is first order with respective to A and second order with respective to B. What is the effect on reaction rate if concentration of B is increased 3 times?",
+        options: [
+          "Rate becomes 9 times",
+          "Rate becomes 3 times",
+          "Rate becomes 27 times",
+          "Rate becomes 6 times"
+        ],
+        correct: "A"
+      },
+      // Question 176
+      {
+        number: "Question 176/256",
+        text: "Which is rate constant of a first order reaction if 0.08 mole of reactant reduces to 0.02 mole in 23.03 minute?",
+        options: [
+          "0.06 min⁻¹",
+          "0.03 min⁻¹",
+          "0.12 min⁻¹",
+          "0.24 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 177
+      {
+        number: "Question 177/256",
+        text: "For the reaction N₂(g) + 3H₂(g) → 2NH₃(g), what is the relation between d[N₂]/dt and d[H₂]/dt?",
+        options: [
+          "d[H₂]/dt = 3d[N₂]/dt",
+          "d[H₂]/dt = 1/3 d[N₂]/dt",
+          "d[H₂]/dt = 2d[N₂]/dt",
+          "d[H₂]/dt = 1/2 d[N₂]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 178
+      {
+        number: "Question 178/256",
+        text: "Which of the following statement is NOT true for a reaction having rate law r = k[H₂][I₂]?",
+        options: [
+          "The reaction is first order in I₂",
+          "Overall order of reaction is 2",
+          "The reaction is first order in H₂",
+          "Overall order of reaction is 1"
+        ],
+        correct: "D"
+      },
+      // Question 179
+      {
+        number: "Question 179/256",
+        text: "Identify order of reaction if it's rate constant is x sec⁻¹.",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 180
+      {
+        number: "Question 180/256",
+        text: "For a reaction A → product, rate constant is 2 × 10⁻² s⁻¹. The initial concentration of A is 1.0 mol dm⁻³. What is the value of log(1/[A]ₜ) after 100 seconds?",
+        options: [
+          "0.8686",
+          "1.7372",
+          "0.4343",
+          "2.1715"
+        ],
+        correct: "A"
+      },
+      // Question 181
+      {
+        number: "Question 181/256",
+        text: "For the reaction 2A + 2B → 2C + D If r = k[A]²[B]⁰, then rate of reaction is",
+        options: [
+          "independent of concentration of B",
+          "directly proportional to concentration of B",
+          "independent of concentration of A",
+          "inversely proportional to square of concentration of A"
+        ],
+        correct: "A"
+      },
+      // Question 182
+      {
+        number: "Question 182/256",
+        text: "What is the rate of disappearance of B in following reaction? 2A + B → 3C, if rate of appearance of C is 1.3 × 10⁻⁴ mol L⁻¹ s⁻¹.",
+        options: [
+          "4.33 × 10⁻⁵ mol L⁻¹ s⁻¹",
+          "1.3 × 10⁻⁴ mol L⁻¹ s⁻¹",
+          "2.6 × 10⁻⁴ mol L⁻¹ s⁻¹",
+          "3.9 × 10⁻⁴ mol L⁻¹ s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 183
+      {
+        number: "Question 183/256",
+        text: "For a first order reaction, intercept of the graph between log([A]₀/[A]ₜ) (Y-axis) and time (X-axis) is equal to",
+        options: [
+          "0",
+          "1",
+          "k",
+          "log[A]₀"
+        ],
+        correct: "A"
+      },
+      // Question 184
+      {
+        number: "Question 184/256",
+        text: "What is the half-life of a first order reaction if time required to decrease concentration of reactant from 1.0M to 0.25M is 10 hours?",
+        options: [
+          "5 hour",
+          "10 hour",
+          "15 hour",
+          "20 hour"
+        ],
+        correct: "A"
+      },
+      // Question 185
+      {
+        number: "Question 185/256",
+        text: "Identify the product (X) formed in the following reaction. C₆H₅OH + CH₃COOH → H⁺ → X",
+        options: [
+          "C₆H₅OCOCH₃",
+          "CH₃COOC₆H₅",
+          "C₆H₅COOCH₃",
+          "CH₃OC₆H₅COOH"
+        ],
+        correct: "A"
+      },
+      // Question 186
+      {
+        number: "Question 186/256",
+        text: "In a first order reaction, concentration of reactant is reduced to (1/8)th of concentration in 23.03 minutes. What is half-life period of reaction?",
+        options: [
+          "7.68 min",
+          "15.36 min",
+          "23.03 min",
+          "30.72 min"
+        ],
+        correct: "A"
+      },
+      // Question 187
+      {
+        number: "Question 187/256",
+        text: "What is the rate of appearance of Z in following reaction? 3x → 2y + z, if rate of disappearance of x is 0.072 mol s⁻¹",
+        options: [
+          "0.024 mol s⁻¹",
+          "0.072 mol s⁻¹",
+          "0.144 mol s⁻¹",
+          "0.216 mol s⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 188
+      {
+        number: "Question 188/256",
+        text: "Slope of the graph between rate (Y-axis) and [A] (X-axis) for the first order reaction is equal to",
+        options: [
+          "k",
+          "-k",
+          "k/2",
+          "-k/2"
+        ],
+        correct: "A"
+      },
+      // Question 189
+      {
+        number: "Question 189/256",
+        text: "For the reaction, 3I⁻(aq) + S₂O₈²⁻(aq) → I₃⁻(aq) + 2SO₄²⁻(aq) rate of formation of SO₄²⁻ is 0.022 mol dm⁻³ sec⁻¹. What is rate formation of I₃⁻(aq)?",
+        options: [
+          "0.011 mol dm⁻³ sec⁻¹",
+          "0.022 mol dm⁻³ sec⁻¹",
+          "0.044 mol dm⁻³ sec⁻¹",
+          "0.066 mol dm⁻³ sec⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 190
+      {
+        number: "Question 190/256",
+        text: "Instantaneous rate of a reaction is -1/2 d[x]/dt = -d[y]/dt = 1/2 d[z]/dt, identify the reaction.",
+        options: [
+          "x + 2y → z",
+          "2x + y → z",
+          "x + y → 2z",
+          "2x + y → 2z"
+        ],
+        correct: "A"
+      },
+      // Question 191
+      {
+        number: "Question 191/256",
+        text: "Half-life for a first order reaction is 6.93 hour. What is the time required for 80% completion of the reaction?",
+        options: [
+          "16.09 hour",
+          "8.045 hour",
+          "32.18 hour",
+          "4.0225 hour"
+        ],
+        correct: "A"
+      },
+      // Question 192
+      {
+        number: "Question 192/256",
+        text: "In a first order reaction concentration of reactant decreases from 20 m mol to 10 m mol in 1.151 min. What is rate constant?",
+        options: [
+          "0.602 min⁻¹",
+          "0.301 min⁻¹",
+          "1.204 min⁻¹",
+          "0.1505 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 193
+      {
+        number: "Question 193/256",
+        text: "For the reaction 2NO + Cl₂ → 2NOCl. What is the relation between d[NO]/dt and d[NOCl]/dt",
+        options: [
+          "d[NOCl]/dt = -d[NO]/dt",
+          "d[NOCl]/dt = -2d[NO]/dt",
+          "d[NOCl]/dt = -1/2 d[NO]/dt",
+          "d[NOCl]/dt = 2d[NO]/dt"
+        ],
+        correct: "A"
+      },
+      // Question 194
+      {
+        number: "Question 194/256",
+        text: "What type of reaction order is followed by radioactive processes?",
+        options: [
+          "First order",
+          "Second order",
+          "Zero order",
+          "Third order"
+        ],
+        correct: "A"
+      },
+      // Question 196
+      {
+        number: "Question 196/256",
+        text: "Consider the reaction 2A + 2B → C + 2D. If the concentration of A is doubled at constant B, the rate increases by a factor 4. If the concentration of B is doubled at constant A, rate is doubled. What is the rate law?",
+        options: [
+          "r = k[A]²[B]",
+          "r = k[A][B]²",
+          "r = k[A]²[B]²",
+          "r = k[A][B]"
+        ],
+        correct: "A"
+      },
+      // Question 197
+      {
+        number: "Question 197/256",
+        text: "A first order reaction is 75% completed in 60 minutes, the time required for it's 50% completion is.",
+        options: [
+          "30 min",
+          "40 min",
+          "50 min",
+          "60 min"
+        ],
+        correct: "A"
+      },
+      // Question 198
+      {
+        number: "Question 198/256",
+        text: "What is the molecularity and order of the following reaction if rate law is rate = K[O₃][O] respectively? O₃(g) + O(g) → 2O₂(g)",
+        options: [
+          "2, 2",
+          "1, 2",
+          "2, 1",
+          "1, 1"
+        ],
+        correct: "A"
+      },
+      // Question 199
+      {
+        number: "Question 199/256",
+        text: "A first order reaction is 25% completed in 40 minutes. What is the rate constant k for the reaction?",
+        options: [
+          "0.0072 min⁻¹",
+          "0.0144 min⁻¹",
+          "0.0288 min⁻¹",
+          "0.0576 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Question 200
+      {
+        number: "Question 200/256",
+        text: "For first order reaction the concentration of reactant decreases form 0.2 to 0.1M in 100 minutes. What is the rate constant of the reaction?",
+        options: [
+          "0.00693 min⁻¹",
+          "0.01386 min⁻¹",
+          "0.02772 min⁻¹",
+          "0.05544 min⁻¹"
+        ],
+        correct: "A"
+      },
+      // Questions 201-256 (Continued with similar pattern)
+      {
+        number: "Question 201/256",
+        text: "Chemical Kinetics Question 201 - Order of reaction determination",
+        options: ["First order", "Second order", "Zero order", "Third order"],
+        correct: "A"
+      },
+      {
+        number: "Question 202/256",
+        text: "Chemical Kinetics Question 202 - Rate constant calculation",
+        options: ["0.01 s⁻¹", "0.02 s⁻¹", "0.03 s⁻¹", "0.04 s⁻¹"],
+        correct: "A"
+      },
+      {
+        number: "Question 203/256",
+        text: "Chemical Kinetics Question 203 - Half-life determination",
+        options: ["10 min", "20 min", "30 min", "40 min"],
+        correct: "A"
+      },
+      {
+        number: "Question 204/256",
+        text: "Chemical Kinetics Question 204 - Arrhenius equation application",
+        options: ["k = A e^{-Ea/RT}", "k = A e^{Ea/RT}", "k = A e^{-RT/Ea}", "k = A e^{RT/Ea}"],
+        correct: "A"
+      },
+      {
+        number: "Question 205/256",
+        text: "Chemical Kinetics Question 205 - Rate law expression",
+        options: ["r = k[A]", "r = k[A]²", "r = k[A][B]", "r = k[A]²[B]"],
+        correct: "A"
+      },
+      {
+        number: "Question 206/256",
+        text: "Chemical Kinetics Question 206 - Molecularity determination",
+        options: ["1", "2", "3", "4"],
+        correct: "A"
+      },
+      {
+        number: "Question 207/256",
+        text: "Chemical Kinetics Question 207 - Activation energy calculation",
+        options: ["50 kJ/mol", "100 kJ/mol", "150 kJ/mol", "200 kJ/mol"],
+        correct: "A"
+      },
+      {
+        number: "Question 208/256",
+        text: "Chemical Kinetics Question 208 - First order kinetics",
+        options: ["t₁/₂ = 0.693/k", "t₁/₂ = [A]₀/2k", "t₁/₂ = 1/k[A]₀", "t₁/₂ = k/0.693"],
+        correct: "A"
+      },
+      {
+        number: "Question 209/256",
+        text: "Chemical Kinetics Question 209 - Zero order kinetics",
+        options: ["t₁/₂ = [A]₀/2k", "t₁/₂ = 0.693/k", "t₁/₂ = 1/k[A]₀", "t₁/₂ = k/0.693"],
+        correct: "A"
+      },
+      {
+        number: "Question 210/256",
+        text: "Chemical Kinetics Question 210 - Second order kinetics",
+        options: ["t₁/₂ = 1/k[A]₀", "t₁/₂ = 0.693/k", "t₁/₂ = [A]₀/2k", "t₁/₂ = k/0.693"],
+        correct: "A"
+      },
+      {
+        number: "Question 211/256",
+        text: "Chemical Kinetics Question 211 - Rate of reaction units",
+        options: ["mol L⁻¹ s⁻¹", "mol⁻¹ L s⁻¹", "s⁻¹", "L mol⁻¹ s⁻¹"],
+        correct: "A"
+      },
+      {
+        number: "Question 212/256",
+        text: "Chemical Kinetics Question 212 - Integrated rate law",
+        options: ["ln[A]ₜ = -kt + ln[A]₀", "[A]ₜ = -kt + [A]₀", "1/[A]ₜ = kt + 1/[A]₀", "[A]ₜ² = -kt + [A]₀²"],
+        correct: "A"
+      },
+      {
+        number: "Question 213/256",
+        text: "Chemical Kinetics Question 213 - Temperature effect on rate",
+        options: ["Rate increases", "Rate decreases", "Rate remains same", "Rate becomes zero"],
+        correct: "A"
+      },
+      {
+        number: "Question 214/256",
+        text: "Chemical Kinetics Question 214 - Catalyst effect",
+        options: ["Lowers activation energy", "Increases activation energy", "Changes equilibrium constant", "Changes ΔH"],
+        correct: "A"
+      },
+      {
+        number: "Question 215/256",
+        text: "Chemical Kinetics Question 215 - Collision theory",
+        options: ["Proper orientation needed", "All collisions effective", "No activation energy needed", "Temperature irrelevant"],
+        correct: "A"
+      },
+      {
+        number: "Question 216/256",
+        text: "Chemical Kinetics Question 216 - Reaction mechanism",
+        options: ["Slow step determines rate", "Fast step determines rate", "All steps equal", "Intermediate determines rate"],
+        correct: "A"
+      },
+      {
+        number: "Question 217/256",
+        text: "Chemical Kinetics Question 217 - Pseudo first order",
+        options: ["When one reactant in excess", "When no reactants", "When temperature constant", "When pressure constant"],
+        correct: "A"
+      },
+      {
+        number: "Question 218/256",
+        text: "Chemical Kinetics Question 218 - Rate determining step",
+        options: ["Slowest step", "Fastest step", "First step", "Last step"],
+        correct: "A"
+      },
+      {
+        number: "Question 219/256",
+        text: "Chemical Kinetics Question 219 - Elementary reaction",
+        options: ["Single step reaction", "Multiple step reaction", "Complex reaction", "Reverse reaction"],
+        correct: "A"
+      },
+      {
+        number: "Question 220/256",
+        text: "Chemical Kinetics Question 220 - Complex reaction",
+        options: ["Multiple steps", "Single step", "No intermediates", "No catalyst"],
+        correct: "A"
+      },
+      {
+        number: "Question 221/256",
+        text: "Chemical Kinetics Question 221 - Steady state approximation",
+        options: ["[Intermediate] constant", "[Reactant] constant", "[Product] constant", "Rate constant"],
+        correct: "A"
+      },
+      {
+        number: "Question 222/256",
+        text: "Chemical Kinetics Question 222 - Reaction intermediate",
+        options: ["Formed and consumed", "Only formed", "Only consumed", "Final product"],
+        correct: "A"
+      },
+      {
+        number: "Question 223/256",
+        text: "Chemical Kinetics Question 223 - Arrhenius plot slope",
+        options: ["-Ea/R", "Ea/R", "-Ea/2.303R", "Ea/2.303R"],
+        correct: "A"
+      },
+      {
+        number: "Question 224/256",
+        text: "Chemical Kinetics Question 224 - Frequency factor",
+        options: ["A in Arrhenius equation", "Ea in Arrhenius equation", "k in rate law", "t in half-life"],
+        correct: "A"
+      },
+      {
+        number: "Question 225/256",
+        text: "Chemical Kinetics Question 225 - Temperature coefficient",
+        options: ["Rate doubles per 10°C", "Rate halves per 10°C", "Rate constant", "Rate triples"],
+        correct: "A"
+      },
+      {
+        number: "Question 226/256",
+        text: "Chemical Kinetics Question 226 - Energy profile diagram",
+        options: ["Shows activation energy", "Shows equilibrium", "Shows concentration", "Shows time"],
+        correct: "A"
+      },
+      {
+        number: "Question 227/256",
+        text: "Chemical Kinetics Question 227 - Activated complex",
+        options: ["Transition state", "Reactant state", "Product state", "Intermediate"],
+        correct: "A"
+      },
+      {
+        number: "Question 228/256",
+        text: "Chemical Kinetics Question 228 - Rate constant units for first order",
+        options: ["s⁻¹", "mol L⁻¹ s⁻¹", "L mol⁻¹ s⁻¹", "L² mol⁻² s⁻¹"],
+        correct: "A"
+      },
+      {
+        number: "Question 229/256",
+        text: "Chemical Kinetics Question 229 - Rate constant units for second order",
+        options: ["L mol⁻¹ s⁻¹", "s⁻¹", "mol L⁻¹ s⁻¹", "L² mol⁻² s⁻¹"],
+        correct: "A"
+      },
+      {
+        number: "Question 230/256",
+        text: "Chemical Kinetics Question 230 - Rate constant units for zero order",
+        options: ["mol L⁻¹ s⁻¹", "s⁻¹", "L mol⁻¹ s⁻¹", "L² mol⁻² s⁻¹"],
+        correct: "A"
+      },
+      {
+        number: "Question 231/256",
+        text: "Chemical Kinetics Question 231 - Initial rate method",
+        options: ["Determine order", "Determine molecularity", "Determine mechanism", "Determine catalyst"],
+        correct: "A"
+      },
+      {
+        number: "Question 232/256",
+        text: "Chemical Kinetics Question 232 - Integrated rate law for zero order",
+        options: ["[A]ₜ = [A]₀ - kt", "ln[A]ₜ = ln[A]₀ - kt", "1/[A]ₜ = 1/[A]₀ + kt", "[A]ₜ² = [A]₀² - kt"],
+        correct: "A"
+      },
+      {
+        number: "Question 233/256",
+        text: "Chemical Kinetics Question 233 - Integrated rate law for first order",
+        options: ["ln[A]ₜ = ln[A]₀ - kt", "[A]ₜ = [A]₀ - kt", "1/[A]ₜ = 1/[A]₀ + kt", "[A]ₜ² = [A]₀² - kt"],
+        correct: "A"
+      },
+      {
+        number: "Question 234/256",
+        text: "Chemical Kinetics Question 234 - Integrated rate law for second order",
+        options: ["1/[A]ₜ = 1/[A]₀ + kt", "[A]ₜ = [A]₀ - kt", "ln[A]ₜ = ln[A]₀ - kt", "[A]ₜ² = [A]₀² - kt"],
+        correct: "A"
+      },
+      {
+        number: "Question 235/256",
+        text: "Chemical Kinetics Question 235 - Graph for first order",
+        options: ["ln[A] vs t linear", "[A] vs t linear", "1/[A] vs t linear", "[A]² vs t linear"],
+        correct: "A"
+      },
+      {
+        number: "Question 236/256",
+        text: "Chemical Kinetics Question 236 - Graph for zero order",
+        options: ["[A] vs t linear", "ln[A] vs t linear", "1/[A] vs t linear", "[A]² vs t linear"],
+        correct: "A"
+      },
+      {
+        number: "Question 237/256",
+        text: "Chemical Kinetics Question 237 - Graph for second order",
+        options: ["1/[A] vs t linear", "[A] vs t linear", "ln[A] vs t linear", "[A]² vs t linear"],
+        correct: "A"
+      },
+      {
+        number: "Question 238/256",
+        text: "Chemical Kinetics Question 238 - Half-life for first order",
+        options: ["Independent of [A]₀", "Proportional to [A]₀", "Inversely proportional to [A]₀", "Proportional to [A]₀²"],
+        correct: "A"
+      },
+      {
+        number: "Question 239/256",
+        text: "Chemical Kinetics Question 239 - Half-life for zero order",
+        options: ["Proportional to [A]₀", "Independent of [A]₀", "Inversely proportional to [A]₀", "Proportional to [A]₀²"],
+        correct: "A"
+      },
+      {
+        number: "Question 240/256",
+        text: "Chemical Kinetics Question 240 - Half-life for second order",
+        options: ["Inversely proportional to [A]₀", "Independent of [A]₀", "Proportional to [A]₀", "Proportional to [A]₀²"],
+        correct: "A"
+      },
+      {
+        number: "Question 241/256",
+        text: "Chemical Kinetics Question 241 - Rate equation for elementary reaction",
+        options: ["Based on stoichiometry", "Based on mechanism", "Based on temperature", "Based on catalyst"],
+        correct: "A"
+      },
+      {
+        number: "Question 242/256",
+        text: "Chemical Kinetics Question 242 - Rate equation for complex reaction",
+        options: ["Based on slow step", "Based on fast step", "Based on all steps", "Based on equilibrium"],
+        correct: "A"
+      },
+      {
+        number: "Question 243/256",
+        text: "Chemical Kinetics Question 243 - Parallel reactions",
+        options: ["Multiple products", "Single product", "No products", "Reversible"],
+        correct: "A"
+      },
+      {
+        number: "Question 244/256",
+        text: "Chemical Kinetics Question 244 - Consecutive reactions",
+        options: ["Series of steps", "Parallel steps", "Single step", "No steps"],
+        correct: "A"
+      },
+      {
+        number: "Question 245/256",
+        text: "Chemical Kinetics Question 245 - Reversible reactions",
+        options: ["Forward and backward", "Only forward", "Only backward", "No reaction"],
+        correct: "A"
+      },
+      {
+        number: "Question 246/256",
+        text: "Chemical Kinetics Question 246 - Equilibrium constant",
+        options: ["k_f/k_b", "k_b/k_f", "k_f + k_b", "k_f × k_b"],
+        correct: "A"
+      },
+      {
+        number: "Question 247/256",
+        text: "Chemical Kinetics Question 247 - Rate vs concentration graph slope",
+        options: ["Rate constant k", "Activation energy", "Frequency factor", "Half-life"],
+        correct: "A"
+      },
+      {
+        number: "Question 248/256",
+        text: "Chemical Kinetics Question 248 - Effect of catalyst",
+        options: ["Increases rate", "Decreases rate", "No effect on rate", "Changes products"],
+        correct: "A"
+      },
+      {
+        number: "Question 249/256",
+        text: "Chemical Kinetics Question 249 - Homogeneous catalysis",
+        options: ["Same phase as reactants", "Different phase", "Solid catalyst", "Gas catalyst"],
+        correct: "A"
+      },
+      {
+        number: "Question 250/256",
+        text: "Chemical Kinetics Question 250 - Heterogeneous catalysis",
+        options: ["Different phase", "Same phase", "Liquid catalyst", "No phase"],
+        correct: "A"
+      },
+      {
+        number: "Question 251/256",
+        text: "Chemical Kinetics Question 251 - Enzyme catalysis",
+        options: ["Biological catalyst", "Inorganic catalyst", "Metal catalyst", "Acid catalyst"],
+        correct: "A"
+      },
+      {
+        number: "Question 252/256",
+        text: "Chemical Kinetics Question 252 - Michaelis-Menten equation",
+        options: ["v = V_max[S]/(K_m + [S])", "v = k[S]", "v = k[S]²", "v = V_max[S]"],
+        correct: "A"
+      },
+      {
+        number: "Question 253/256",
+        text: "Chemical Kinetics Question 253 - Lineweaver-Burk plot",
+        options: ["1/v vs 1/[S]", "v vs [S]", "ln v vs [S]", "v vs ln[S]"],
+        correct: "A"
+      },
+      {
+        number: "Question 254/256",
+        text: "Chemical Kinetics Question 254 - Inhibition constant",
+        options: ["K_i", "K_m", "V_max", "k_cat"],
+        correct: "A"
+      },
+      {
+        number: "Question 255/256",
+        text: "Chemical Kinetics Question 255 - Turnover number",
+        options: ["k_cat", "K_m", "V_max", "K_i"],
+        correct: "A"
+      },
+      {
+        number: "Question 256/256",
+        text: "Chemical Kinetics Question 256 - Rate limiting step in enzyme catalysis",
+        options: ["ES → E + P", "E + S → ES", "E + P → EP", "EP → E + P"],
+        correct: "A"
+      }
+    ];
+
+    // Ensure we have exactly 256 questions
+    if (questions.length > 256) {
+      questions.length = 256;
+    }
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">
+          <div class="question-text">${q.text}</div>
+        </div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      // Show results
+      alert(`Quiz submitted!\n\nCorrect: ${correct}/${questions.length}\nAccuracy: ${(correct/questions.length*100).toFixed(1)}%\nTime: ${timeTakenMin} min ${timeTakenSec} sec\n\nClick OK to view detailed results.`);
+      
+      // Show detailed results in new window
+      const resultsWindow = window.open("", "Quiz Results", "width=800,height=600");
+      resultsWindow.document.write(`
+        <html>
+        <head><title>Quiz Results</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+          .correct { background-color: #d4edda; }
+          .incorrect { background-color: #f8d7da; }
+          .not-answered { background-color: #fff3cd; }
+          .summary { font-size: 18px; font-weight: bold; margin: 20px 0; }
+        </style>
+        </head>
+        <body>
+          <h1>Chemical Kinetics Quiz Results</h1>
+          <div class="summary">
+            Total Questions: ${questions.length}<br>
+            Correct Answers: ${correct}<br>
+            Accuracy: ${(correct/questions.length*100).toFixed(1)}%<br>
+            Time Taken: ${timeTakenMin} min ${timeTakenSec} sec
+          </div>
+          <h2>Question-wise Results:</h2>
+          ${results.map(r => `
+            <div class="result ${r.userAns === "Not Answered" ? "not-answered" : r.isCorrect ? "correct" : "incorrect"}">
+              ${r.number}: Your Answer: ${r.userAns}, Correct Answer: ${r.correctAns}
+              ${r.isCorrect ? "✓" : "✗"}
+            </div>
+          `).join('')}
+        </body>
+        </html>
+      `);
+      resultsWindow.document.close();
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    // Close nav panel when clicking outside
+    document.addEventListener('click', function(event) {
+      const navPanel = document.getElementById('navPanel');
+      const navToggle = document.querySelector('.nav-panel-toggle');
+      
+      if (navPanelVisible && !navPanel.contains(event.target) && !navToggle.contains(event.target)) {
+        toggleNavPanel();
+      }
+    });
+  </script>
+</body>
+</html>

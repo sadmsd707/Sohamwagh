@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Surface Chemistry</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 1",
+        text: "Which of the following is NOT a characteristic of chemisorption?",
+        options: [
+          "It is specific.",
+          "It is irreversible.",
+          "Heat released is in the range of 40–200 kJ/mol.",
+          "Formation of multimolecular layer of adsorbate."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 2",
+        text: "Identify catalyst used in following reaction: CO(g) + H₂O(g) → CO₂(g) + H₂(g) at 623K",
+        options: [
+          "Traces of acid or alkali",
+          "Vanadium pentoxide",
+          "Iron chromate",
+          "Ni metal"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 3",
+        text: "Identify the negatively charged sol from following.",
+        options: [
+          "As₂S₃",
+          "Fe(OH)₃",
+          "Al(OH)₃",
+          "TiO₂"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 4",
+        text: "Which from following nanomaterial has all three dimensions less than 100 nm?",
+        options: [
+          "Quantum dots",
+          "Nanotubes",
+          "Thin films",
+          "Nanowires"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 5",
+        text: "Which instrument is used for determination of particle size?",
+        options: [
+          "Ultramicroscope",
+          "Electron microscope",
+          "Tyndallometer",
+          "Ultracentrifuge"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 6",
+        text: "Which among the following gases is least adsorbed on solid at similar conditions of temperature and pressure?",
+        options: [
+          "NH₃",
+          "HCl",
+          "H₂",
+          "CO₂"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 7",
+        text: "Identify the technique used to know binding nature of nanomaterials?",
+        options: [
+          "X-ray diffraction",
+          "FTIR",
+          "TEM",
+          "UV-Vis spectroscopy"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 8",
+        text: "Which from following substances is classified as macromolecular colloid?",
+        options: [
+          "Starch",
+          "Gold sol",
+          "Sulphur sol",
+          "Arsenious sulphide sol"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 9",
+        text: "Find the temperature from following graph so that highest amount of a gas is adsorbed.",
+        options: [
+          "T1",
+          "T2",
+          "T3",
+          "T4"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 10",
+        text: "What type of colloid is fog?",
+        options: [
+          "Liquid in gas",
+          "Gas in liquid",
+          "Solid in gas",
+          "Gas in solid"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 11",
+        text: "Which from following is classified as multimolecular colloid?",
+        options: [
+          "Protein",
+          "Starch",
+          "Sulphur sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 12",
+        text: "Which of the following ion exhibits maximum power of coagulation for positively charged sol?",
+        options: [
+          "Cl⁻",
+          "SO₄²⁻",
+          "PO₄³⁻",
+          "NO₃⁻"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 13",
+        text: "Which from following process does NOT result in coagulation?",
+        options: [
+          "Heating",
+          "Electrophoresis",
+          "Adding electrolyte",
+          "Adding oppositely charged sol"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 14",
+        text: "Which from following represents the Freundlich's empirical equation for adsorption of gas on solid (for n > 1)?",
+        options: [
+          "x/m = kP¹/ⁿ",
+          "x/m = kPⁿ",
+          "x/m = kP",
+          "x/m = k/P"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 15",
+        text: "Identify sequential reactions involved in Sol-Gel process.",
+        options: [
+          "Oxidation and hydrolysis",
+          "Hydrolysis and polycondensation",
+          "Polycondensation and oxidation",
+          "Polycondensation and hydrolysis"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "Identify the property of colloidal solutions so that colloidal particles move freely towards respective electrodes under an applied electrical potential.",
+        options: [
+          "Tyndall effect",
+          "Brownian motion",
+          "Electrophoresis",
+          "Coagulation"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 17",
+        text: "Which from following gases is adsorbed to greater extent if adsorbent remains same at similar conditions of temperature and pressure?",
+        options: [
+          "H₂",
+          "N₂",
+          "O₂",
+          "NH₃"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 18",
+        text: "Which of the following is effectively used to remove E. coli bacteria from water?",
+        options: [
+          "TiO₂ nanoparticles",
+          "Silver nanoparticles",
+          "Silicon nanoparticles",
+          "Carbon black nanoparticles"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 19",
+        text: "Which of the following is not negatively charged sol?",
+        options: [
+          "Arsenious sulphide",
+          "Gold sol",
+          "Ferric hydroxide",
+          "Clay"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 20",
+        text: "Identify example of sorption from following.",
+        options: [
+          "Oxygen gas is passed over finely divided nickel.",
+          "Hydrogen gas is passed over platinum.",
+          "Chalk is dipped in ink.",
+          "Charcoal is added to methylene blue solution."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 21",
+        text: "Match column I (process) with column II (application)",
+        options: [
+          "A-d, B-c, C-a, D-b",
+          "A-d, B-a, C-c, D-b",
+          "A-b, B-c, C-d, D-a",
+          "A-c, B-d, C-a, D-b"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 22",
+        text: "What is the number of electrons present in antibonding orbitals of N₂ molecule according to molecular orbital theory?",
+        options: [
+          "2",
+          "4",
+          "6",
+          "8"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 23",
+        text: "What is the value of slope in Freundlich adsorption isotherm log(x/m) against log C?",
+        options: [
+          "1/n",
+          "n",
+          "log k",
+          "k"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 24",
+        text: "Identify dispersed phase and dispersion medium in fog respectively.",
+        options: [
+          "Liquid, gas",
+          "Gas, liquid",
+          "Solid, gas",
+          "Gas, solid"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 25",
+        text: "Which among the following is an example of emulsion?",
+        options: [
+          "Milk",
+          "Smoke",
+          "Cheese",
+          "Jelly"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 26",
+        text: "Which from following statements is NOT true about absorption?",
+        options: [
+          "Concentration of absorbate is uniform throughout the bulk of the absorbent.",
+          "It is not accompanied by evolution or absorption of heat.",
+          "It depends on surface area.",
+          "It is independent of temperature and pressure."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 27",
+        text: "What type of colloid is soap lather?",
+        options: [
+          "Gas in liquid",
+          "Liquid in gas",
+          "Solid in gas",
+          "Gas in solid"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 28",
+        text: "Which from following anions has maximum coagulating power for precipitation of positive sol?",
+        options: [
+          "Cl⁻",
+          "SO₄²⁻",
+          "PO₄³⁻",
+          "NO₃⁻"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 29",
+        text: "What type of colloid is milk?",
+        options: [
+          "Liquid in solid",
+          "Liquid in liquid",
+          "Solid in liquid",
+          "Gas in liquid"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 30",
+        text: "Which from following anions has lowest coagulating power for precipitation of positive sol?",
+        options: [
+          "Cl⁻",
+          "SO₄²⁻",
+          "PO₄³⁻",
+          "NO₃⁻"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 31",
+        text: "Which from following statements is NOT true about lyophilic colloids?",
+        options: [
+          "These are self stabilized.",
+          "These are reversible.",
+          "Coagulation occurs even by adding very small amount of electrolytes.",
+          "The particles of dispersed phase have greater affinity for the dispersion medium."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 32",
+        text: "Which is NOT an example of macromolecular colloid?",
+        options: [
+          "Starch",
+          "Protein",
+          "Gold sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 33",
+        text: "Which from following is an example of multimolecular colloids?",
+        options: [
+          "Starch",
+          "Protein",
+          "Sulphur sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 34",
+        text: "Identify dispersed phase and dispersion medium in cheese.",
+        options: [
+          "Liquid, solid",
+          "Liquid, liquid",
+          "Solid, liquid",
+          "Solid, solid"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 35",
+        text: "Which of the following is an example of heterogeneous catalysis?",
+        options: [
+          "Hydrolysis of ester in presence of acid",
+          "Decomposition of H₂O₂ in presence of I⁻",
+          "Oxidation of SO₂ to SO₃ in presence of V₂O₅",
+          "Inversion of cane sugar in presence of acid"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 36",
+        text: "Which of the following gases is readily adsorbed by solid adsorbent?",
+        options: [
+          "H₂",
+          "N₂",
+          "O₂",
+          "NH₃"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 37",
+        text: "Which from following is an example of two dimensional nanostructures?",
+        options: [
+          "Quantum dots",
+          "Nanotubes",
+          "Thin films",
+          "Nanowires"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 38",
+        text: "What type of following solutions is the gasoline?",
+        options: [
+          "Liquid as solute and liquid as solvent",
+          "Gas as solute and liquid as solvent",
+          "Solid as solute and liquid as solvent",
+          "Liquid as solute and solid as solvent"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 39",
+        text: "Which of the following ion has greater coagulating power for negatively charged sol?",
+        options: [
+          "Na⁺",
+          "Mg²⁺",
+          "Al³⁺",
+          "K⁺"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 40",
+        text: "Which statement from following about nanomaterial is NOT correct?",
+        options: [
+          "Nanomaterial based catalysts exhibit increased catalytic activities",
+          "Nanosized Cu and Pd clusters have very less hardness than bulk metal",
+          "Carbon nanotube can act as electrical conductor",
+          "As the particle size decreases the total surface area of particles increases"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 41",
+        text: "Identify FALSE statement regarding adsorption from following.",
+        options: [
+          "During adsorption surface energy of adsorbent increases.",
+          "It takes place due to unbalanced forces acting on the surface of solid or liquid.",
+          "It is caused by van der Waals forces.",
+          "It is an exothermic process."
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 42",
+        text: "Which from following nanomaterial has one dimension less than 100 nm?",
+        options: [
+          "Quantum dots",
+          "Nanotubes",
+          "Thin films",
+          "Nanowires"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 43",
+        text: "Identify the example of zero-dimensional nanostructure from following.",
+        options: [
+          "Quantum dots",
+          "Nanotubes",
+          "Thin films",
+          "Nanowires"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 44",
+        text: "Which from following phenomena is inversely proportional with adsorption?",
+        options: [
+          "Temperature of process",
+          "Pressure of gas",
+          "Critical temperature of gas",
+          "Surface area of adsorbent"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 45",
+        text: "Which of the following is positively charged sol?",
+        options: [
+          "As₂S₃",
+          "Fe(OH)₃",
+          "Gold sol",
+          "Clay"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 46",
+        text: "Identify physisorption from following.",
+        options: [
+          "O₂ gas deposited on tungsten",
+          "N₂ gas deposited on iron",
+          "All gases deposited on charcoal",
+          "H₂ gas deposited on nickel"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 47",
+        text: "Identify the last step in wet chemical synthesis of nanomaterial.",
+        options: [
+          "Precipitation",
+          "Aging",
+          "Calcination",
+          "Drying"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 48",
+        text: "Which of the following is character of lyophilic colloid?",
+        options: [
+          "Addition of large amount of electrolyte causes precipitation.",
+          "Particles of dispersed phase have no affinity for dispersion medium.",
+          "These are irreversible colloids.",
+          "Particles easily detected under ultramicroscope."
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 49",
+        text: "Which of the following colloids is NOT a gel?",
+        options: [
+          "Cheese",
+          "Butter",
+          "Jelly",
+          "Curd"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 50",
+        text: "Which is NOT an example of macromolecular colloid?",
+        options: [
+          "Starch",
+          "Protein",
+          "Gold sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 51",
+        text: "What type of following phenomena is exhibited by adsorption?",
+        options: [
+          "Surface phenomenon",
+          "Bulk phenomenon",
+          "Both surface and bulk",
+          "Neither surface nor bulk"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 52",
+        text: 'Identify correct statement for "oil in water" type of emulsion.',
+        options: [
+          "Water is dispersed phase.",
+          "No effect on conducting power when small amount of an electrolyte is added.",
+          "Oil is dispersion medium.",
+          "Basic metal sulfates are used as emulsifiers."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 53",
+        text: "What type of solution is sea water?",
+        options: [
+          "Liquid in solid",
+          "Solid in liquid",
+          "Liquid in liquid",
+          "Solid in solid"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 54",
+        text: "What is effect of pressure on extent of adsorption?",
+        options: [
+          "Increase as pressure increases continuously",
+          "Increases at start as pressure increase and then remains constant",
+          "Decrease as pressure increase",
+          "No change in extent of adsorption if pressure increase or decreases"
+        ],
+        correct: "B"
+      },
+      {
+        number: "Question 55",
+        text: "Which of the following conversions is carried out by using charcoal catalyst?",
+        options: [
+          "SO₂(g) + Cl₂(g) → SO₂Cl₂(l)",
+          "4HCl + O₂ → 2Cl₂ + 2H₂O",
+          "2SO₂(g) + O₂(g) → 2SO₃(g)",
+          "2ZnS(s) + 3O₂(g) → 2ZnO(s) + 2SO₂(g)"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 56",
+        text: "Which among following is a zero-dimensional nanostructure?",
+        options: [
+          "Quantum dots",
+          "Nanotubes",
+          "Thin films",
+          "Nanowires"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 57",
+        text: "Which among the following is a negatively charged sol?",
+        options: [
+          "Fe(OH)₃",
+          "Al(OH)₃",
+          "As₂S₃",
+          "TiO₂"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 58",
+        text: "Which of the following is NOT a characteristic of chemisorption?",
+        options: [
+          "Formation of multimolecular layer of adsorbate.",
+          "It is irreversible",
+          "It is specific.",
+          "Heat of adsorption is in the range of 40–200 kJ mol⁻¹"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 59",
+        text: "Which among the following is an example of sorption?",
+        options: [
+          "Chalk is dipped in ink",
+          "Charcoal is added to methylene blue solution",
+          "Oxygen gas is passed over finely divided nickel",
+          "Hydrogen gas is passed over platinum"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 60",
+        text: "What is the range of particle size in colloidal state?",
+        options: [
+          "1–10 nm",
+          "1–100 nm",
+          "10–1000 nm",
+          "1–1000 nm"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 61",
+        text: "Identify the colloidal molecule containing hydrophilic head and hydrophobic tail.",
+        options: [
+          "Soap",
+          "Starch",
+          "Protein",
+          "Gum"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 62",
+        text: "Which from following is an example of multimolecular colloids?",
+        options: [
+          "Starch",
+          "Protein",
+          "Sulphur sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 63",
+        text: "Which of the following is a first step in mechanism of heterogeneous catalysis?",
+        options: [
+          "Desorption of reaction product from catalyst surface",
+          "Occurrence of chemical reaction on catalyst surface to form an intermediate",
+          "Adsorption of reactant molecules on catalyst surface to form an intermediate",
+          "Diffusion of reactants towards catalyst surface"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 64",
+        text: "Which of the following statements is true for adsorption?",
+        options: [
+          "It is independent of surface area.",
+          "It is independent of temperature.",
+          "It is a bulk phenomenon.",
+          "It is accompanied by evolution of heat."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 65",
+        text: "Air is an example of a solution of",
+        options: [
+          "Liquid in gas",
+          "Gas has solid",
+          "Gas in liquid",
+          "Gas in gas"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 66",
+        text: "What is the value of intercept on y-axis when log(x/m) is plotted against log P in Freundlich isotherm?",
+        options: [
+          "log k",
+          "k",
+          "1/n",
+          "n"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 67",
+        text: "Identify the correct decreasing order of precipitation power of flocculating ion added.",
+        options: [
+          "Al³⁺ > Ba²⁺ > Na⁺",
+          "Ba²⁺ > Al³⁺ > Na⁺",
+          "Na⁺ > Ba²⁺ > Al³⁺",
+          "Al³⁺ > Na⁺ > Ba²⁺"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 68",
+        text: "Which among the following is true for chemisorption?",
+        options: [
+          "It is favored at high temperature up to certain limit",
+          "It is multimolecular layered",
+          "Heat of adsorption is in the range of 20–40 kJ mol⁻¹",
+          "Van der Waals forces are involved"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 69",
+        text: "Which among the following is NOT an example of one-dimensional nanostructure?",
+        options: [
+          "Nanotubes",
+          "Nanowires",
+          "Quantum dots",
+          "Nanofibers"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 70",
+        text: "Which of following statement is correct for physisorption?",
+        options: [
+          "It involves formation of covalent or ionic bonds.",
+          "It is very specific.",
+          "It is favoured at high temperature.",
+          "It is reversible."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 71",
+        text: "Which among the following is a multimolecular colloid?",
+        options: [
+          "Starch",
+          "Protein",
+          "Sulphur sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 72",
+        text: "Identify negatively charged sol from following.",
+        options: [
+          "Fe(OH)₃",
+          "Al(OH)₃",
+          "As₂S₃",
+          "TiO₂"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 73",
+        text: "Which of the following is an emulsion?",
+        options: [
+          "Milk",
+          "Smoke",
+          "Cheese",
+          "Jelly"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 74",
+        text: "Identify the enzyme 'X' in the following reaction: H₂O₂(aq) → H₂O(l) + ½O₂(g)",
+        options: [
+          "Catalase",
+          "Peroxidase",
+          "Invertase",
+          "Urease"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 75",
+        text: "If a dilute solution of AgNO₃ is added to dilute solution of excess NaI, then the species adsorbed on AgI colloidal particles is",
+        options: [
+          "Ag⁺",
+          "NO₃⁻",
+          "Na⁺",
+          "I⁻"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 76",
+        text: "Which of the following is multimolecular colloid?",
+        options: [
+          "Starch",
+          "Protein",
+          "Sulphur sol",
+          "Cellulose"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 77",
+        text: "Identify the enzyme that catalyses the reaction of CO₂ with water in human body?",
+        options: [
+          "Carbonic anhydrase",
+          "Carboxypeptidase",
+          "Catalase",
+          "Cytochrome oxidase"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 78",
+        text: "Which among the following ionic species has least precipitating power?",
+        options: [
+          "Na⁺",
+          "Mg²⁺",
+          "Al³⁺",
+          "K⁺"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 79",
+        text: "Which among the following sources contains caryophyllene?",
+        options: [
+          "Clove oil",
+          "Eucalyptus oil",
+          "Turpentine oil",
+          "Lemon grass oil"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "Solution of chloroform in nitrogen is an example of",
+        options: [
+          "Liquid in solid",
+          "Liquid in liquid",
+          "Liquid in gas",
+          "Gas in liquid"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 81",
+        text: "Tyndall effect is observed due to",
+        options: [
+          "Scattering of light",
+          "Absorption of light",
+          "Reflection of light",
+          "Refraction of light"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 82",
+        text: "An amalgam of mercury with sodium is an example of",
+        options: [
+          "Solid in liquid",
+          "Liquid in solid",
+          "Solid in solid",
+          "Liquid in liquid"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 83",
+        text: "Which of the following is an example of hydrophobic sol?",
+        options: [
+          "Starch",
+          "Protein",
+          "Sulphur sol",
+          "Gum"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 84",
+        text: "Which of the following can form colloidal sol with water?",
+        options: [
+          "NaCl",
+          "Sugar",
+          "Starch",
+          "Urea"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 85",
+        text: "Electrophoresis is used",
+        options: [
+          "to count number of particles in colloidal dispersions",
+          "for stability of colloids",
+          "to determine size of colloidal particles",
+          "to determine charge on colloidal particles"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 86",
+        text: "Freundlich's equation for adsorption of gas on solid is represented as",
+        options: [
+          "x/m = kP¹/ⁿ",
+          "x/m = kPⁿ",
+          "x/m = kP",
+          "x/m = k/P"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 87",
+        text: "Which of the following ionic species has highest precipitating power?",
+        options: [
+          "Na⁺",
+          "Mg²⁺",
+          "Al³⁺",
+          "K⁺"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 88",
+        text: "When soap is added to an oily part of cloth, the hydrocarbon part of soap dissolves in",
+        options: [
+          "Water, keeping the tail away from the oil",
+          "Oil, keeping the tail away from the oil",
+          "Water, keeping the head away from the oil",
+          "Oil, keeping the head away from the oil"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 89",
+        text: "Which of the following is a character of catalyst?",
+        options: [
+          "It changes the position of equilibrium.",
+          "It affects the energies of reactants and products of the reaction.",
+          "It increases the rates of both forward and backward reactions equally in reversible reaction.",
+          "It increases the activation energy of reactants."
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 90",
+        text: "The precipitation power of an electrolyte increases with",
+        options: [
+          "Ionic radii",
+          "Rise in temperature",
+          "Atomic radii",
+          "Charge of an ion"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 91",
+        text: "Blue colour of water in sea is due to",
+        options: [
+          "None of the above",
+          "Refraction of blue light by impurities",
+          "Refraction blue sky by water",
+          "Scattering of light by water"
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 92",
+        text: "Freundlich adsorption isotherm is",
+        options: [
+          "x/m = kP¹/ⁿ",
+          "x/m = kPⁿ",
+          "x/m = kP",
+          "x/m = k/P"
+        ],
+        correct: "A"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    renderQuestion(current);
+
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

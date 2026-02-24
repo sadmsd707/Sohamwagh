@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET p-Block Elements Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · p-Block Elements (Group 15, 16, 17 & 18)</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Question 01",
+        text: "Which of the following halogens does always show oxidation state -1?",
+        options: ["Fluorine", "Chlorine", "Bromine", "Iodine"],
+        correct: "A"
+      },
+      {
+        number: "Question 02",
+        text: "Which from following compounds is NOT acidic in nature?",
+        options: ["NH₃", "PH₃", "AsH₃", "SbH₃"],
+        correct: "A"
+      },
+      {
+        number: "Question 03",
+        text: "What is oxidation state of xenon in xenonmonooxytetrafluoride?",
+        options: ["+6", "+2", "+8", "+4"],
+        correct: "A"
+      },
+      {
+        number: "Question 04",
+        text: "Which of the following xenon compound has chlorine pentafluoride like structure?",
+        options: ["XeF₂", "XeF₄", "XeF₆", "XeO₃"],
+        correct: "B"
+      },
+      {
+        number: "Question 05",
+        text: "Which of the following statements is false about oxygen and sulphur?",
+        options: [
+          "Oxygen and sulphur show -2, +4 and +6 oxidation states.",
+          "Atoms of oxygen and sulphur consist two unpaired electrons in valence shell.",
+          "Hydride of oxygen is more stable than hydride of sulphur.",
+          "Oxygen is gas while sulphur is solid at room temperature."
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 06",
+        text: "What is the number of oxygen atoms bonded to chlorine in its strongest oxacid?",
+        options: ["1", "2", "3", "4"],
+        correct: "C"
+      },
+      {
+        number: "Question 07",
+        text: "Which of the following is an acidic oxide?",
+        options: ["CO", "N₂O", "P₄O₁₀", "NO"],
+        correct: "C"
+      },
+      {
+        number: "Question 08",
+        text: "Which of the following statements is NOT correct about ozone?",
+        options: [
+          "It has angular shape",
+          "It is good bleaching agent",
+          "It is strong reducing agent",
+          "It absorbs harmful Ultra Violet radiation from the sun"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 09",
+        text: "Which of the following is existing oxacid of fluorine?",
+        options: ["HFO", "HFO₂", "HFO₃", "HFO₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 10",
+        text: "What is shape of interhalogen compound so that central halogen exhibits +3 oxidation state?",
+        options: ["Linear", "T-shaped", "Square planar", "Octahedral"],
+        correct: "B"
+      },
+      {
+        number: "Question 11",
+        text: "Which of the following interhalogen compounds in liquid state at room temperature?",
+        options: ["ClF", "BrF₃", "IF₅", "BrF"],
+        correct: "B"
+      },
+      {
+        number: "Question 12",
+        text: "Identify from following compounds that valence shell of 'Xe' consists one lone pair of electrons.",
+        options: ["XeF₂", "XeF₄", "XeF₆", "XeO₃"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "Which of the following inert gases is used for magnetic resonance imaging?",
+        options: ["He", "Ne", "Ar", "Xe"],
+        correct: "D"
+      },
+      {
+        number: "Question 14",
+        text: "Which of the following halogen forms maximum number of oxoacids?",
+        options: ["F", "Cl", "Br", "I"],
+        correct: "B"
+      },
+      {
+        number: "Question 15",
+        text: "Which of the following is the molecular formula of halous acid of chlorine?",
+        options: ["HClO", "HClO₂", "HClO₃", "HClO₄"],
+        correct: "B"
+      },
+      {
+        number: "Question 16",
+        text: "What are the different types of bonds formed by sulphur with oxygen in thiosulfuric acid?",
+        options: [
+          "Only S=O bonds",
+          "S=O and S-O bonds",
+          "S=O, S-O and S-S bonds",
+          "Only S-O bonds"
+        ],
+        correct: "C"
+      },
+      {
+        number: "Question 17",
+        text: "Which of the following statements is false about interhalogen compounds?",
+        options: [
+          "They are diamagnetic.",
+          "They are more reactive than halogens.",
+          "They are covalent in nature.",
+          "If these are represented as XX', number of X' atoms is always even."
+        ],
+        correct: "D"
+      },
+      {
+        number: "Question 18",
+        text: "Identify the correct decreasing order of boiling point for hydrides of halogens.",
+        options: [
+          "HF > HI > HBr > HCl",
+          "HI > HBr > HCl > HF",
+          "HF > HCl > HBr > HI",
+          "HI > HBr > HF > HCl"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 19",
+        text: "Which of the following set of elements is present in apatite?",
+        options: [
+          "Ca, P, O, F",
+          "Ca, P, O, Cl",
+          "Ca, P, O, Br",
+          "Ca, P, O, I"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 20",
+        text: "Identify false statement from the following about fluorine.",
+        options: [
+          "It has high bond dissociation enthalpy among all halogens.",
+          "It is highly electronegative element.",
+          "It exhibits only -1 oxidation state.",
+          "It form only one oxoacid."
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 21",
+        text: "Which of the following statements is correct about O₂ and O₃ molecule?",
+        options: [
+          "The enthalpy change during the formation of O₃ from O₂ is positive",
+          "O₂ and O₃ are paramagnetic",
+          "The entropy change in the formation of O₃ from O₂ is positive",
+          "O₃ is more stable than O₂"
+        ],
+        correct: "A"
+      },
+      {
+        number: "Question 22",
+        text: "Identify the correct molecular formula of 'Oleum' from following.",
+        options: ["H₂S₂O₇", "H₂SO₄", "H₂S₂O₈", "H₂SO₃"],
+        correct: "A"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set(); // Track which questions have been viewed
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

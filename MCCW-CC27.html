@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz - Aldehydes and Ketones</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+      line-height: 1.5;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Aldehydes and Ketones</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    // Questions extracted from the PDF file
+    const questions = [
+      {
+        number: "Question 01",
+        text: "Identify the reaction so that carbonyl group of aldehydes and ketones is reduced to methylene group on treatment with Zinc-amalgam and concentrated hydrochloric acid.",
+        options: ["Stephan reaction", "Clemmensen reduction", "Wolf-Kishner reduction", "Etard reaction"],
+        correct: "B"
+      },
+      {
+        number: "Question 02",
+        text: "Identify the reagent used for Rosenmund reduction.",
+        options: ["Zn(Hg)/HCl", "H₂, Pd/BaSO₄", "LiAlH₄", "NaBH₄"],
+        correct: "B"
+      },
+      {
+        number: "Question 03",
+        text: "Which among the following has higher boiling point?",
+        options: ["Propanal", "Butanal", "Pentanal", "Hexanal"],
+        correct: "D"
+      },
+      {
+        number: "Question 04",
+        text: "Identify the product formed when Hex-3-enenitrile is reduced with diisobutylaluminium hydride followed by acid hydrolysis?",
+        options: ["Hex-3-enal", "Hexanal", "Hexan-3-one", "Hexanoic acid"],
+        correct: "A"
+      },
+      {
+        number: "Question 05",
+        text: "Which of the following does NOT exhibit haloform reaction?",
+        options: ["CH₃CHO", "CH₃CH₂OH", "CH₃COCH₃", "CH₃CH₂COCH₃"],
+        correct: "D"
+      },
+      {
+        number: "Question 06",
+        text: "Identify the products of following reaction? Formaldehyde + Benzaldehyde i) conc. NaOH Products ii) H₃O⁺",
+        options: ["Benzyl alcohol + Sodium formate", "Benzaldehyde + Formic acid", "Benzophenone", "Benzyl alcohol + Formic acid"],
+        correct: "A"
+      },
+      {
+        number: "Question 07",
+        text: "Which of the following is used as reagent in Etard reaction?",
+        options: ["CrO₂Cl₂", "Zn(Hg)/HCl", "H₂N-NH₂", "LiAlH₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 08",
+        text: "Identify the name of reaction if carbonyl group of aldehydes and ketones is reduced to methylene group on treatment with hydrazine followed by heating with sodium hydroxide in ethylene glycol.",
+        options: ["Clemmensen reduction", "Wolf-Kishner reduction", "Rosenmund reduction", "Stephen reaction"],
+        correct: "B"
+      },
+      {
+        number: "Question 09",
+        text: "Which among the following has lowest boiling point?",
+        options: ["Formaldehyde", "Acetaldehyde", "Propionaldehyde", "Butyraldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 10",
+        text: "Which among the following compounds has highest boiling point?",
+        options: ["CH₃CHO", "CH₃CH₂CHO", "CH₃CH₂CH₂CHO", "CH₃CH₂CH₂CH₂CHO"],
+        correct: "D"
+      },
+      {
+        number: "Question 11",
+        text: "Identify substrate 'S' in the following reaction. Dimethyl cadmium + S → Propanone + Cadmium chloride",
+        options: ["Acetyl chloride", "Acetic anhydride", "Acetaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 12",
+        text: "Identify the substrate 'A' in the following conversion. A → [AlH(i-Bu)₂/H₃O⁺] → Pent-3-enal",
+        options: ["Pent-3-enenitrile", "Pent-3-enoic acid", "Pent-3-en-1-ol", "Pent-3-enoyl chloride"],
+        correct: "A"
+      },
+      {
+        number: "Question 13",
+        text: "Identify the reagent 'R' used in the following reaction. Ketone → [R] → Semicarbazone",
+        options: ["NH₂CONHNH₂", "NH₂NH₂", "C₆H₅NHNH₂", "NH₂OH"],
+        correct: "A"
+      },
+      {
+        number: "Question 14",
+        text: "Which from following compounds has highest boiling point?",
+        options: ["Acetone", "Acetaldehyde", "Formaldehyde", "Butanone"],
+        correct: "D"
+      },
+      {
+        number: "Question 15",
+        text: "Identify the product 'B' in following reaction. Ethanal + dil NaOH → A → B - H₂O",
+        options: ["Crotonaldehyde", "Acetaldehyde", "3-Hydroxybutanal", "But-2-enal"],
+        correct: "A"
+      },
+      {
+        number: "Question 17",
+        text: "Which from following reagents is used in Gatterman-Koch formylation of arene?",
+        options: ["CO + HCl/AlCl₃", "HCN + HCl", "HCOCl + AlCl₃", "HCOOH + H₂SO₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 18",
+        text: "Identify the product 'B' in the following sequence of reactions. Methyl magnesium bromide + CdCl₂ → A → [CH₃COCl] → B",
+        options: ["Acetone", "Propanone", "Acetyl acetone", "Diethyl ketone"],
+        correct: "A"
+      },
+      {
+        number: "Question 19",
+        text: "Benzonitrile on reduction with stannous chloride in presence of hydrochloric acid followed by acid hydrolysis forms,",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzophenone"],
+        correct: "A"
+      },
+      {
+        number: "Question 20",
+        text: "Identify the product of following reaction. Formaldehyde + Benzaldehyde → [conc. NaOH] → product → [H₃O⁺]",
+        options: ["Benzyl alcohol + Sodium formate", "Benzaldehyde + Formic acid", "Benzophenone", "Benzyl alcohol + Formic acid"],
+        correct: "A"
+      },
+      {
+        number: "Question 21",
+        text: "Identify the reagent R used in following reaction. Ketone → [R] → semicarbazone",
+        options: ["NH₂CONHNH₂", "NH₂NH₂", "C₆H₅NHNH₂", "NH₂OH"],
+        correct: "A"
+      },
+      {
+        number: "Question 22",
+        text: "Identify the substrate 'A' in the following conversion. A → [AlH(i-Bu)₂/H₃O⁺] → Pent-3-enal",
+        options: ["Pent-3-enenitrile", "Pent-3-enoic acid", "Pent-3-en-1-ol", "Pent-3-enoyl chloride"],
+        correct: "A"
+      },
+      {
+        number: "Question 23",
+        text: "Which of the following is a simple ketone?",
+        options: ["Acetone", "Benzophenone", "Acetophenone", "Cyclohexanone"],
+        correct: "A"
+      },
+      {
+        number: "Question 24",
+        text: "Identify the reagent 'R' used in the following reaction. Ketone → [R] → Semicarbazone",
+        options: ["NH₂CONHNH₂", "NH₂NH₂", "C₆H₅NHNH₂", "NH₂OH"],
+        correct: "A"
+      },
+      {
+        number: "Question 25",
+        text: "Which reagent from following is used for preparation of aliphatic aldehyde from nitriles?",
+        options: ["SnCl₂/HCl", "LiAlH₄", "DIBAL-H", "H₂/Pd"],
+        correct: "C"
+      },
+      {
+        number: "Question 26",
+        text: "Identify reagent used for preparation of benzophenone from benzonitrile?",
+        options: ["C₆H₅MgBr", "(CH₃)₂Cd", "CH₃MgCl (in dry ether)", "AlH(i-Bu)₂"],
+        correct: "A"
+      },
+      {
+        number: "Question 27",
+        text: "Identify the product obtained in following reaction. CO + C₆H₆ → [Anhyd. AlCl₃, pressure] → product",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzophenone", "Toluene"],
+        correct: "A"
+      },
+      {
+        number: "Question 28",
+        text: "Identify the product 'B' obtained in following reaction. R-C≡N → [SnCl₂/HCl] → A → [H₃O⁺] → B",
+        options: ["Aldehyde", "Ketone", "Acid", "Alcohol"],
+        correct: "A"
+      },
+      {
+        number: "Question 29",
+        text: "Identify the test from following so that aldehyde when boiled with ammoniacal silver nitrate solution deposits silver.",
+        options: ["Fehling's test", "Tollen's test", "Schiff's test", "Benedict's test"],
+        correct: "B"
+      },
+      {
+        number: "Question 30",
+        text: "Which of the following compounds is used to convert acetaldehyde into acetaldehyde cyanohydrin?",
+        options: ["HCN", "NaCN", "KCN", "All of these"],
+        correct: "A"
+      },
+      {
+        number: "Question 31",
+        text: "What is the product obtained in the reaction? CH₃-CH=CH-CH₂-CHO → [(i)] → [H₃O⁺] → product",
+        options: ["CH₃CH₂CH₂CH₂CHO", "CH₃CH=CHCH₂COOH", "CH₃CHOHCH₂CH₂CHO", "CH₃CH=CHCH₂CH₂OH"],
+        correct: "B"
+      },
+      {
+        number: "Question 32",
+        text: "Which of the following compounds when treated with ammoniacal silver nitrate exhibits silver mirror test?",
+        options: ["Ketones", "Aldehydes", "Alcohols", "Acids"],
+        correct: "B"
+      },
+      {
+        number: "Question 33",
+        text: "Which of the following is Stephen reaction?",
+        options: ["R-CN → [SnCl₂/HCl] → R-CHO", "R-CHO → [Zn-Hg/HCl] → R-CH₃", "R-COCl → [H₂/Pd-BaSO₄] → R-CHO", "R-CN → [DIBAL-H] → R-CHO"],
+        correct: "A"
+      },
+      {
+        number: "Question 34",
+        text: "Which of the following compounds does not undergo haloform reaction?",
+        options: ["CH₃CHO", "CH₃COCH₃", "C₆H₅COCH₃", "CH₃CH₂OH"],
+        correct: "C"
+      },
+      {
+        number: "Question 35",
+        text: "Identify the reagent 'R' used in the following reaction. Benzoyl chloride → [R] → Benzaldehyde",
+        options: ["H₂/Pd-BaSO₄", "LiAlH₄", "NaBH₄", "Zn(Hg)/HCl"],
+        correct: "A"
+      },
+      {
+        number: "Question 36",
+        text: "Identify the product 'B' in the following sequence of reactions. Propanone → [Ba(OH)₂] → A → [Δ] → B",
+        options: ["4-Hydroxy-4-methylpentan-2-one", "2-methylpentan-3-one", "4-methylpent-3-en-2-one", "2-methylpent-2-en-4-one"],
+        correct: "C"
+      },
+      {
+        number: "Question 37",
+        text: "Identify the product 'B' in the following reaction. Ethylphenyl ketone → [H₂N-NH₂/-H₂O] → A → [KOH, HO(CH₂)₂OH] → B",
+        options: ["Ethylbenzene", "Phenylethane", "Styrene", "Phenylacetylene"],
+        correct: "A"
+      },
+      {
+        number: "Question 38",
+        text: "Identify substrate 'A' in the following reaction. Dimethyl cadmium + A → Propanone + Cadmium chloride",
+        options: ["Acetyl chloride", "Acetic anhydride", "Acetaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 39",
+        text: "Identify the product 'B' in the following reaction. Toluene → [Chromyl chloride] → A → [H₂O⁺] → B",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 40",
+        text: "Which from following compounds is obtained when toluene is treated with CrO₂Cl₂ in presence of CS₂ followed by acid hydrolysis?",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 41",
+        text: "Which following reagent is used in Etard reaction?",
+        options: ["CrO₂Cl₂", "Zn(Hg)/HCl", "H₂N-NH₂", "LiAlH₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 42",
+        text: "Identify product 'B' in following sequence of reactions. 2 Propanone → [Ba(OH)₂] → A - H₂O → B",
+        options: ["4-Hydroxy-4-methylpentan-2-one", "2-Methylpent-2-en-4-one", "2-Methylpentan-3-one", "4-Methylpent-3-en-2-one"],
+        correct: "D"
+      },
+      {
+        number: "Question 43",
+        text: "Identify the products of following reaction: Methanol + Benzene carbaldehyde i. conc. NaOH ii. H₃O⁺",
+        options: ["Methanol and phenol", "Methanoic acid and phenol", "Methanol and benzoic acid", "Methanoic acid and phenyl methanol"],
+        correct: "D"
+      },
+      {
+        number: "Question 44",
+        text: "An organic compound 'A' on reaction with PCl₃ gives an alkyl chloride having formula C₃H₇Cl. 'A' on oxidation with PCC forms an aldehyde having formula C₃H₆O. Identify 'A'.",
+        options: ["Propan-1-ol", "Propan-2-ol", "Propanal", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 45",
+        text: "Which among the following colours is obtained in Schiff test of aldehydes?",
+        options: ["Red", "Blue", "Green", "Pink"],
+        correct: "D"
+      },
+      {
+        number: "Question 46",
+        text: "Which of the following on reaction with ammoniacal silver nitrate forms silver precipitate?",
+        options: ["Ketones", "Aldehydes", "Alcohols", "Acids"],
+        correct: "B"
+      },
+      {
+        number: "Question 47",
+        text: "What type of reaction is the formation of aldol from aldehyde?",
+        options: ["Electrophilic substitution", "Nucleophilic addition", "Condensation", "Elimination"],
+        correct: "C"
+      },
+      {
+        number: "Question 48",
+        text: "Identify the product 'B' in following reaction.",
+        options: ["Acetaldehyde", "Acetone", "Butanal", "Butanone"],
+        correct: "B"
+      },
+      {
+        number: "Question 49",
+        text: "Which among the following compounds does not exhibit iodoform test?",
+        options: ["CH₃CHO", "CH₃CH₂OH", "CH₃COCH₃", "CH₃CH₂CHO"],
+        correct: "D"
+      },
+      {
+        number: "Question 50",
+        text: "Identify the product P in following reaction",
+        options: ["Acetaldehyde", "Acetone", "Formaldehyde", "Propionaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 51",
+        text: "Identify the product of following reaction.",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 52",
+        text: "Identify the product 'B' in following sequence of reaction.",
+        options: ["Acetaldehyde", "Acetone", "Butanal", "Butanone"],
+        correct: "B"
+      },
+      {
+        number: "Question 53",
+        text: "Which of the following reagents is used in Gatterman-Koch formylation of arene?",
+        options: ["CO + HCl/AlCl₃", "HCN + HCl", "HCOCl + AlCl₃", "HCOOH + H₂SO₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 55",
+        text: "Which of the following compounds is obtained when R-CHO is treated with dilute nitric acid?",
+        options: ["R-COOH", "R-CH₂OH", "R-CO-R", "R-CN"],
+        correct: "A"
+      },
+      {
+        number: "Question 56",
+        text: "What is the name of following reaction?",
+        options: ["Stephen reaction", "Aldol condensation", "Etard reaction", "Rosenmund reduction"],
+        correct: "B"
+      },
+      {
+        number: "Question 57",
+        text: "Identify the compound X in the following reaction. Acetone + X → [Δ] → CHI₃ + CH₃COONa + 2NaOH",
+        options: ["I₂/NaOH", "NaOI", "HI", "I₂/H₂O"],
+        correct: "A"
+      },
+      {
+        number: "Question 58",
+        text: "Identify the product Y in the following reaction.",
+        options: ["Acetaldehyde", "Acetone", "Formaldehyde", "Propionaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 59",
+        text: "Which of the following aldehydes is less reactive towards nucleophilic addition reaction?",
+        options: ["Formaldehyde", "Acetaldehyde", "Benzaldehyde", "Propionaldehyde"],
+        correct: "C"
+      },
+      {
+        number: "Question 60",
+        text: "Identify product B in following reaction.",
+        options: ["Acetaldehyde", "Acetone", "Butanal", "Butanone"],
+        correct: "B"
+      },
+      {
+        number: "Question 61",
+        text: "What is the product formed when side chain chlorination of toluene is carried out followed by acid hydrolysis at 373 K?",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 62",
+        text: "Identify the reagent used in following conversion. Pent-3-enenitrile → [A] → pent-3-enal",
+        options: ["SnCl₂/HCl", "LiAlH₄", "DIBAL-H", "H₂/Pd"],
+        correct: "C"
+      },
+      {
+        number: "Question 63",
+        text: "Which from following aldehyde has buttery odour?",
+        options: ["Formaldehyde", "Acetaldehyde", "Butyraldehyde", "Benzaldehyde"],
+        correct: "C"
+      },
+      {
+        number: "Question 64",
+        text: "Which of the following reaction is an example of Rosenmund reduction?",
+        options: ["R-COCl → R-CHO", "R-CN → R-CHO", "R-CHO → R-CH₃", "R-CO-R' → R-CH₂-R'"],
+        correct: "A"
+      },
+      {
+        number: "Question 65",
+        text: "Identify the product 'B' in following reaction. 2CH₃CHO → [dil.NaOH] → A → [Δ] → B",
+        options: ["4-Hydroxyl butanal", "But-3-enal", "But-2-enal", "3-Hydroxyl butanal"],
+        correct: "C"
+      },
+      {
+        number: "Question 66",
+        text: "What are the final products obtained by ozonolysis of propene?",
+        options: ["Formaldehyde and acetaldehyde", "Acetone", "2 molecules of formaldehyde", "2 molecules of acetaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 68",
+        text: "Identify the product formed when benzoyl chloride is reduced by hydrogen using palladium catalyst poisoned with barium sulphate?",
+        options: ["Benzaldehyde", "Benzyl alcohol", "Benzene", "Chlorobenzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 69",
+        text: "Identify the reagent used in following conversion.",
+        options: ["CrO₂Cl₂/H₃O⁺", "AlH(i-Bu)₂, H₃O⁺", "CrO₃, (CH₃CO)₂O", "CO, HCl/AlCl₃"],
+        correct: "C"
+      },
+      {
+        number: "Question 70",
+        text: "The reagent used Gatterman-Koch formylation of arene is",
+        options: ["CO + HCl/AlCl₃", "HCN + HCl", "HCOCl + AlCl₃", "HCOOH + H₂SO₄"],
+        correct: "A"
+      },
+      {
+        number: "Question 71",
+        text: "Which among the following compound has highest boiling point?",
+        options: ["CH₃CHO", "CH₃CH₂CHO", "CH₃CH₂CH₂CHO", "CH₃CH₂CH₂CH₂CHO"],
+        correct: "D"
+      },
+      {
+        number: "Question 72",
+        text: "What is the final product obtained when benzonitrile react with phenyl magnesium bromide in equimolar proportion?",
+        options: ["Benzophenone", "Benzaldehyde", "Diphenyl ketone", "Benzoic acid"],
+        correct: "A"
+      },
+      {
+        number: "Question 73",
+        text: "Which of the following catalyst is used in Rosenmund reaction?",
+        options: ["Pd/BaSO₄", "Pt", "Ni", "Cu"],
+        correct: "A"
+      },
+      {
+        number: "Question 74",
+        text: "The reaction in which methyl group on benzene ring is converted to aldehyde group is called",
+        options: ["Etard reaction", "Fridel-Craft reaction", "Gatterman-Koch reaction", "Rosenmund reaction"],
+        correct: "A"
+      },
+      {
+        number: "Question 75",
+        text: "Identify 'B' in the following reaction",
+        options: ["Acetaldehyde", "Acetone", "Formaldehyde", "Propionaldehyde"],
+        correct: "B"
+      },
+      {
+        number: "Question 76",
+        text: "Which of the following is used to convert olefins into aldehyde?",
+        options: ["Ozonolysis", "Hydroboration", "Hydration", "Halogenation"],
+        correct: "A"
+      },
+      {
+        number: "Question 77",
+        text: "Which of the following is Clemensen reduction?",
+        options: ["R-CO-R' → R-CH₂-R' using Zn(Hg)/HCl", "R-COCl → R-CHO using H₂/Pd-BaSO₄", "R-CN → R-CHO using SnCl₂/HCl", "R-CHO → R-CH₃ using NH₂NH₂/KOH"],
+        correct: "A"
+      },
+      {
+        number: "Question 78",
+        text: "Which of the following is a Stephen reaction?",
+        options: ["R-CN → R-CHO using SnCl₂/HCl", "R-CHO → R-CH₃ using Zn(Hg)/HCl", "R-COCl → R-CHO using H₂/Pd-BaSO₄", "R-CN → R-CHO using DIBAL-H"],
+        correct: "A"
+      },
+      {
+        number: "Question 79",
+        text: "Identify A in the following reaction A + CH₃MgBr → [ether] → complex → [H₃O⁺] → (CH₃)₃C-OH",
+        options: ["Acetone", "Acetaldehyde", "Formaldehyde", "Propionaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 80",
+        text: "Which of the following compound is highly reactive towards HCN?",
+        options: ["Formaldehyde", "Acetaldehyde", "Benzaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 81",
+        text: "Which of the following compounds reacts with ammonia to form urotropine?",
+        options: ["Formaldehyde", "Acetaldehyde", "Benzaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 82",
+        text: "An acylchloride is hydrogenated over catalyst palladium on barium sulphate to form an aldehyde. This reaction is called as",
+        options: ["Rosenmund reduction", "Stephen reduction", "Clemmensen reduction", "Wolf-Kishner reduction"],
+        correct: "A"
+      },
+      {
+        number: "Question 83",
+        text: "Propane nitrile on reaction with ethyl magnesium iodide in presence of dry ether gives complex. This imine complex on acid hydrolysis forms",
+        options: ["Ketone", "Aldehyde", "Acid", "Alcohol"],
+        correct: "A"
+      },
+      {
+        number: "Question 84",
+        text: "Identify 'A' in the following reaction 2A + (C₆H₅CH₂)₂Cd → 2CH₃-C-CH₂-C₆H₅ + CdCl₂",
+        options: ["Acetyl chloride", "Acetic anhydride", "Acetaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 85",
+        text: "Which of the following does NOT give yellow precipitate when reacted with (NaOH + I₂) mixture?",
+        options: ["CH₃CHO", "CH₃CH₂OH", "CH₃COCH₃", "CH₃CH₂CHO"],
+        correct: "D"
+      },
+      {
+        number: "Question 86",
+        text: "Identify 'A' in the following reaction, A → [Pd-BaSO₄] → C₆H₅CHO + HCl",
+        options: ["Benzoyl chloride", "Benzoic acid", "Benzyl chloride", "Benzonitrile"],
+        correct: "A"
+      },
+      {
+        number: "Question 87",
+        text: "Chromyl chloride converts methyl group to a chromium complex, which on acid hydrolysis gives corresponding aldehyde. This reaction is called",
+        options: ["Etard reaction", "Gatterman-Koch reaction", "Rosenmund reduction", "Stephen reaction"],
+        correct: "A"
+      },
+      {
+        number: "Question 88",
+        text: "Which among following compounds in obtained when calcium formate is dry distilled alone?",
+        options: ["Formaldehyde", "Acetaldehyde", "Acetone", "Propionaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 89",
+        text: "Which among the following compounds is treated with benzonitrile of obtain benzophenone in dry ether and then acid hydrolysis?",
+        options: ["C₆H₅MgBr", "(CH₃)₂Cd", "CH₃MgCl", "AlH(i-Bu)₂"],
+        correct: "A"
+      },
+      {
+        number: "Question 90",
+        text: "Identify product 'A' in the following reaction R-C≡N → [DIBAL-H] → A",
+        options: ["Aldehyde", "Ketone", "Acid", "Alcohol"],
+        correct: "A"
+      },
+      {
+        number: "Question 91",
+        text: "Which of the following is obtained by hydrogenation of benzoyl chloride in presence of Pd on BaSO₄?",
+        options: ["Benzaldehyde", "Benzoic acid", "Benzyl alcohol", "Benzene"],
+        correct: "A"
+      },
+      {
+        number: "Question 92",
+        text: "Which of the following is a solid trimer of formaldehyde?",
+        options: ["Paraformaldehyde", "Methenamine", "Trioxane", "Paraaldehyde"],
+        correct: "C"
+      },
+      {
+        number: "Question 93",
+        text: "Which of the following carbonyl compounds does NOT undergo aldol condensation?",
+        options: ["Formaldehyde", "Acetaldehyde", "Acetone", "Benzaldehyde"],
+        correct: "A"
+      },
+      {
+        number: "Question 94",
+        text: "Which of the following is Rosenmund reduction?",
+        options: ["R-COCl → R-CHO", "R-CN → R-CHO", "R-CHO → R-CH₃", "R-CO-R' → R-CH₂-R'"],
+        correct: "A"
+      },
+      {
+        number: "Question 95",
+        text: "In the reaction, C₆H₅COCH₃ → [Zn-Hg/conc.HCl] → X, X is",
+        options: ["Ethylbenzene", "Benzyl alcohol", "Methylbenzene", "Toluene"],
+        correct: "A"
+      },
+      {
+        number: "Question 96",
+        text: "Which of the following does not give yellow soil on treatment with sodium hypoidite?",
+        options: ["CH₃CHO", "CH₃CH₂OH", "CH₃COCH₃", "CH₃CH₂CHO"],
+        correct: "D"
+      },
+      {
+        number: "Question 97",
+        text: "Carbolic acid is oxidised by acidified sodium dichromate to give",
+        options: ["Ethyl methyl ketone", "Benzoquinone", "Acetone", "Anthraquinone"],
+        correct: "B"
+      },
+      {
+        number: "Question 98",
+        text: "Which of the following is most reactive towards addition reaction of hydrogen cyanide to form corresponding cyanohydrin?",
+        options: ["Formaldehyde", "Acetaldehyde", "Benzaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 99",
+        text: "Which of the following compound will give positive iodoform test?",
+        options: ["CH₃CHO", "CH₃CH₂OH", "CH₃COCH₃", "All of these"],
+        correct: "D"
+      },
+      {
+        number: "Question 100",
+        text: "Aldehydes or ketones when treated with C₆H₅-NH-NH₂, the product formed is",
+        options: ["Phenylhydrazone", "Semicarbazone", "Oxime", "Hydrazone"],
+        correct: "A"
+      },
+      {
+        number: "Question 101",
+        text: "Nitration of which among the following compounds yields cyclonite?",
+        options: ["Formaldehyde", "Acetaldehyde", "Acetone", "Benzaldehyde"],
+        correct: "C"
+      },
+      {
+        number: "Question 102",
+        text: "What reagent is used in Etard reaction?",
+        options: ["Chromyl chloride", "Ethanol chloride", "SnCl₂ and HCl", "Cadmium chloride"],
+        correct: "A"
+      },
+      {
+        number: "Question 103",
+        text: "Which of the following compounds when treated with dibenzyl cadmium yields benzyl methyl ketone?",
+        options: ["Acetyl chloride", "Acetic anhydride", "Acetaldehyde", "Acetone"],
+        correct: "A"
+      },
+      {
+        number: "Question 104",
+        text: "Ethyl methyl ketone is obtained by heating calcium salts of",
+        options: ["Acetic and propionic acids", "Formic and butyric acids", "Acetic and butyric acids", "Propionic and formic acids"],
+        correct: "A"
+      },
+      {
+        number: "Question 107",
+        text: "Which reaction intermediate is formed during the condensation reaction between acetaldehyde and formaldehyde?",
+        options: ["Carbocation", "Carbanion", "Free radical", "Carbene"],
+        correct: "B"
+      },
+      {
+        number: "Question 108",
+        text: "Glucose gives silver mirror with ammoniacal silver nitrate because it has",
+        options: ["Aldehyde group", "Alcoholic silver nitrate", "Ester group", "Ketone group"],
+        correct: "A"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      alert(`Quiz submitted!\n\nScore: ${correct}/${questions.length} (${(correct/questions.length*100).toFixed(1)}%)\nTime: ${timeTakenMin} min ${timeTakenSec} sec`);
+      
+      // For demonstration, just show results in alert
+      // In actual implementation, redirect to results page
+      // window.location.href = "MCCW-PRC2.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

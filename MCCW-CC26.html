@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Alcohols Phenols and Ethers</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      // Questions 1-10
+      {number:"Question 1", text:"Which of the following on reaction with Grignards reagent followed by hydrolysis forms tertiary alcohol?", options:["Aldehyde","Ketone","Ester","Acid chloride"], correct:"B"},
+      {number:"Question 2", text:"What type of alcohol is the crotonyl alcohol?", options:["Vinylic alcohol","Polyhydric alcohol","Benzylic alcohol","Allylic alcohol"], correct:"D"},
+      {number:"Question 3", text:"What is the number of moles of propane-1,2,3-triol formed when n mole of triglyceride is hydrolysed?", options:["n","2n","3n","4n"], correct:"C"},
+      {number:"Question 4", text:"Identify the product 'B' in the following series of reactions. Chlorobenzene i) NaOH,623 K/150 atm Br2 water ii) H3O+ B", options:["o-Bromophenol","2,4,6-tribromophenol","p-Bromophenol","Phenol"], correct:"B"},
+      {number:"Question 5", text:"Identify the product 'A' in the following reaction, HI Anisole → A + Iodomethane", options:["Benzenol","Iodobenzene","Benzene","Aniline"], correct:"A"},
+      {number:"Question 6", text:"Which among the following has highest boiling point?", options:["Ether","Aldehyde","Alcohol","Ketone"], correct:"C"},
+      {number:"Question 7", text:"Which from following compounds has lowest boiling point?", options:["Ethanol","Propanol","Butanol","Methanol"], correct:"D"},
+      {number:"Question 8", text:"What is the natural source of salicylic acid?", options:["Turmeric plant","Indian gooseberry","Cinnamon","Willow plant"], correct:"D"},
+      {number:"Question 9", text:"Which from following compounds is obtained when phenol reacts with dilute nitric acid at low temperature?", options:["o-Nitrophenol only","Mixture of ortho and para nitrophenols","2,4,6-trinitrophenol","p-Nitrophenol only"], correct:"B"},
+      {number:"Question 10", text:"Which among the following compounds does NOT form inter molecular hydrogen bonding?", options:["Butane","Ethoxy ethane","Phenol","Butan-1-ol"], correct:"A"},
+      
+      // Questions 11-20
+      {number:"Question 11", text:"Which of the following reagents is used in the conversion of phenol into picric acid?", options:["Conc. HNO3","Conc. H2SO4","Conc. HNO3 + Conc. H2SO4","Dil. HNO3"], correct:"C"},
+      {number:"Question 12", text:"In carbonic system, sec-Butyl alcohol is named as", options:["sec-Butylcarbinol","Ethyl methyl carbinol","Isopropyl carbinol","Diethylcarbinol"], correct:"B"},
+      {number:"Question 13", text:"Which from following statements is NOT true for phenol?", options:["Pure phenol is odourless, nontoxic, high melting solid.","Phenols show appreciable solubility in water.","Phenols are polar molecules.","Boiling points of phenols increases with increase in molecular mass."], correct:"A"},
+      {number:"Question 14", text:"Which of the following forms 2-Methylbut-2-ene on heating with concentrated sulphuric acid?", options:["2-Methylbutan-2-ol","2-Methylbutan-1-ol","Butan-2-ol","2-Methyl-2-propanol"], correct:"A"},
+      {number:"Question 15", text:"Identify the product 'B' in the following reaction. Sodium phenoxide → A → B", options:["Picric acid","Salicylaldehyde","Salicylic acid","Sulphonic acid"], correct:"C"},
+      {number:"Question 16", text:"Which of the following compounds is formed when ether is dissolved in cold concentrated sulphuric acid?", options:["Oxonium salt","Alkyl hydrogen sulphate","Alcohol","Alkene"], correct:"A"},
+      {number:"Question 17", text:"Identify 'A' in the following reaction. A + Acetic anhydride → Aspirin + Acetic acid", options:["Phthalic acid","Salicylic acid","Acrylic acid","Oxalic acid"], correct:"B"},
+      {number:"Question 18", text:"Which of the following is NOT phenol?", options:["Catechol","Resorcinol","Quinol","Benzyl alcohol"], correct:"D"},
+      {number:"Question 19", text:"Which of the following compounds has lowest solubility in water?", options:["Ethanol","Propanol","Butanol","Pentanol"], correct:"D"},
+      {number:"Question 20", text:"Identify the final product obtained when a mixture of vapours of phenol and hydrogen is passed over nickel catalyst at 433 K.", options:["Cyclohexanol","Benzene","Toluene","Cyclohexane"], correct:"A"},
+      
+      // Questions 21-30
+      {number:"Question 21", text:"What is the medicinal property of Eugenol?", options:["Antiseptic","Antidiabetic","Analgesic and antimicrobial","Antioxidant"], correct:"C"},
+      {number:"Question 22", text:"Which of the following has highest solubility in water?", options:["Ethanol","Propanol","Butanol","Pentanol"], correct:"A"},
+      {number:"Question 23", text:"Identify the product 'Z' in the following series of reactions. Ethanol → X → Y → Z", options:["Ethyl amine","Ethylchloride","Ethane","Ethyl magnesium chloride"], correct:"A"},
+      {number:"Question 24", text:"Which of the following is correct IUPAC name of catechol?", options:["Benzene-1,2-diol","Benzene-1,3,5-triol","Benzene-1,4-diol","Benzene-1,3-diol"], correct:"A"},
+      {number:"Question 25", text:"The common name of Benzene-1,4-diol is", options:["Catechol","Pyrogallol","Quinol","Resorcinol"], correct:"C"},
+      {number:"Question 26", text:"Hydroboration-oxidation of but-1-ene forms", options:["Butanone","Butanal","Butan-2-ol","Butan-1-ol"], correct:"D"},
+      {number:"Question 27", text:"Which of the following is a bondline structure of glycerol?", options:["Three OH groups on propane","1,2,3-trihydroxypropane","Propane-1,2,3-triol","All of these"], correct:"D"},
+      {number:"Question 28", text:"Phenol on reaction with aqueous solution of bromine gives", options:["o-Bromophenol","m-Bromophenol","2,4,6-tribromophenol","p-Bromophenol"], correct:"C"},
+      {number:"Question 29", text:"Which among the following has lowest boiling point?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"A"},
+      {number:"Question 30", text:"Which among the following has highest boiling point?", options:["Ether","Aldehyde","Ketone","Alcohol of same molecular weight"], correct:"D"},
+      
+      // Questions 31-40
+      {number:"Question 31", text:"Methyl propanoate on hydrolysis with dil NaOH forms a salt that on further acidification with conc. HCl forms", options:["Propanoic acid","Methanol","Sodium propanoate","Propanoic acid and methanol"], correct:"A"},
+      {number:"Question 32", text:"Identify the product in the following reaction.", options:["Benzene","p-Benzoquinone","Benzaldehyde","Benzoic acid"], correct:"B"},
+      {number:"Question 33", text:"What is IUPAC name of hydroquinone?", options:["Benzene-1,2-diol","Benzene-1,3-diol","Benzene-1,4-diol","Benzene-1,3,5-triol"], correct:"C"},
+      {number:"Question 34", text:"Identify substrate 'A' in the following reaction. A + CO2 → Sodium salicylate → Salicylic acid", options:["Phenol","o-Phenolsulphonic acid","Sodium phenoxide","Salicyldehyde"], correct:"C"},
+      {number:"Question 35", text:"Identify the major product formed when 2-Methylhexan-3-ol is heated with concentrated sulphuric acid.", options:["2-Methylhex-2-ene","3-Methylhex-2-ene","2-Methylhex-3-ene","3-Methylhex-3-ene"], correct:"A"},
+      {number:"Question 36", text:"Which from following compounds does NOT contain phenolic -OH group?", options:["Gallic acid","Eugenol","Curcumin","Ascorbic acid"], correct:"D"},
+      {number:"Question 37", text:"Identify the correct decreasing order of boiling points for different organic compounds from following.", options:["Alcohol > Carboxylic acid > Amine","Carboxylic acid > Alcohol > Amine","Amine > Alcohol > Carboxylic acid","Carboxylic acid > Amine > Alcohol"], correct:"B"},
+      {number:"Question 38", text:"Identify the major product obtained when anisole reacts with bromine in acetic acid.", options:["o-bromoanisole","2,4,6-tribromoanisole","p-bromoanisole","m-bromoanisole"], correct:"C"},
+      {number:"Question 39", text:"Which among the following compounds has lowest boiling point?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"A"},
+      {number:"Question 40", text:"Which among the following compounds has lowest boiling point?", options:["Ether","Aldehyde","Ketone","Alcohol"], correct:"A"},
+      
+      // Questions 41-50
+      {number:"Question 41", text:"Identify the structural formula of phloroglucinol.", options:["Benzene-1,3,5-triol","Benzene-1,2,3-triol","Benzene-1,2,4-triol","Benzene-1,3-diol"], correct:"A"},
+      {number:"Question 42", text:"Identify the substrate 'X' in the following reaction. X + O2 → phenol + Acetone", options:["Benzene sulphonic acid","Benzenamine","Chlorobenzene","Isopropyl benzene"], correct:"D"},
+      {number:"Question 43", text:"Identify the product 'B' in the following series of reactions. Chlorobenzene → A → B", options:["2,4,6-tribromophenol","o-Bromophenol","p-Bromophenol","Phenol"], correct:"A"},
+      {number:"Question 44", text:"Which from following compounds is least soluble in water at STP?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"D"},
+      {number:"Question 45", text:"Which of the following is NOT dihydric alcohol?", options:["Hydroquinone","Resorcinol","Catechol","Phloroglucinol"], correct:"D"},
+      {number:"Question 46", text:"Select the correct IUPAC name of pyrogallol.", options:["Benzene-1,3-diol","Benzene-1,4-diol","Benzene-1,3,5-triol","Benzene-1,2,3-triol"], correct:"D"},
+      {number:"Question 47", text:"Which of the following is the structure of an alcohol with molecular formula C5H12O?", options:["Pentanol","2-Methylbutanol","3-Methylbutanol","All of these"], correct:"D"},
+      {number:"Question 48", text:"Which of the following is primary allylic alcohol?", options:["But-3-en-1-ol","But-2-en-1-ol","But-1-en-3-ol","Prop-2-en-1-ol"], correct:"D"},
+      {number:"Question 49", text:"Which of the following is allylic alcohol?", options:["But-1-en-1-ol","But-2-en-1-ol","Butane-1,3-diol","But-3-en-1-ol"], correct:"B"},
+      {number:"Question 50", text:"Which reagent is used in the conversion of phenol to picric acid?", options:["Sulphuric acid (conc.)","Nitric acid (conc.) + Sulphuric acid (conc.)","Nitric acid (dil.)","Nitrous acid (conc.)"], correct:"B"},
+      
+      // Questions 51-60
+      {number:"Question 51", text:"Which among the following has the highest melting point?", options:["Phenol","o-Nitrophenol","p-Cresol","p-Nitrophenol"], correct:"D"},
+      {number:"Question 52", text:"Identify the product obtained when alkenes react with cold and dilute alkaline potassium permanganate.", options:["Diol","Aldehyde","Ketone","Carboxylic acid"], correct:"A"},
+      {number:"Question 53", text:"What is the product of Hydroboration-oxidation of but-1-ene?", options:["Butan-1-ol","Butan-2-ol","Butanal","Butanone"], correct:"A"},
+      {number:"Question 54", text:"Which of the following compounds does not undergo Williamson's synthesis?", options:["Phenol","Primary alkyl halide","Secondary alkyl halide","Tertiary alkyl halide"], correct:"A"},
+      {number:"Question 55", text:"Phenol on heating with zinc dust forms", options:["Cyclohexanol","Benzoquinone","Benzene","Cyclohexane"], correct:"C"},
+      {number:"Question 56", text:"Which of the following compounds is NOT a phenol?", options:["Cresol","Catechol","Resorcinol","Benzyl alcohol"], correct:"D"},
+      {number:"Question 57", text:"Ethers when dissolved in cold concentrated sulfuric acid forms,", options:["Alkanols","Alkyl hydrogen sulphate","Oxonium salts","Alkanoic acids"], correct:"C"},
+      {number:"Question 58", text:"Identify the product formed in the following reaction.", options:["2-Methylpropanoic acid","Ethanoic acid","Butanoic acid","Propanoic acid"], correct:"C"},
+      {number:"Question 59", text:"Aldol condensation reaction is", options:["Addition reaction","Substitution reaction","Condensation reaction","Elimination reaction"], correct:"C"},
+      {number:"Question 60", text:"Identify product 'B' in the following reaction. Sodium phenoxide → A → B", options:["Picric acid","Salicylic acid","Sulphonic acid","Salicylaldehyde"], correct:"B"},
+      
+      // Questions 61-70
+      {number:"Question 61", text:"Which from following reagents is used in the conversion of phenol to picric acid?", options:["dil. Nitric acid","conc. Nitrous acid","conc. Sulphuric acid","conc. HNO3 + conc. H2SO4"], correct:"D"},
+      {number:"Question 62", text:"Which reagent from following is used in Reimer-Tiemann reaction?", options:["CO2, 6 atm H3O+","Na2Cr2O7/H2SO4","CS2 (at low temperature)","CHCl3, aq. NaOH, H3O+"], correct:"D"},
+      {number:"Question 63", text:"Which from following is called as Lucas reagent?", options:["NaNO2 + HCl(dil.)","Neutral FeCl3 solution in water","Conc. HCl + ZnCl2","CHCl3 + NaOH"], correct:"C"},
+      {number:"Question 64", text:"Identify product obtained in following reaction. C6H5OH → Product", options:["Benzoquinone","Benzaldehyde","Benzoic acid","Phenol"], correct:"A"},
+      {number:"Question 65", text:"Which of the following is a tertiary allylic alcohol?", options:["But-3-en-2-ol","2-methylprop-2-en-1-ol","2-methylbut-3-en-2-ol","Prop-2-en-1-ol"], correct:"C"},
+      {number:"Question 66", text:"Identify the product 'B' in the following series of reactions. Propan-1-ol → A → B", options:["Propene","Propan-2-ol","Propane","Propanal"], correct:"A"},
+      {number:"Question 67", text:"Which isomer of C4H9OH has highest boiling point?", options:["Isobutyl alcohol","n-Butyl alcohol","sec-Butyl alcohol","tert-Butyl alcohol"], correct:"B"},
+      {number:"Question 68", text:"Select the correct increasing order of boiling points of alcohols, amines and carboxylic acids of comparable molar mass from the following.", options:["Amine < Alcohol < Carboxylic acid","Alcohol < Amine < Carboxylic acid","Amine < Carboxylic acid < Alcohol","Carboxylic acid < Alcohol < Amine"], correct:"A"},
+      {number:"Question 69", text:"Identify the product P of following reaction. CH3OH + CH3MgX → P + MgX(OCH3)", options:["Methane","Ethane","Methanol","Ethanol"], correct:"A"},
+      {number:"Question 70", text:"Which isomer of C4H9OH has lower boiling point?", options:["Sec-Butyl alcohol","Isobutyl alcohol","n-Butyl alcohol","tert-Butyl alcohol"], correct:"D"},
+      
+      // Questions 71-80
+      {number:"Question 71", text:"The decreasing order of reactivity of following alcohols with halo acid is", options:["(IV) > (III) > (II) > (I)","(III) > (II) > (I) > (IV)","(II) > (I) > (IV) > (III)","(I) > (II) > (III) > (IV)"], correct:"A"},
+      {number:"Question 72", text:"Which among the following is the method for the preparation of ethers?", options:["By the action of sodium alkoxide on alkyl halide.","By the action of moist Ag2O on alkyl halide","By the action of aq. KOH on alkyl halide.","By the action of alc. Sodium hydroxide on alkyl halide."], correct:"A"},
+      {number:"Question 73", text:"Crotonyl alcohol is an example of", options:["Allylic alcohol","Polyhydric alcohol","Vinylic alcohol","Benzyllic alcohol"], correct:"A"},
+      {number:"Question 74", text:"Identify the product 'Z' in the following series of reactions. Ethanol → X → Y → Z", options:["Ethylchloride","Ethyl magnesium chloride","Ethane","Ethyl amine"], correct:"D"},
+      {number:"Question 75", text:"Identify the product 'B' in the following reaction.", options:["Benzoic acid","Benzaldehyde","Benzal chloride","Benzyl alcohol"], correct:"B"},
+      {number:"Question 76", text:"Which of the following is a secondary allylic alcohol?", options:["But-3-en-2-ol","2-methylprop-2-en-1-ol","Prop-2-en-1-ol","3-methylbut-2-en-1-ol"], correct:"A"},
+      {number:"Question 77", text:"Identify the product obtained when ethers are dissolved in cold concentrated sulphuric acid.", options:["Alkyl hydrogen sulphate","Alkanols","Alkanoic acids","Oxonium salts"], correct:"D"},
+      {number:"Question 78", text:"Identify the product of following reaction.", options:["Benzaldehyde","Benzene","Benzoic acid","p-Benzoquinone"], correct:"D"},
+      {number:"Question 79", text:"What type of product is obtained when formaldehyde reacts with CH3MgBr in dry ether?", options:["Primary alcohol with same number of carbon atoms as in aldehyde.","Tertiary alcohol with two carbon atoms more than aldehyde.","Primary alcohol with one carbon atom more than aldehyde.","Secondary alcohol with one carbon atom more than aldehyde."], correct:"C"},
+      {number:"Question 80", text:"Identify the compound having highest solubility in water from following?", options:["p-Nitrophenol","tert-Butyl alcohol","Phenol","o-Nitrophenol"], correct:"B"},
+      
+      // Questions 81-90
+      {number:"Question 81", text:"Identify the product obtained when phenol is heated with Zn dust.", options:["Benzene","Cyclohexanol","Benzoquinone","Cyclohexane"], correct:"A"},
+      {number:"Question 82", text:"Which of the following on reaction with Grignard reagent followed by hydrolysis forms secondary alcohol?", options:["Formaldehyde","Acetaldehyde","Acetone","Ester"], correct:"B"},
+      {number:"Question 83", text:"Identify the substrate 'S' in the following reaction.", options:["2,4,6-trichloronitrobenzene","o-Nitrochlorobenzene","2,4,6-trinitrochlorobenzene","p-Nitrochlorobenzene"], correct:"C"},
+      {number:"Question 84", text:"What is the percentage of p-bromoanisole formed in the bromination of anisole with bromine in acetic acid?", options:["10%","50%","90%","100%"], correct:"C"},
+      {number:"Question 85", text:"What is the name of tert-butyl alcohol according to carbonil system?", options:["Ethyl carbonil","Methyl carbonil","Trimethyl carbonil","Propyl carbonil"], correct:"C"},
+      {number:"Question 86", text:"Which from following compounds is obtained when acyl chloride is hydrolysed with water?", options:["Carboxylic acid","Aldehyde","Ketone","Alcohol"], correct:"A"},
+      {number:"Question 87", text:"Identify the product obtained when methyl bromide reacts with sodium tert-butoxide.", options:["Isobutylene and methanol","2-Methoxy-2-methylpropane","2-Methoxybutane","1-Methoxybutane"], correct:"B"},
+      {number:"Question 88", text:"Which of the following is a secondary allylic alcohol?", options:["But-3-en-2-ol","Prop-2-en-1-ol","2-methylprop-2-en-1-ol","3-methylbut-2-en-1-ol"], correct:"A"},
+      {number:"Question 89", text:"Identify the compound 'A' in the following sequence of reactions.", options:["Ethyl magnesium bromide","Propyl magnesium bromide","Butyl magnesium bromide","Pentyl magnesium bromide"], correct:"B"},
+      {number:"Question 90", text:"Which of the following is a pair of dihydric phenols?", options:["Catechol and Quinol","Quinol and Phloroglucinol","Phloroglucinol and Pyrogallol","Resorcinol and Pyrogallol"], correct:"A"},
+      
+      // Questions 91-100
+      {number:"Question 91", text:"Which of the following is vinylic alcohol?", options:["But-2-en-2-ol","But-3-en-2-ol","Prop-2-en-1-ol","2-Methylbut-3-en-2-ol"], correct:"A"},
+      {number:"Question 92", text:"Which of the following is NOT prepared by the action of Grignard's reagent on methanol?", options:["Propan-2-ol","Propan-1-ol","Ethanol","Butan-1-ol"], correct:"A"},
+      {number:"Question 93", text:"Which of the following is tertiary benzylic alcohol?", options:["Benzyl alcohol","Diphenyl methanol","Triphenyl methanol","Phenyl methanol"], correct:"C"},
+      {number:"Question 94", text:"Identify substrate 'A' in the following sequence of reactions. A → B → C2H5Cl", options:["Butan-2-ol","Propan-1-ol","Propan-2-ol","2-Chloropropane"], correct:"C"},
+      {number:"Question 95", text:"Which of the following compounds is obtained by Rosenmund reduction of benzoyl chloride?", options:["Chlorobenzene","Benzene","Benzyl alcohol","Benzaldehyde"], correct:"D"},
+      {number:"Question 96", text:"Crotonyl alcohol is an example of", options:["Polyhydric alcohol","Allylic alcohol","Benzyllic alcohol","Vinyllic alcohol"], correct:"B"},
+      {number:"Question 97", text:"What type of following phenomena does the Cannizzaro reaction exhibit?", options:["Disproportionation","Redox","Addition","Substitution"], correct:"A"},
+      {number:"Question 98", text:"Which from following compounds is obtained when anisole is heated with dilute sulfuric acid?", options:["Pyrogallol and methanol","Phenol and methanol","Phloroglucinol and ethanol","Phenol and ethanol"], correct:"B"},
+      {number:"Question 99", text:"Identify the product obtained in following reaction. nCH3MgI + H2O → product", options:["nCH4 and nMgI(OH)","n/2 C2H6","nCH3OH and nMgI","nMgI and nCH4"], correct:"A"},
+      {number:"Question 100", text:"Which of the following reactions is Rosenmund reduction?", options:["R-COCl → R-CHO","R-COOH → R-CHO","R-CN → R-CHO","R-COOR' → R-CHO"], correct:"A"},
+      
+      // Questions 101-110
+      {number:"Question 101", text:"Identify the product obtained when ethoxybenzene reacts with hot and concentrated HI.", options:["Ethyl iodide and Phenol","Ethyl alcohol and Phenol","Ethyl alcohol and Iodobenzene","Ethyl iodide and Iodobenzene"], correct:"A"},
+      {number:"Question 102", text:"Which of the following compounds does NOT undergo Williamson's synthesis?", options:["Phenol","Primary alkyl halide","Secondary alkyl halide","Tertiary alkyl halide"], correct:"A"},
+      {number:"Question 103", text:"Which among the following phenols has highest melting point?", options:["Phenol","o-Nitrophenol","p-Cresol","p-Nitrophenol"], correct:"D"},
+      {number:"Question 104", text:"Identify the product obtained when phenol is reacted with dilute nitric acid at low temperature.", options:["Mixture of ortho and para-nitrophenols","para-Nitrophenol","2,4,6-Trinitrophenol","ortho-Nitrophenol"], correct:"A"},
+      {number:"Question 105", text:"Identify the solvent used in bromination of phenol to obtain 2,4,6-tribromophenol.", options:["CS2","CHCl3","Water","Acetic acid"], correct:"C"},
+      {number:"Question 106", text:"Which among the following compounds reacts fastly with HBr?", options:["Primary alcohol","Secondary alcohol","Tertiary alcohol","All equally"], correct:"C"},
+      {number:"Question 107", text:"Identify the compound with highest acidic strength from following.", options:["Phenol","o-Nitrophenol","p-Nitrophenol","m-Nitrophenol"], correct:"B"},
+      {number:"Question 108", text:"Which among the following reactions occurs by breaking of C-O bond in alcohol?", options:["Reaction with acetic anhydride","Reaction with acetyl chloride","Reaction with propionic acid","Reaction with phosphorus trichloride"], correct:"D"},
+      {number:"Question 109", text:"Identify the product formed when vapours of 2-methylpropan-2-ol are passed over hot copper.", options:["2-Methylpropene","Butene","Propene","Isobutene"], correct:"A"},
+      {number:"Question 110", text:"Identify the product A obtained in the following reaction. Phenol + Conc. Nitric acid → A", options:["2,4,6-Trinitrophenol","Mixture of ortho and para-nitrophenol","o-Nitrophenol","p-Nitrophenol"], correct:"A"},
+      
+      // Questions 111-120
+      {number:"Question 111", text:"Identify the product when phenol is heated with zinc dust.", options:["Benzene","Cyclohexanol","Benzoquinone","Cyclohexane"], correct:"A"},
+      {number:"Question 112", text:"Which of the following compound is used as antifreeze agent in automobile radiators?", options:["Methanol","Ethanol","Ethylene glycol","Glycerol"], correct:"C"},
+      {number:"Question 113", text:"Which among the following reactions does not correctly match with its reagent?", options:["Rosenmund reduction: H2/Pd-BaSO4","Stephen reaction: SnCl2, HCl","Etard reaction: CO + HCl CrO2Cl2","Gatterman-Koch formulation: CrO3/(CH3CO)2O"], correct:"C"},
+      {number:"Question 114", text:"What is the product formed when cumene is air oxidized in presence of co-naphthenate and further treated with dilute acid?", options:["Cumene hydroperoxide","Phenol and CO2","Acetone and Benzoic acid","Phenol + Acetone"], correct:"D"},
+      {number:"Question 115", text:"What is the temperature at which the ethers can be prepared from alcohols by the action of concentrated H2SO4?", options:["140°C","170°C","200°C","250°C"], correct:"A"},
+      {number:"Question 116", text:"When aldehyde is treated with excess of monohydric alcohol, forms.", options:["Oxime","Imine","Hemiacetal","Acetal"], correct:"D"},
+      {number:"Question 117", text:"Which among the following is not a property of alcohols?", options:["Methanol is toxic liquid.","These are non-polar molecules.","Dihydric alcohols contain two OH groups in their structures.","The boiling points of alcohols increases with increase in their molecular mass."], correct:"B"},
+      {number:"Question 118", text:"Identify the compound A in the following reaction.", options:["Acetone","Acetic acid","Formaldehyde","Acetaldehyde"], correct:"D"},
+      {number:"Question 119", text:"Which among the following has highest melting point?", options:["Phenol","P-Cresol","P-Nitrophenol","O-Nitrophenol"], correct:"C"},
+      {number:"Question 120", text:"Which of the following compounds has difficulty in breaking C–X bond?", options:["O-nitrochlorobenzene","m-nitrochlorobenzene","P-nitrochlorobenzene","2,4,6-trinitrochlorobenzene"], correct:"D"},
+      
+      // Questions 121-130
+      {number:"Question 121", text:"Identify the product A in the following reaction C2H5Br + aq.KOH → A + KBr", options:["Ethanol","Ethene","Ethane","Ethanal"], correct:"A"},
+      {number:"Question 122", text:"Which among the following reagents forms alcohol when reacted with R-COOH?", options:["LiAlH4","NaBH4","H2/Pd","All of these"], correct:"A"},
+      {number:"Question 123", text:"Identify reducing agent used for the following conversion. R-CHO → R-CH2-OH", options:["Sn/HCl","Na/Dry ether","K2Cr2O7/dil. H2SO4","LiAlH4/H3O+"], correct:"D"},
+      {number:"Question 124", text:"Which among the following is a Lucas regent?", options:["Conc. HCl + ZnCl2","Conc. HNO3 + HCl","Conc. H2SO4 + HCl","Conc. H3PO4 + HCl"], correct:"A"},
+      {number:"Question 125", text:"Which among the following is obtained as a product when phenol is treated with NaOH and CO2 followed by acid hydrolysis?", options:["Salicylic acid","Salicylaldehyde","Benzoic acid","Phthalic acid"], correct:"A"},
+      {number:"Question 126", text:"Identify product A and B in following reaction. R-COOR' → A + B", options:["A = R-OH, B = R'-H","A = R-CH2OH, B = R'-OH","A = R-CH3, B = R'-COOH","A = R-COOH, B = R'-OH"], correct:"B"},
+      {number:"Question 127", text:"What is the number of hydroxyl group present in propylene glycol?", options:["1","2","3","4"], correct:"B"},
+      {number:"Question 128", text:"The compound CH3–CH=CH–CH2–OH is also called as", options:["Crotonyl alcohol","Propylene glycol","Benzenol","Ethylene glycol"], correct:"A"},
+      {number:"Question 129", text:"What is the product obtained when vapours of phenol is passed over heated zinc dust?", options:["Benzene","Cyclohexanol","Benzoquinone","Cyclohexane"], correct:"A"},
+      {number:"Question 130", text:"Identify the product formed in the reaction. Phenol + conc. H2SO4 → product", options:["o-Phenol sulphonic acid","p-Phenol sulphonic acid","Benzene sulphonic acid","m-Phenol sulphonic acid"], correct:"A"},
+      
+      // Questions 131-140
+      {number:"Question 131", text:"What is the product formed when aniline is treated with NaNO2 + HCl previous to hydrolysis?", options:["Phenol","Benzene","Nitrobenzene","Chlorobenzene"], correct:"A"},
+      {number:"Question 132", text:"What is the number of different products formed when mixture of ethanol and propanal reacts with aq. NaOH after warming?", options:["1","2","3","4"], correct:"B"},
+      {number:"Question 133", text:"What is the product obtained in Reimer-Tiemann reaction?", options:["Salicylaldehyde","2,4,6-trinitrophenol","Salicylic acid","Aniline"], correct:"A"},
+      {number:"Question 134", text:"Choose the false statement from following.", options:["Constant boiling HBr(48%) is used for the preparation of alkyl bromides from alcohols.","Good yield of alkyl halide may be obtained by heating alcohols with NaI in 95%H3PO4.","The order of reactivity of alcohols with a given halo acid 1° > 2° > 3°.","Tertiary alcohol readily react with conc. HCl in absence of zinc chloride."], correct:"D"},
+      {number:"Question 135", text:"Which among the following is not the method of preparation of phenol?", options:["From cumene","From benzene sulphonic acid","From aniline","From chlorobenzene"], correct:"C"},
+      {number:"Question 136", text:"What is the intermediate product obtained in the preparation of phenol from aniline?", options:["Sodium phenoxide","Benzene diazonium chloride","Anilium cation","Benzene"], correct:"B"},
+      {number:"Question 137", text:"Which among the following is not a characteristic of alcohols?", options:["Alcohols are polar molecules due to presence of -OH group.","Lower members of alcohols are insoluble in water as well as in organic solvents.","Methanol is toxic liquids.","Boiling point of alcohols increases with increase in their molecular mass."], correct:"B"},
+      {number:"Question 138", text:"Which of the following alcohols has lowest boiling point?", options:["n-Butyl alcohol","tert-Butyl alcohol","iso-Butyl alcohol","sec-Butyl alcohol"], correct:"B"},
+      {number:"Question 139", text:"Cannizzaro reaction is an example of", options:["Disproportionation reaction","Nucleophilic addition reaction","Elimination reaction","Decomposition reaction"], correct:"A"},
+      {number:"Question 140", text:"Identify compound A from following reaction A + C2H5MgBr → B → 3-methylpentan-3-ol", options:["Acetone","Butanone","Pentanone","Hexanone"], correct:"B"},
+      
+      // Questions 141-150
+      {number:"Question 141", text:"Ethoxy benzene on reaction with hot and concentrated HI forms", options:["ethyl alcohol and phenol","ethyl iodide and phenol","ethyl alcohol and iodobenzene","ethyl iodide and iodobenzene"], correct:"B"},
+      {number:"Question 142", text:"Identify the major product when anisole is treated with Br2 in presence of acetic acid.", options:["2,4,6-Tribromo anisole","p-Bromo anisole","m-Bromo anisole","o-Bromo anisole"], correct:"B"},
+      {number:"Question 143", text:"Identify the product (A) obtained in the following reaction. Phenol + concentrated Nitric acid → A", options:["p-Nitrophenol","o-Nitrophenol","2,4,6-Trinitrophenol","mixture of o-Nitrophenol and p-Nitrophenol"], correct:"C"},
+      {number:"Question 144", text:"When a mixture of vapours of phenol and hydrogen is passed over nickel catalyst at 433 K, the product obtained is", options:["Cyclohexanol","Benzene","Cyclohexane","Toluene"], correct:"A"},
+      {number:"Question 145", text:"To obtain 3-methylbutan-2-ol from acetaldehyde, the Grignard's reagent used is", options:["CH3MgBr","C2H5MgBr","iso-propyl MgBr","tert-butyl MgBr"], correct:"C"},
+      {number:"Question 146", text:"Which among the following compounds has highest melting point?", options:["Phenol","o-Nitrophenol","p-Cresol","p-Nitrophenol"], correct:"D"},
+      {number:"Question 147", text:"Ethers when dissolved in cold concentrated sulphuric acid forms", options:["Alkanols","Alkyl hydrogen sulphate","Oxonium salts","Alkanoic acids"], correct:"C"},
+      {number:"Question 148", text:"Which of the following is likely to undergo racemization during alkaline hydrolysis?", options:["(CH3)3C-CH2-Cl","CH3-CH2-CH-CH3-Cl","CH3-CH2-CH-CH3-CH3-Cl","CH3-CH-CH3-Cl"], correct:"D"},
+      {number:"Question 149", text:"Identify 'A' in following reaction. Dimethyl cadmium A → propanone + cadmium chloride", options:["Ethyl chloride","Ethanol chloride","Ethylidene dichloride","Ethylene dichloride"], correct:"C"},
+      {number:"Question 150", text:"Which among the following isomers of C4H9OH has lowest boiling point?", options:["Isobutyl alcohol","n-Butyl alcohol","sec-Butyl alcohol","tert-Butyl alcohol"], correct:"D"},
+      
+      // Questions 151-160
+      {number:"Question 151", text:"Which among the following obtained as major product x in the reaction stated below?", options:["4-Nitro anisole","2,4,6-Trinitro anisole","2-Nitro anisole","3-Nitro anisole"], correct:"C"},
+      {number:"Question 152", text:"Identify the reactant, reagent and condition of Kolbe's reaction from following.", options:["C6H5OH, dil. HNO3 and 413 K","C6H5OH, CHCl3 and aq. NaOH","C6H5ONa, CO2 and 398 K, 6 atm","C6H5ONa, Na2CO3 and 398 K"], correct:"C"},
+      {number:"Question 153", text:"Identify the product obtained when phenol reacts with concentrated sulphuric acid at 293 K?", options:["o-Phenol sulphonic acid","Salicylic acid","p-Phenol sulphonic acid","Picric acid"], correct:"A"},
+      {number:"Question 154", text:"Which of the following compounds on reaction with Grignard reagent followed by hydrolysis forms secondary alcohol?", options:["Formaldehyde","Acetaldehyde","Acetone","Ester"], correct:"B"},
+      {number:"Question 155", text:"Which of the following compounds on reaction with ammonical silver nitrate solution forms precipitate of silver?", options:["Aldehyde","Ketone","Alcohol","Ether"], correct:"A"},
+      {number:"Question 156", text:"When alcoholic solution of an organic compound is treated with few drops of shiff's reagent, pink colour appears. This confirms the presence of group", options:["-CHO","-COOH","-OH","-NH2"], correct:"A"},
+      {number:"Question 157", text:"Which among the following compounds has highest melting point?", options:["n-Butyl alcohol","sec-Butyl alcohol","tert-Butyl alcohol","Isobutyl alcohol"], correct:"A"},
+      {number:"Question 158", text:"Identify the product formed in the following reactions,", options:["Ethanol","Ethene","Ethanal","Ethanoic acid"], correct:"C"},
+      {number:"Question 159", text:"Which of the following is NOT a dihydric phenol?", options:["Resorcinol","Quinol","Hydroxyquinol","Catechol"], correct:"C"},
+      {number:"Question 160", text:"Identify the alcohol that react immediately with Lucas reagent?", options:["Propan-2-ol","Butan-2-ol","Ethanol","2-Methyl Propan-2-ol"], correct:"D"},
+      
+      // Questions 161-170
+      {number:"Question 161", text:"Which products are obtained when methoxy ethane is heated with HI?", options:["Methanol and Ethanol","Methanol and Iodoethane","Iodomethane and Ethanol","Iodomethane and Iodoethane"], correct:"C"},
+      {number:"Question 162", text:"Identify the product Y in the following series of reactions. 4-Nitrotoluene → X → Y", options:["Benzaldehyde","4-nitrobenzoic acid","Acetophenone","4-nitrobenzaldehyde"], correct:"D"},
+      {number:"Question 163", text:"Which of the following reagents is used to convert phenol to benzene?", options:["Zn dust","H2/Ni","LiAlH4","NaBH4"], correct:"A"},
+      {number:"Question 164", text:"When aldoxime is treated with trifluoroperoxy acetic acid yields", options:["Nitrile","Amide","Acid","Ester"], correct:"A"},
+      {number:"Question 165", text:"Which of the following reagents is used for the following conversion? CH3-CH=CH-CHO → CH3-CH=CH-CH2OH", options:["LiAlH4","NaBH4","H2/Pd","All of these"], correct:"B"},
+      {number:"Question 166", text:"Which of the following compounds is obtained when phenol react with bromine water?", options:["3-Bromophenol","2,4,6-tribromophenol","2-Bromophenol","4-Bromophenol"], correct:"B"},
+      {number:"Question 167", text:"Which of the following alcohols is least soluble in water?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"D"},
+      {number:"Question 168", text:"Which of the following is reacted with benzaldehyde to obtain 1-phenylethanol?", options:["CH3MgBr","C2H5MgBr","C6H5MgBr","All of these"], correct:"A"},
+      {number:"Question 169", text:"Which catalyst is used in conversion of chlorobenzene to phenol by Rasching process?", options:["Calcium chloride","Calcium sulphate","Calcium phosphate","Calcium carbonate"], correct:"C"},
+      {number:"Question 170", text:"Identify 'A' in the following reaction. A + SOCl2 → B → propane nitrile", options:["Propan-1-ol","Propane","1-Chloropropane","Ethanol"], correct:"A"},
+      
+      // Questions 171-180
+      {number:"Question 171", text:"Which of the following reaction of diazonium salt involves retention of diazonium group?", options:["Reaction with phosphinic acid","Reaction with dilute sulphuric acid","Reaction with HCl and Cu powder","Reaction with phenol"], correct:"D"},
+      {number:"Question 172", text:"Identify compound 'B' in following series of reactions? Acetonitrile → A → B", options:["Acetic acid","Acetamide","Methyl amine","Ethyl amine"], correct:"D"},
+      {number:"Question 173", text:"Which of the following is NOT dihydric phenol?", options:["Resorcinol","Catechol","Quinol","Phloroglucinol"], correct:"D"},
+      {number:"Question 174", text:"Which of the following alcohols needs acidic KMnO4 to convert it into aldehyde or ketone?", options:["Primary alcohol","Secondary alcohol","Tertiary alcohol","All of these"], correct:"B"},
+      {number:"Question 175", text:"Which of the following is dihydric phenol?", options:["Resorcinol","m-Cresol","Phloroglucinol","Pyrogallol"], correct:"A"},
+      {number:"Question 176", text:"Identify 'B' in the following series of reactions Ethanol → A → B", options:["Ethyl bromide","Ethyl magnesium bromide","Ethane","Ethanol"], correct:"B"},
+      {number:"Question 177", text:"Identify Z in the following sequence of reactions?", options:["Ethanol","Ethanal","Ethanoic acid","Ethene"], correct:"C"},
+      {number:"Question 178", text:"Identify 'A' in the following reaction C2H5OH + HCl → C2H5Cl + H2O", options:["conc. H2SO4","anhydrous ZnCl2","pyridine","NaNO2"], correct:"B"},
+      {number:"Question 179", text:"Which of the following alcohol is more acidic?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"A"},
+      {number:"Question 180", text:"When methoxy benzene react with HI at room temperature the products formed are", options:["Iodomethane and Phenol","Iodomethane and Benzene","Iodomethane and Iodobenzene","Methanol and Iodobenzene"], correct:"A"},
+      
+      // Questions 181-190
+      {number:"Question 181", text:"Formation of p-hydroxyazobenzene from benzene diazonium chloride and phenol in mild alkaline medium is a", options:["electrophilic addition","nucleophilic substitution","nucleophilic addition","electrophilic substitution"], correct:"D"},
+      {number:"Question 182", text:"A reaction of phenol with chloroform in presence of sodium hydroxide to form salicylaldehyde is known as", options:["Friedel craft's reaction","Stephens reaction","Kolbe's reaction","Reimer-Tiemann reaction"], correct:"D"},
+      {number:"Question 183", text:"When phenol reacts with dilute nitric acid at room temperature, the major product obtained is", options:["2,4,6-trinitrophenol","p-nitrophenol","o-nitrophenol","m-nitrophenol"], correct:"C"},
+      {number:"Question 184", text:"An aqueous solution of sodium nitrite on boiling with α-chlorosodium propionate gives", options:["Nitroethane","2-Nitropropane","1-Nitropropane","Nitromethane"], correct:"B"},
+      {number:"Question 185", text:"Identify 'A' and 'B' respectively in following reaction Toluene → A → B", options:["Benzyl chloride and benzaldehyde","Benzoyl chloride and benzaldehyde","Benzyl chloride and benzoic acid","Benzoyl chloride and benzoic acid"], correct:"C"},
+      {number:"Question 186", text:"Which of the following alcohols is NOT prepared by acid catalyzed hydration of alkenes?", options:["Ethanol","Propan-2-ol","Butan-2-ol","2-Methylpropan-2-ol"], correct:"D"},
+      {number:"Question 187", text:"Which among the following is a dihydric phenol?", options:["Catechol","Pyrogallol","Phloroglucinol","All of these"], correct:"A"},
+      {number:"Question 188", text:"When Butan-2-ol is dehydrated using sulphuric acid, the concentration of acid and temperature needed respectively is", options:["60% Conc. and 373 K","20% conc. and 373 K","20% conc. and 363 K","95% conc. and 373 K"], correct:"B"},
+      {number:"Question 189", text:"Which of the following phenols is isolated from defensive secretion of grasshopper species?", options:["2,5-dichlorophenol","Benzene-1,3-diol","Phenol","4-Methylphenol"], correct:"A"},
+      {number:"Question 190", text:"The product obtained when 2-methylpropan-2-ol is treated with alumina at 423 K is", options:["2-Methylpropene","Butene","Propene","Isobutene"], correct:"A"},
+      
+      // Questions 191-200
+      {number:"Question 191", text:"Which of the following compounds does NOT react with sodium metal?", options:["Ethanol","Phenol","Ether","Propanol"], correct:"C"},
+      {number:"Question 192", text:"How many hydroxy groups are present in hydroxyinol?", options:["1","2","3","4"], correct:"C"},
+      {number:"Question 193", text:"Identify product 'C' in following reaction C2H5OH → A → B → C", options:["Ethanol","Ethyl ethanoate","But-2-ene","Ethanoic acid"], correct:"D"},
+      {number:"Question 194", text:"Which of the following alcohols is prepared by acid catalysed hydration of alkenes?", options:["Ethanol","Propan-2-ol","Butan-2-ol","All of these"], correct:"D"},
+      {number:"Question 195", text:"When carbolic acid is heated with concentrated nitric acid in presence of concentrated sulphuric acid it forms", options:["Picric acid","Salicylic acid","Benzene sulphonic acid","Aniline"], correct:"A"},
+      {number:"Question 196", text:"Methoxy ethane on reaction with hot concentrated HI gives", options:["iodomethane and ethanol","methanol and iodoethane","methanol and ethanol","iodomethane and iodoethane"], correct:"B"},
+      {number:"Question 197", text:"Action of hydrogen iodide on anisole gives,", options:["phenol and iodomethane","iodobenzene and iodomethane","iodobenzene and methanol","phenol and methanol"], correct:"A"},
+      {number:"Question 198", text:"Which from following is obtained when phenol is treated with conc. HNO3?", options:["o-Nitrophenol","p-Nitrophenol","2,4,6-Trinitrophenol","Mixture of o- and p-nitrophenol"], correct:"C"},
+      {number:"Question 199", text:"Which alcohol gives iodoform test?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"B"},
+      {number:"Question 200", text:"Phenol is less acidic than:", options:["Ethanol","Water","Carboxylic acid","All of these"], correct:"C"},
+      
+      // Questions 201-210
+      {number:"Question 201", text:"Which of the following is used as an antiseptic?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"B"},
+      {number:"Question 202", text:"Glycerol is:", options:["Monohydric alcohol","Dihydric alcohol","Trihydric alcohol","Tetrahydric alcohol"], correct:"C"},
+      {number:"Question 203", text:"Which of the following is NOT a method for preparation of alcohols?", options:["Hydration of alkenes","Hydrolysis of alkyl halides","Reduction of aldehydes","Oxidation of alkanes"], correct:"D"},
+      {number:"Question 204", text:"Lucas reagent is used to distinguish:", options:["Primary, secondary and tertiary alcohols","Alcohols and phenols","Aldehydes and ketones","Acids and esters"], correct:"A"},
+      {number:"Question 205", text:"Which of the following has highest boiling point?", options:["CH3CH2OH","CH3OCH3","CH3CH2CH3","CH3CHO"], correct:"A"},
+      {number:"Question 206", text:"Phenol is also known as:", options:["Carbolic acid","Acetic acid","Formic acid","Benzoic acid"], correct:"A"},
+      {number:"Question 207", text:"Which test is used to distinguish between phenol and alcohol?", options:["Lucas test","Iodoform test","FeCl3 test","Tollen's test"], correct:"C"},
+      {number:"Question 208", text:"Which of the following is NOT a use of methanol?", options:["Antifreeze","Solvent","Fuel","Antiseptic"], correct:"D"},
+      {number:"Question 209", text:"Dehydration of alcohol gives:", options:["Alkene","Alkane","Aldehyde","Ketone"], correct:"A"},
+      {number:"Question 210", text:"Williamson synthesis is used to prepare:", options:["Alcohols","Ethers","Aldehydes","Ketones"], correct:"B"},
+      
+      // Questions 211-220
+      {number:"Question 211", text:"Which of the following is most acidic?", options:["Phenol","Ethanol","Water","Acetic acid"], correct:"D"},
+      {number:"Question 212", text:"Ethers are isomeric with:", options:["Alcohols","Aldehydes","Ketones","All of these"], correct:"A"},
+      {number:"Question 213", text:"Which of the following is used as an anesthetic?", options:["Diethyl ether","Methanol","Ethanol","Acetone"], correct:"A"},
+      {number:"Question 214", text:"Phenol turns FeCl3 solution to:", options:["Green","Violet","Blue","Yellow"], correct:"B"},
+      {number:"Question 215", text:"Which of the following is trihydric phenol?", options:["Pyrogallol","Catechol","Resorcinol","Quinol"], correct:"A"},
+      {number:"Question 216", text:"Which alcohol is used in spirit lamps?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"B"},
+      {number:"Question 217", text:"Which of the following is NOT true about ethers?", options:["They are polar","They form hydrogen bonds","They are less soluble in water than alcohols","They are good solvents"], correct:"B"},
+      {number:"Question 218", text:"Absolute alcohol is:", options:["95% ethanol","100% ethanol","Methanol","Denatured alcohol"], correct:"B"},
+      {number:"Question 219", text:"Which of the following is used in perfumes?", options:["Benzyl alcohol","Methanol","Ethanol","Glycerol"], correct:"A"},
+      {number:"Question 220", text:"Phenol is manufactured from:", options:["Cumene","Benzene","Toluene","Chlorobenzene"], correct:"A"},
+      
+      // Questions 221-230
+      {number:"Question 221", text:"Which of the following gives positive iodoform test?", options:["CH3OH","CH3CH2OH","CH3CH2CH2OH","(CH3)3COH"], correct:"B"},
+      {number:"Question 222", text:"The process of converting vegetable oil to fat is called:", options:["Hydrogenation","Saponification","Esterification","Hydrolysis"], correct:"A"},
+      {number:"Question 223", text:"Which of the following is used in cough syrups?", options:["Methanol","Ethanol","Glycerol","Ethylene glycol"], correct:"C"},
+      {number:"Question 224", text:"Phenol is more reactive than benzene towards electrophilic substitution because:", options:["-OH group is electron donating","-OH group is electron withdrawing","Phenol is more nucleophilic","All of these"], correct:"A"},
+      {number:"Question 225", text:"Which of the following is used in making synthetic rubber?", options:["Methanol","Ethanol","2-Propanol","Glycerol"], correct:"C"},
+      {number:"Question 226", text:"Denatured alcohol is ethanol mixed with:", options:["Methanol","Water","Methanol and pyridine","All of these"], correct:"C"},
+      {number:"Question 227", text:"Which of the following is used in antifreeze?", options:["Methanol","Ethanol","Glycerol","Ethylene glycol"], correct:"D"},
+      {number:"Question 228", text:"Phenol gives violet colour with:", options:["Bromine water","FeCl3","NaOH","NaHCO3"], correct:"B"},
+      {number:"Question 229", text:"Which of the following is NOT a use of phenol?", options:["Antiseptic","Production of bakelite","Production of aspirin","Fuel"], correct:"D"},
+      {number:"Question 230", text:"Ethanol is prepared industrially by:", options:["Fermentation","Hydration of ethene","Reduction of acetaldehyde","All of these"], correct:"B"},
+      
+      // Questions 231-238
+      {number:"Question 231", text:"Which of the following is used in alcoholic beverages?", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"B"},
+      {number:"Question 232", text:"Wood spirit is:", options:["Methanol","Ethanol","Propanol","Butanol"], correct:"A"},
+      {number:"Question 233", text:"Which of the following is used in making smokeless powder?", options:["Glycerol","Ethanol","Methanol","Ethylene glycol"], correct:"A"},
+      {number:"Question 234", text:"Phenol is soluble in NaOH because:", options:["It forms phenoxide ion","It is acidic","Both A and B","None of these"], correct:"C"},
+      {number:"Question 235", text:"Which of the following is used as a preservative for biological specimens?", options:["Methanol","Ethanol","Formalin","Acetone"], correct:"C"},
+      {number:"Question 236", text:"Rectified spirit contains:", options:["95% ethanol","100% ethanol","40% ethanol","60% ethanol"], correct:"A"},
+      {number:"Question 237", text:"Which of the following is used in making dynamite?", options:["Glycerol","Ethanol","Methanol","Ethylene glycol"], correct:"A"},
+      {number:"Question 238", text:"Phenol is obtained from coal tar by:", options:["Fractional distillation","Steam distillation","Vacuum distillation","All of these"], correct:"B"}
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set(); // Track which questions have been viewed
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
