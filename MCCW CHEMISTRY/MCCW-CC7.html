@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Chemical Equilibrium</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {number:"Question 01", text:"Identify from following salts so that the solubility of salt in water decreases with increase in temperature.", options:["NaCl","KCl","CaSO₄","KNO₃"], correct:"C"},
+      {number:"Question 02", text:"A weak base is 1.42% dissociated in its 0.05M solution. Calculate its dissociation constant.", options:["1.0 × 10⁻⁵","1.0 × 10⁻⁶","1.0 × 10⁻⁷","1.0 × 10⁻⁸"], correct:"A"},
+      {number:"Question 03", text:"Calculate the degree of dissociation of 0.01M acetic acid at 25°C [Λc = 15.0Ω⁻¹ cm² mol⁻¹ and Λ₀ = 300Ω⁻¹ cm² mol⁻¹]", options:["0.035","0.042","0.05","0.025"], correct:"C"},
+      {number:"Question 04", text:"A weak monobasic acid dissociates to 0.001% in its 0.01M solution. What is its dissociation constant?", options:["1.0 × 10⁻¹²","1.0 × 10⁻¹⁰","1.0 × 10⁻⁸","1.0 × 10⁻⁶"], correct:"B"},
+      {number:"Question 05", text:"The percent dissociation of weak monobasic acid is 3% in its 0.02M solution. What is the dissociation constant of acid?", options:["1.8 × 10⁻⁵","1.8 × 10⁻⁶","1.8 × 10⁻⁷","1.8 × 10⁻⁸"], correct:"A"},
+      {number:"Question 06", text:"A weak monacidic base is 1.2% dissociated in its 0.2M solution. What is the value of dissociation constant?", options:["2.9 × 10⁻⁵","2.9 × 10⁻⁶","2.9 × 10⁻⁷","2.9 × 10⁻⁸"], correct:"A"},
+      {number:"Question 07", text:"A weak monobasic acid is 2% dissociated in its 0.1M solution. What is its dissociation constant?", options:["4.0 × 10⁻⁵","4.0 × 10⁻⁶","4.0 × 10⁻⁷","4.0 × 10⁻⁸"], correct:"A"},
+      {number:"Question 08", text:"A weak monobasic acid has dissociation constant:", options:["1.1 × 10⁻⁵","2.25 × 10⁻⁵","1.5 × 10⁻⁵","1.2 × 10⁻⁵"], correct:"B"},
+      {number:"Question 09", text:"An organic weak monobasic acid is 0.001 percent dissociated in its 0.05M solution. What is its dissociation constant?", options:["5.0 × 10⁻¹²","5.0 × 10⁻¹⁰","5.0 × 10⁻⁸","5.0 × 10⁻⁶"], correct:"A"},
+      {number:"Question 10", text:"At 298 K, 0.1M solution of acetic acid is 1.34% ionized. What is the dissociation constant of acetic acid?", options:["1.8 × 10⁻⁵","1.8 × 10⁻⁶","1.8 × 10⁻⁷","1.8 × 10⁻⁸"], correct:"A"},
+      {number:"Question 11", text:"A weak monobasic acid is 3.0% dissociated in its 0.04M solution. What is the dissociation constant of acid?", options:["3.6 × 10⁻⁵","3.6 × 10⁻⁶","3.6 × 10⁻⁷","3.6 × 10⁻⁸"], correct:"A"},
+      {number:"Question 12", text:"What is percent dissociation of acetic acid in its 0.01M solution if dissociation constant of acid is 1.34 × 10⁻⁶?", options:["1.16%","1.26%","1.36%","1.46%"], correct:"A"},
+      {number:"Question 13", text:"The pH of monacidic weak base is 10.9. Calculate the percent dissociation in 0.02M solution.", options:["0.5%","1.0%","1.5%","2.0%"], correct:"B"},
+      {number:"Question 14", text:"A weak monobasic acid is 10% dissociated in 0.05M solution. What is its percentage dissociation in 0.10M solution?", options:["7.07%","5.07%","8.07%","6.07%"], correct:"A"},
+      {number:"Question 15", text:"The dissociation constant of weak monobasic acid is 2.7 × 10⁻⁵. If degree of dissociation of acid is 3 × 10⁻², what is the concentration of acid?", options:["0.01 M","0.02 M","0.03 M","0.04 M"], correct:"C"},
+      {number:"Question 16", text:"Dissociation constant of propionic acid is 1.32 × 10⁻⁵. Calculate the degree of dissociation of acid in 0.05M solution.", options:["0.0162","0.0262","0.0362","0.0462"], correct:"A"},
+      {number:"Question 17", text:"The pH of 0.1M solution of monobasic acid is 2.34. Calculate the degree of dissociation of the acid.", options:["0.046","0.056","0.066","0.076"], correct:"A"},
+      {number:"Question 18", text:"What is molar concentration of weak monobasic acid if dissociation constant is 5 × 10⁻⁸ and undergoes 0.5% dissociation?", options:["0.02 M","0.04 M","0.06 M","0.08 M"], correct:"A"},
+      {number:"Question 19", text:"A chemical reaction takes places in two steps as follows: (i) NO₂Cl(g) → NO₂(g) + Cl(g) (ii) NO₂Cl(g) + Cl(g) → NO₂(g) + Cl₂(g) Identify the reaction intermediate.", options:["NO₂(g)","NO₂Cl(g)","Cl₂(g)","Cl(g)"], correct:"D"}
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set(); // Track which questions have been viewed
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      // Mark this question as seen
+      seenQuestions.add(index);
+      
+      // Update navigation buttons
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      // Update question navigation panel
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        // Set appropriate class based on question status
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    // Initialize the quiz
+    renderQuestion(current);
+
+    // Stopwatch Timer
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

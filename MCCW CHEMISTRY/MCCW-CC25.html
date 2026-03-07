@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET · Haloalkanes and Haloarenes</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {number:"Question 01", text:"What is the order of reactivity of alkyl halides with ammonia?", options:["RI > RBr > RCl > RF","RF > RCl > RBr > RI","RBr > RCl > RI > RF","RCl > RF > RBr > RI"], correct:"A"},
+      {number:"Question 02", text:"Which of the following reagents is used in the preparation of nitroalkane from haloalkane?", options:["Sodium nitrite","Silver nitrite","Potassium cyanide","Potassium nitrite"], correct:"B"},
+      {number:"Question 03", text:"Which of the following is obtained as major product when excess of methane is treated with limited chlorine in presence of UV light?", options:["CH3Cl","CH2Cl2","CHCl3","CCl4"], correct:"A"},
+      {number:"Question 04", text:"Identify 'A' in the following reaction. A + Acetyl chloride → AlCl3 → 1-chloroacetophenone + 4-chloroacetophenone", options:["Chlorobenzene","Toluene","Phenol","Benzene"], correct:"D"},
+      {number:"Question 05", text:"Select the correct decreasing order of boiling points of compounds from the following.", options:["CH3Br > CH3Cl > CH3F > CH3I","CH3I > CH3Br > CH3Cl > CH3F","CH3F > CH3Cl > CH3Br > CH3I","CH3Cl > CH3F > CH3Br > CH3I"], correct:"B"},
+      {number:"Question 06", text:"Which among the following is benzylic halide?", options:["C6H5-CH2-CH2-X","C6H5-X","C6H5-CH2-X","C6H5-CH=CH-X"], correct:"C"},
+      {number:"Question 07", text:"Which of the following is a fitting reaction?", options:["C6H5Br + CH3Br + Na → C6H5CH3 + NaBr","2C6H5Br + 2Na → C6H5-C6H5 + 2NaBr","2CH3Br + 2Na → C2H6 + 2NaBr","C6H5Br + Na → C6H5Na + Br"], correct:"B"},
+      {number:"Question 08", text:"Which of the following compounds does not exhibit optical isomerism?", options:["3-Iodohexane","2-Iodo-3-methylbutane","2-Iodopentane","2-Iodo-2-methylbutane"], correct:"D"},
+      {number:"Question 09", text:"Identify the product formed when 2-Bromobutane is heated with aqueous solution of sodium hydroxide.", options:["Butan-1-ol","Butan-2-ol","But-1-ene","But-2-ene"], correct:"B"},
+      {number:"Question 10", text:"Identify 'A' in the following reaction. A + Acetyl chloride (excess) → AlCl3 → Chloroacetophenone + 4-chloroacetophenone", options:["Toluene","Benzene","Phenol","Chlorobenzene"], correct:"B"},
+      {number:"Question 11", text:"Which of the following is likely to undergo racemization during alkaline hydrolysis by SN1 mechanism?", options:["1-Bromobutane","2-Bromobutane","2-Bromo-2-methylpropane","Bromobenzene"], correct:"C"},
+      {number:"Question 12", text:"Calculate percentage atom economy when 46 g ethanol is obtained from 64.5 g chloroethane and 56 g KOH(aq)", options:["25.25%","38.17%","50.25%","64.17%"], correct:"B"},
+      {number:"Question 13", text:"Which of the following is NOT obtained when mixture of methyl bromide and ethyl bromide is treated with sodium metal in presence of dry ether?", options:["Ethane","Propane","Butane","Methane"], correct:"D"},
+      {number:"Question 14", text:"Which of the following compounds has difficulty in breaking of C-X bond?", options:["2,4,6-trinitrochlorobenzene","m-Nitrochlorobenzene","p-Nitrochlorobenzene","o-Nitrochlorobenzene"], correct:"A"},
+      {number:"Question 15", text:"The reaction of aryl halide with sodium metal in dry ether to give biphenyl is known as", options:["Wurtz reaction","Swartz reaction","Fittig reaction","Wurtz-fittig reaction"], correct:"C"},
+      {number:"Question 16", text:"Which among the following is NOT Allylic halide?", options:["CH3-CH=CH-CH2-CH2-X","CH3-CH=CH-CH2-X","CH3-CH2-CH=CH-CH2-X","CH2=CH-CH2-X"], correct:"A"},
+      {number:"Question 17", text:"Which among the following statements is true for haloalkyne?", options:["Halogen atom is bonded to sp2 hybridised carbon atom of aromatic ring","Halogen atom is bonded to sp3 hybridised carbon atom next to a carbon-carbon double bond","Halogen atom is bonded to sp2 hybridised carbon atom of aliphatic chain","Halogen atom is bonded to sp hybridised carbon atom"], correct:"D"},
+      {number:"Question 18", text:"Which of the following has highest reactivity towards nucleophilic substitution reaction involving cleavage of C-Cl bond?", options:["Chlorobenzene","2,4-Dinitrochlorobenzene","p-Nitrochlorobenzene","2,4,6-trinitrochlorobenzene"], correct:"D"},
+      {number:"Question 19", text:"Which of the following is NOT obtained when a mixture of chloroethane and 1-chloropropane is treated with sodium metal in dry ether?", options:["Butane","Pentane","Propane","Hexane"], correct:"C"},
+      {number:"Question 20", text:"The reaction of bromobenzene with bromomethane and sodium metal in dry ether to give toluene is", options:["Friedel crafts reaction","Wurtz-fittig reaction","Fittig reaction","Wurtz reaction"], correct:"B"},
+      {number:"Question 21", text:"Which of the following has highest reactivity for SN reactions?", options:["sec-butyliodide","n-Butyliodide","Isobutyl iodide","tert-Butyl iodide"], correct:"D"},
+      {number:"Question 22", text:"What type of arenes are obtained when arene diazonium chloride is treated with fluoroboric acid and then heated further?", options:["Fluoroarenes","Chloroarenes","Bromoarenes","Iodoarenes"], correct:"A"},
+      {number:"Question 23", text:"Identify the name of reaction that of aryl halide with alkyl halide and sodium metal in dry ether to give substituted aromatic compounds.", options:["Wurtz-Fittig reaction","Friedel Crafts reaction","Wurtz reaction","Fittig reaction"], correct:"A"},
+      {number:"Question 24", text:"Which from the following reaction is a Fittig reaction?", options:["2C6H5Br + 2Na → C6H5-C6H5 + 2NaBr","C6H5Br + CH3Br + 2Na → C6H5CH3 + 2NaBr","2CH3Br + 2Na → C2H6 + 2NaBr","C6H5Cl + AlCl3 → C6H5+ + AlCl4-"], correct:"A"},
+      {number:"Question 25", text:"Which among the following is vinylic halide?", options:["Haloarene","Haloalkyne","Haloalkene","Haloalkane"], correct:"C"},
+      {number:"Question 26", text:"The correct order of reactivity for reaction involving cleavage of C-X bond in following compounds is", options:["p-Nitrochlorobenzene > m-Nitrochlorobenzene > o-Nitrochlorobenzene > 2,4,6-trinitrochlorobenzene","2,4,6-trinitrochlorobenzene > p-Nitrochlorobenzene > m-Nitrochlorobenzene > o-Nitrochlorobenzene","2,4,6-trinitrochlorobenzene > o-Nitrochlorobenzene > m-Nitrochlorobenzene > p-Nitrochlorobenzene","o-Nitrochlorobenzene > m-Nitrochlorobenzene > p-Nitrochlorobenzene > 2,4,6-trinitrochlorobenzene"], correct:"B"},
+      {number:"Question 27", text:"Identify the name of reaction for aryl halide with alkyl halide and sodium metal in dry ether to give substituted aromatic compounds.", options:["Fittig reaction","Finkelstein reaction","Wurtz-Fittig reaction","Wurtz reaction"], correct:"C"},
+      {number:"Question 28", text:"Which among the following is NOT benzylic halide?", options:["2-Bromo-2-phenylpropane","1-Bromo-1-phenylpropane","1-Bromo-2-phenylbutane","Bromophenylmethane"], correct:"B"},
+      {number:"Question 29", text:"Identify the product 'X' formed in the following reaction: Sodium ethoxide + Isopropyl chloride → X + Ethanol + Sodium Chloride", options:["Ethyl isopropyl ether","Isopropyl ethyl ether","Propene","Isopropanol"], correct:"A"},
+      {number:"Question 30", text:"Identify the reagent involved in Sandmeyer reaction.", options:["CuCl/HCl","NaNO2/HCl","HNO3/H2SO4","SOCl2"], correct:"A"},
+      {number:"Question 31", text:"Identify the product 'Z' in the following series of reactions: Ethanol →(SOCl2/Δ)→ X →(Mg/Dry ether)→ Y →(NH3)→ Z", options:["Ethane","Ethyl magnesium chloride","Ethyl amine","Ethyl chloride"], correct:"C"},
+      {number:"Question 32", text:"Which of the following pair of compounds on heating gives butanenitrile?", options:["n-Propylchloride and alcoholic KCN","Propanol and alcoholic KCN","Butanol and alcoholic KCN","n-Butylchloride and alcoholic KCN"], correct:"D"},
+      {number:"Question 33", text:"When tert butyl bromide is heated with silver fluoride the major product obtained is", options:["1-Fluorobutane","2-Fluoro-2-methylpropane","1-Fluoro-2-methylpropane","2-Fluorobutane"], correct:"B"},
+      {number:"Question 34", text:"Which of the following alkenes is most easily formed by dehydrohalogenation of alkyl halides?", options:["3-Bromopropene","4-Bromobut-1-ene","1-Bromopropene","2-Bromopropene"], correct:"D"},
+      {number:"Question 35", text:"Identify the product 'B' in the following reaction sequence: Alkyl halide →(Mg/Dry ether)→ A →(NH3)→ B", options:["Alkyl magnesium halide","Hydrocarbon","Alkyl nitrile","Alkyl amine"], correct:"D"},
+      {number:"Question 36", text:"Identify the product formed from chlorobenzene on heating with conc. HNO3 in presence of conc. H2SO4.", options:["Only 1-chloro-4-nitrobenzene","2,4,6-trinitrochlorobenzene","1-chloro-2-nitrobenzene","Mixture of 1-chloro-4-nitrobenzene and 1-chloro-2-nitrobenzene"], correct:"D"},
+      {number:"Question 37", text:"Which among the following is benzylic halide?", options:["Bromophenylmethane","Bromobenzene","1-Bromo-2-phenylethane","4-Bromotoluene"], correct:"A"},
+      {number:"Question 38", text:"Identify the compound formed by action of chromyl chloride on toluene in presence of CS2 and hydrolysed further?", options:["Benzaldehyde","Benzoic acid","Benzyl chloride","Benzene"], correct:"A"},
+      {number:"Question 39", text:"What is the major product obtained when tert-butyl bromide is heated with silver fluoride?", options:["2-Fluoro-2-methylpropane","2-Fluorobutane","1-Fluorobutane","1-Fluoro-2-methylpropane"], correct:"A"},
+      {number:"Question 40", text:"Which of the following compounds is obtained by using Finkelstein reaction?", options:["Alkyl bromides","Alkyl fluorides","Alkyl iodides","Alkyl chlorides"], correct:"C"},
+      {number:"Question 41", text:"Identify 'Y' in the following reaction: CH3Br →(KCN)→ X →(Na/C2H5OH)→ Y", options:["CH3CH2NH2","CH3COOH","CH3CH2OH","CH3CH3"], correct:"A"},
+      {number:"Question 42", text:"Which among the following has lowest boiling point?", options:["Iodomethane","Chloromethane","Fluoromethane","Bromomethane"], correct:"C"},
+      {number:"Question 43", text:"Which of the following is vinylic halide?", options:["Haloarene","Haloalkane","Haloalkene","Haloalkyne"], correct:"C"},
+      {number:"Question 44", text:"Identify product 'B' in following reaction: CH3-I + KCN → A →(Na)→ B", options:["CH3CH2NH2","CH3COOH","CH3CH2OH","CH3CH3"], correct:"A"},
+      {number:"Question 45", text:"Identify the product obtained in the following reaction: CH3CH2Br + CH3COOAg →(Δ)→ x + AgBr", options:["CH3COOC2H5","CH3CH2OCOCH3","CH3CH2COOH","CH3CH2OCH3"], correct:"B"},
+      {number:"Question 46", text:"Identify the product 'B' in the following reaction sequence: C2H5-Br →(Mg)→ A →(CH3OH)→ B", options:["C2H6","C2H5-OH","C2H5-O-CH3","C2H5-CH2-CH3"], correct:"A"},
+      {number:"Question 47", text:"Which among the following is benzylic halide?", options:["Bromobenzene","1-Bromo-2-phenylethane","4-Bromotoluene","Bromophenyl methane"], correct:"D"},
+      {number:"Question 48", text:"Which from following compounds is used to prepare a refrigerant R-22?", options:["Monochloromethane","Dichloromethane","Trichloromethane","Tetrachloromethane"], correct:"A"},
+      {number:"Question 49", text:"Which among the following has lowest boiling point?", options:["Chloromethane","Bromomethane","Tribromomethane","Dibromomethane"], correct:"A"},
+      {number:"Question 50", text:"Which alkyl halide has highest bond enthalpy of C-X bond?", options:["CH3-Br","CH3-Cl","CH3-F","CH3-I"], correct:"C"},
+      {number:"Question 51", text:"Identify the major product (99%) formed when (CH3)3CH is treated with Br2 in UV light.", options:["(CH3)3CBr","CH3CHBrCH3","CH2BrCH(CH3)2","CH3CH2CH2Br"], correct:"A"},
+      {number:"Question 52", text:"Identify structural formula of DDT.", options:["p,p'-dichlorodiphenyltrichloroethane","o,p'-dichlorodiphenyltrichloroethane","p,p'-dichlorodiphenyldichloroethane","o,o'-dichlorodiphenyltrichloroethane"], correct:"A"},
+      {number:"Question 53", text:"Identify the major product formed in the bromination of 2-Methylpropane.", options:["1-Bromo-2-methylpropane","2-Bromo-2-methylpropane","1-Bromopropane","2-Bromopropane"], correct:"B"},
+      {number:"Question 54", text:"Which of the following is NOT obtained when a mixture of methyl bromide and ethyl bromide is treated with sodium metal in presence of dry ether?", options:["Ethane","Propane","Butane","Methane"], correct:"D"},
+      {number:"Question 55", text:"What is the order of ease of dehydrohalogenation of alkyl halides?", options:["3° > 2° > 1°","1° > 2° > 3°","2° > 1° > 3°","3° > 1° > 2°"], correct:"A"},
+      {number:"Question 56", text:"What is the molar mass of product hydrocarbon when 2 moles of methyl bromide reacts with large excess of sodium in dry ether?", options:["30 g/mol","16 g/mol","58 g/mol","44 g/mol"], correct:"A"},
+      {number:"Question 57", text:"Identify the product obtained when chlorobenzene is heated with conc. HNO3 in presence of conc. H2SO4.", options:["2,4,6-trinitrochlorobenzene","Only 1-chloro-2-nitrobenzene","Mixture of 1-chloro-4-nitrobenzene and 1-chloro-2-nitrobenzene","Only 1-chloro-4-nitrobenzene"], correct:"C"},
+      {number:"Question 58", text:"Which among the following reactions is used for the preparation of alkyl fluorides?", options:["Fittig reaction","Wurtz reaction","Finkelstein reaction","Swartz reaction"], correct:"D"},
+      {number:"Question 59", text:"Identify 'B' in the following conversion: CH3-I →(KCN)→ A →(Na/C2H5OH)→ B", options:["CH3CH2NH2","CH3COOH","CH3CH2OH","CH3CH3"], correct:"A"},
+      {number:"Question 60", text:"The correct order of reactivity for reactions involving cleavage of C-Cl bond in following compounds is", options:["Chlorobenzene > p-Nitrochlorobenzene > 2,4-Dinitrochlorobenzene > 2,4,6-Trinitrochlorobenzene","2,4,6-Trinitrochlorobenzene > 2,4-Dinitrochlorobenzene > p-Nitrochlorobenzene > Chlorobenzene","p-Nitrochlorobenzene > 2,4-Dinitrochlorobenzene > 2,4,6-Trinitrochlorobenzene > Chlorobenzene","2,4-Dinitrochlorobenzene > p-Nitrochlorobenzene > Chlorobenzene > 2,4,6-Trinitrochlorobenzene"], correct:"B"},
+      {number:"Question 61", text:"Which from following alkyl halides has highest boiling point?", options:["CH3Cl","CH3Br","CH3I","CH3F"], correct:"C"},
+      {number:"Question 62", text:"Identify compound Q in following reaction: R-OH + Q → R-Cl + HCl + PCl3", options:["PCl5","SOCl2","HCl","PCl3"], correct:"A"},
+      {number:"Question 63", text:"Which of the following compounds has difficulty in breaking the C-Cl bond?", options:["o-Nitrochlorobenzene","p-Nitrochlorobenzene","m-Nitrochlorobenzene","2,4,6-trinitrochlorobenzene"], correct:"A"},
+      {number:"Question 64", text:"Which among the following is haloarene?", options:["C6H5Cl","CH2=CHCl","CH3CH2Cl","CH≡CCl"], correct:"A"},
+      {number:"Question 65", text:"Which of the following compounds is obtained by using Swartz reaction?", options:["Alkyl iodides","Alkyl fluorides","Alkyl bromides","Alkyl chlorides"], correct:"B"},
+      {number:"Question 66", text:"What is the number of moles of ethane obtained from 2n moles of bromomethane using 2n moles of sodium atoms in dry ether medium?", options:["n moles","2n moles","0.5n moles","1.5n moles"], correct:"A"},
+      {number:"Question 67", text:"Which among the following is haloalkyne?", options:["Chloroethylene","1-Chloropent-2-yne","3-Chlorobut-1-yne","4-Chloropent-2-yne"], correct:"B"},
+      {number:"Question 68", text:"Which of the following is a structural formula of DDT?", options:["p,p'-dichlorodiphenyltrichloroethane","o,p'-dichlorodiphenyltrichloroethane","p,p'-dichlorodiphenyldichloroethane","o,o'-dichlorodiphenyltrichloroethane"], correct:"A"},
+      {number:"Question 69", text:"Which among the following is benzylic halide?", options:["C6H5-CH=CH-X","C6H5-CH2-CH2-X","C6H5-CH2-X","C6H5-X"], correct:"C"},
+      {number:"Question 70", text:"Which among the following is a feature of SN1 mechanism?", options:["One step mechanism","Inversion of configuration","Formation of carbocation","Bimolecular reaction"], correct:"C"},
+      {number:"Question 71", text:"Which of the following compounds has difficulty in breaking of C-X bond during nucleophilic substitution reaction?", options:["Benzyl chloride","Allyl chloride","Vinyl chloride","tert-Butyl chloride"], correct:"C"},
+      {number:"Question 72", text:"The molecular formula of hexachlorobenzene is", options:["C6H5Cl","C6H6Cl6","C6Cl6","C6H6Cl"], correct:"C"},
+      {number:"Question 73", text:"Identify 'A' and 'B' in the following reaction: CH3Br →(AgNO2)→ A →(Sn/HCl)→ B", options:["A=CH3NO2, B=CH3NH2","A=CH3ONO, B=CH3OH","A=CH3CN, B=CH3CH2NH2","A=CH3NC, B=CH3NHCH3"], correct:"A"},
+      {number:"Question 74", text:"The reaction of aryl halide with alkyl halide and sodium metal in dry ether to form substituted aromatic compounds is known as:", options:["Wurtz reaction","Friedel Craft's reaction","Fittig reaction","Wurtz Fittig reaction"], correct:"D"},
+      {number:"Question 75", text:"When tert-butyl bromide is heated with silver fluoride, the major product obtained is:", options:["2-Fluoro-2-methylpropane","1-Fluorobutane","1-Fluoro-2-methylpropane","2-Fluorobutane"], correct:"A"},
+      {number:"Question 76", text:"Identify the product obtained when isopropyl bromide is reacted with metallic sodium in dry ether.", options:["2,3-Dimethylbutane","Propane","Hexane","2-Methylpropane"], correct:"A"},
+      {number:"Question 77", text:"Identify compound Y in the following reaction: C2H5Cl + Y →(Δ)→ C2H5CN", options:["KCN","NaCN","AgCN","CuCN"], correct:"A"},
+      {number:"Question 78", text:"Identify the reagent A in the following conversion: Alkyl halide →(A)→ Alkyl nitrite", options:["AgNO2","KNO2","NaNO2","CuNO2"], correct:"A"},
+      {number:"Question 79", text:"Which among the following methods is used to prepare Grignard reagent?", options:["Action of magnesium hydroxide on alkyl halide","Action of magnesium metal on alkyl halide in presence of dry ether","Action of MgCl2 on alkyl halide in presence of dry ether","Action of magnesium powder on alkyl halide in aqueous medium"], correct:"B"},
+      {number:"Question 80", text:"What is the intermediate compound formed when chlorobenzene is treated with fused NaOH under pressure?", options:["Benzene diazonium chloride","Sodium phenoxide","Phenoxide ion","Benzene"], correct:"B"},
+      {number:"Question 81", text:"Which among the following compounds is NOT prepared by Sandmeyer's reaction?", options:["Chlorobenzene","Bromobenzene","Iodobenzene","Cyanobenzene"], correct:"C"},
+      {number:"Question 82", text:"Which among the following is NOT an example of Wurtz reaction?", options:["2CH3Br + 2Na → C2H6 + 2NaBr","2C2H5Br + 2Na → C4H10 + 2NaBr","C6H5Br + CH3Br + 2Na → C6H5CH3 + 2NaBr","2C6H5Br + 2Na → C6H5-C6H5 + 2NaBr"], correct:"C"},
+      {number:"Question 83", text:"Identify Swartz reaction from the following.", options:["R-Br + NaI → R-I + NaBr","2R-Cl + 2Na → R-R + 2NaCl","R-Cl + AgF → R-F + AgCl","R-OH + SOCl2 → R-Cl + SO2 + HCl"], correct:"C"},
+      {number:"Question 84", text:"What product is obtained when alkyl halides react with metallic sodium in presence of dry ether?", options:["Alkane","Alkene","Alkyne","Alcohol"], correct:"A"},
+      {number:"Question 85", text:"The correct order of reactivity for reactions involving cleavage of C-X bond in following compounds is", options:["Benzyl chloride > Allyl chloride > Vinyl chloride > Chlorobenzene","Allyl chloride > Benzyl chloride > Vinyl chloride > Chlorobenzene","Vinyl chloride > Allyl chloride > Benzyl chloride > Chlorobenzene","Chlorobenzene > Vinyl chloride > Allyl chloride > Benzyl chloride"], correct:"A"},
+      {number:"Question 86", text:"Which among the following compounds is used in Swartz reaction?", options:["AgF","NaF","KF","HF"], correct:"A"},
+      {number:"Question 87", text:"Which among the following compounds have highest boiling point?", options:["CH3F","CH3Cl","CH3Br","CH3I"], correct:"D"},
+      {number:"Question 88", text:"Which among the following compounds converts alkyl halides to nitro alkanes?", options:["Silver nitrite","alc. Potassium cyanide","Potassium nitrite","alc. Silver cyanide"], correct:"A"},
+      {number:"Question 89", text:"Which among the following statements is NOT correct about SN2 reaction mechanism?", options:["Bond formation and bond breaking occurs simultaneously","SN2 mechanism is observed in tertiary alkyl halides","Nucleophile attacks the atom from the side opposite to halogen","Rate of reaction is dependent on the concentration of nucleophile"], correct:"B"},
+      {number:"Question 90", text:"Which of the following reaction is used to prepare toluene from bromobenzene?", options:["Swartz reaction","Fittig reaction","Wurtz-Fittig reaction","Wurtz reaction"], correct:"C"},
+      {number:"Question 91", text:"Choose the false statement from following about SN1 reaction mechanism.", options:["Intermediate formed during the reaction is a carbocation","Racemization takes place if reaction is carried out at chiral carbon in optically active substance","Concentration of nucleophile does not affect the rate of reaction","It is single step mechanism"], correct:"D"},
+      {number:"Question 92", text:"Identify the compound that undergoes SN1 mechanism most fastly.", options:["CH3Cl","CH3CH2Cl","(CH3)2CHCl","(CH3)3CCl"], correct:"D"},
+      {number:"Question 93", text:"Which among the following reactions does NOT form alkyl halides?", options:["Alcohol reacts with HCl in presence of anhydrous ZnCl2","Alcohol reacts with halogen in presence of sunlight","Alcohol reacts with HI in presence of NaI/H3PO4","Alcohol reacts with HBr in presence of NaBr, H2SO4"], correct:"B"},
+      {number:"Question 94", text:"Which among the following is NOT a feature of SN1 mechanisms?", options:["Heterolysis of C-X bond forms carbocation intermediate","Two step mechanism","Involve only backside attack of nucleophile","In an optically active substrate the product formed is racemic"], correct:"C"},
+      {number:"Question 95", text:"Identify product 'B' in following reaction: CH3Br + AgNO2 → A →(Sn/HCl)→ B", options:["CH3NH2","CH3OH","CH3NO2","CH3CN"], correct:"A"},
+      {number:"Question 96", text:"When 2-Chlorobutane is boiled with concentrated alcoholic solution of KOH, the major product formed is", options:["But-1-ene","But-2-ene","Butan-1-ol","Butan-2-ol"], correct:"B"},
+      {number:"Question 97", text:"The major product obtained in the following reaction is Chlorobenzene + chlorine →(Anhydrous FeCl3)→ product (Major)", options:["1,4-dichlorobenzene","1,3-dichlorobenzene","1,3,5-trichlorobenzene","1,2-dichlorobenzene"], correct:"D"},
+      {number:"Question 98", text:"Conversion of benzene diazonium chloride to chlorobenzene in presence of CuCl/HCl is known as", options:["Hoffmann degradation","Medius reaction","Sandmeyer reaction","Gattermann reaction"], correct:"C"},
+      {number:"Question 99", text:"When tert-butyl bromide is heated with silver fluoride, the major product obtained is", options:["2-Fluorobutane","2-Fluoro-2-methylpropene","1-Fluorobutane","2-Fluoro-2-methylpropane"], correct:"D"},
+      {number:"Question 100", text:"Identify the reagent used in following conversion: Chloroethane →(A)→ Nitroethane", options:["Sodium nitrite","Potassium cyanide","Potassium nitrite","Silver nitrite"], correct:"D"},
+      {number:"Question 101", text:"Which of the following reactions is a Wurtz-Fittig reaction?", options:["2C6H5Br + 2Na → C6H5-C6H5 + 2NaBr","C6H5Br + CH3Br + 2Na → C6H5CH3 + 2NaBr","2CH3Br + 2Na → C2H6 + 2NaBr","C6H5Cl + AlCl3 → C6H5+ + AlCl4-"], correct:"B"},
+      {number:"Question 102", text:"Which among the following is NOT correct statement about SN1 reaction?", options:["SN1 reaction proceeds more rapidly in polar protic solvent","The rate of SN1 mechanism is independent of the nature of nucleophile","A more powerful nucleophile favours SN1 mechanism","SN1 reaction proceeds via formation of carbocation intermediate"], correct:"C"},
+      {number:"Question 103", text:"Which of the following haloalkane is used as paint remover?", options:["Chloroethane","Trichloromethane","Carbon tetra chloride","Dichloromethane"], correct:"D"},
+      {number:"Question 104", text:"How many chlorine atoms are present in a molecule of D.D.T.?", options:["3","4","5","6"], correct:"C"},
+      {number:"Question 105", text:"Identify the correct decreasing order of reactivity of alkyl halide with ammonia?", options:["RI > RBr > RCl > RF","RF > RCl > RBr > RI","RBr > RCl > RI > RF","RCl > RF > RBr > RI"], correct:"A"},
+      {number:"Question 106", text:"Which among the following has highest boiling point?", options:["CH3F","CH3Cl","CH3Br","CH3I"], correct:"D"},
+      {number:"Question 107", text:"Which of the following is least reactive towards SN1 reactions?", options:["CH3Cl","CH3CH2Cl","(CH3)2CHCl","(CH3)3CCl"], correct:"A"},
+      {number:"Question 108", text:"Which among the following is NOT obtained when bromobenzene treated with bromoethane and sodium in presence of dry ether?", options:["Ethylbenzene","Butane","Diphenyl","Biphenyl"], correct:"B"},
+      {number:"Question 109", text:"What is correct order of C-X bond strength in CH3-X?", options:["CH3-F > CH3-Cl > CH3-Br > CH3-I","CH3-I > CH3-Br > CH3-Cl > CH3-F","CH3-Cl > CH3-F > CH3-Br > CH3-I","CH3-Br > CH3-Cl > CH3-I > CH3-F"], correct:"A"},
+      {number:"Question 110", text:"Identify the catalyst X used in following reaction? CH3CH2Br + 2[H] → CH3-CH3 + HBr", options:["Zn-Cu Couple in alcohol","KMnO4","CaO, Δ","K2Cr2O7"], correct:"A"},
+      {number:"Question 111", text:"The reaction 2R-Cl + CoF2 → 2R-F + CoCl2 is an example of", options:["Finkelstein reaction","Wurtz-fittig reaction","Sandmeyer's reaction","Swarts reaction"], correct:"D"},
+      {number:"Question 112", text:"Which among the following methods is NOT suitable for the preparation of allyl chlorides?", options:["By heating alcohols with thionyl chloride","Treating alcohols with Lucas reagent","Addition of HCl to alkene","Chlorination of alkanes in presence of sunlight"], correct:"D"},
+      {number:"Question 113", text:"When HCl is treated with propene in presence of sodium peroxide, the major product obtained is", options:["2-Chloropropane","1,2-dichloropropane","1-Chloropropane","2,2-dichloropropane"], correct:"C"},
+      {number:"Question 114", text:"Identify the name of reaction in which alkyl fluorides are prepared by heating alkyl bromide with metallic fluorides?", options:["Finkelstein reaction","Wurtz reaction","Swarts reaction","Fittig reaction"], correct:"C"},
+      {number:"Question 115", text:"Two vectors of same magnitude have resultant equal to either vector. Angle between them is", options:["cos⁻¹(-0.5)","cos⁻¹(-0.4)","cos⁻¹(-0.3)","cos⁻¹(-0.6)"], correct:"A"},
+      {number:"Question 116", text:"Which among the following is true for Balz-Schiemann reaction?", options:["In this Ar-Cl is obtained from Ar-N+X-","In this Ar-F is obtained from Ar-N+X-","In this Ar-CN is obtained from Ar-N+X-","It is useful for preparation of nitrobenzene from benzene diazonium salts"], correct:"B"},
+      {number:"Question 117", text:"What is the relative rate of SN1 reaction for (CH3)2CH-Br?", options:["1","10","100","1000"], correct:"B"},
+      {number:"Question 118", text:"Which of the following is a major product obtained in the reaction of isobutylene with hydrogen bromide?", options:["Isobutyl bromide","tert-butyl bromide","n-butyl bromide","sec-butyl bromide"], correct:"B"},
+      {number:"Question 119", text:"If a mixture of iodomethane and iodoethane is treated with sodium metal in presence of dry ether it forms", options:["propane and butane","propane and ethane","ethane, propane and butane","ethane and butane"], correct:"C"},
+      {number:"Question 120", text:"Which of the following compounds is obtained when t-butyl bromide is treated with alcoholic ammonia?", options:["tert-Butylamine","Isobutylene","Isobutane","tert-Butanol"], correct:"A"},
+      {number:"Question 121", text:"When alkyl halide is boiled with large excess of alcoholic ammonia it forms", options:["secondary amine","primary amine","tertiary amine","quaternary ammonium salt"], correct:"B"},
+      {number:"Question 122", text:"When propene reacts with HCl in presence of peroxide, the product is", options:["1,1-dichloropropane","1-chloropropane","1,2-dichloropropane","2-chloropropane"], correct:"B"},
+      {number:"Question 123", text:"Nitroalkanes are obtained in laboratory from primary or secondary alkyl halides by the action of", options:["Silver nitrite","Potassium nitrite","Sodium nitrite","Copper nitrite"], correct:"A"},
+      {number:"Question 124", text:"Which reaction is useful in exchange of halogen in alkyl chloride by iodide?", options:["Williamson synthesis","Finkelstein reaction","Wurtz reaction","Reimer-Tiemann reaction"], correct:"B"},
+      {number:"Question 125", text:"The reaction in which 2 molecules of chlorobenzene reacts with metallic sodium in presence of dry ether forming diphenyl is an example of,", options:["Rosenmund reaction","Wurtz reaction","Balz-Schiemann reaction","Wurtz-Fittig reaction"], correct:"B"},
+      {number:"Question 126", text:"The reaction in which 2 molecules of chlorobenzene reacts with metallic sodium in presence of dry ether forming biphenyl is an example of,", options:["Wurtz-Fittig reaction","Balz-Schiemann reaction","Resenmund reaction","Wurtz reaction"], correct:"D"},
+      {number:"Question 127", text:"The correct order of boiling points of alkyl halides is", options:["RI > RBr > RCl > RF","RF > RCl > RBr > RI","RBr > RCl > RI > RF","RCl > RF > RBr > RI"], correct:"A"},
+      {number:"Question 128", text:"Which bond in a molecule of ethyl magnesium bromide is ionic in nature?", options:["C-Mg bond","Mg-Br bond","C-C bond","C-H bond"], correct:"B"},
+      {number:"Question 129", text:"Arenes on treatment with chlorine in presence of ferric chloride as a catalyst undergo what type of reaction?", options:["Nucleophilic substitution","Electrophilic substitution","Free radical substitution","Elimination"], correct:"B"},
+      {number:"Question 130", text:"Which of the following reactions is used to prepare aryl fluorides from diazonium salts and fluoroboric acid?", options:["Sandmeyer reaction","Gattermann reaction","Balz-Schiemann reaction","Finkelstein reaction"], correct:"C"},
+      {number:"Question 131", text:"The conversion of ethyl bromide to ethyl iodide using sodium and dry acetone, this reaction is known as", options:["Finkelstein reaction","Wurtz reaction","Swarts reaction","Fittig reaction"], correct:"A"},
+      {number:"Question 132", text:"The name of the reaction C6H6 + CH3Cl →(Anhy. AlCl3)→ C6H5CH3 + HCl is", options:["Gattermann","Reimer-Tiemann","Friedel-Craft","Cannizzaro"], correct:"C"},
+      {number:"Question 133", text:"Ethanolik KOH gives", options:["dehydrohalogenation reactions","substitution reactions","dehalogenation reactions","dehydrogenation reactions"], correct:"A"},
+      {number:"Question 134", text:"The raw material for Raschig process is", options:["anisole","phenol","benzene","chlorobenzene"], correct:"C"},
+      {number:"Question 135", text:"In Dow's process, the starting raw material is", options:["aniline","diazobenzene","phenol","chlorobenzene"], correct:"D"},
+      {number:"Question 136", text:"Chloroform on reduction with zinc dust and water gives", options:["Methane","Methylene chloride","Chloromethane","Carbon tetrachloride"], correct:"A"},
+      {number:"Question 137", text:"Ethylidene dichloride is obtained by the reaction of excess of HCl with", options:["Acetylene","Ethylene","Ethane","Ethanol"], correct:"B"},
+      {number:"Question 138", text:"Williamson's synthesis involves", options:["SN1 reaction","SN2 reaction","E1 reaction","E2 reaction"], correct:"B"},
+      {number:"Question 139", text:"For synthesis of 1-butene, CH3MgI should be treated with", options:["2-chloropropene","ethyl chloride","propene","allyl chloride"], correct:"D"},
+      {number:"Question 140", text:"Component of Q in direction of Q (P and Q inclined at angle θ)", options:["P · Q","P × Q / |P|","P · Q / |P|","p · q"], correct:"D"},
+      {number:"Question 141", text:"Angle between resultant of A + B and A × B is", options:["π rad","0°","π/2 rad","π/4 rad"], correct:"C"},
+      {number:"Question 142", text:"Angle subtended by A = 4î + 3ĵ + 12k with X-axis is", options:["cos⁻¹(3/13)","sin⁻¹(3/13)","sin⁻¹(4/13)","cos⁻¹(4/13)"], correct:"D"},
+      {number:"Question 143", text:"Two vectors A and B, B is doubled and resultant becomes perpendicular to A. Magnitude of C is", options:["2B","B","3B","4B"], correct:"A"},
+      {number:"Question 144", text:"Vector P has components 1 and 3. Resultant of P and Q has components 5 and 6. Magnitude of Q is", options:["5","4","3","2"], correct:"A"},
+      {number:"Question 145", text:"Two vectors of same magnitude have resultant equal to either vector. Angle between them is", options:["cos⁻¹(-0.5)","cos⁻¹(-0.4)","cos⁻¹(-0.3)","cos⁻¹(-0.6)"], correct:"A"},
+      {number:"Question 146", text:"Vector P has components 2 and 4. Vector Q along -X axis has magnitude 6. Vector (Q - P) is", options:["4(2î - 3ĵ)","-4(2î - ĵ)","4(2î + ĵ)","-4(2î + ĵ)"], correct:"B"},
+      {number:"Question 147", text:"Vectors (A + B) and (A - B) are perpendicular. Condition is", options:["|A| = |B|","A · B = 0","A · B = 1","A × B = 0"], correct:"B"},
+      {number:"Question 148", text:"Component of Q in direction of Q (P and Q inclined at angle θ)", options:["P · Q","P × Q / |P|","P · Q / |P|","p · q"], correct:"D"},
+      {number:"Question 149", text:"If √(A² + B²) is magnitude of resultant of (A + B) and (A - B), angle between vectors is", options:["cos⁻¹(2(A² - B²)/A² + B²)","cos⁻¹((A² - B²)/A² + B²)","cos⁻¹(2(A² - B²)/A² + B²)","cos⁻¹((A² - B²)/A² + B²)"], correct:"A"},
+      {number:"Question 150", text:"Resultant R of P and Q is perpendicular to P and |P| = |R|. Angle between P and Q is", options:["5π/4","7π/4","π/4","3π/4"], correct:"C"},
+      {number:"Question 151", text:"If A = 2î + 3ĵ and B = î - ĵ, find A · B", options:["-1","1","2","3"], correct:"D"},
+      {number:"Question 152", text:"Vector A of magnitude 5√3 units, vector B of magnitude 10 units are inclined at 30°. What is the magnitude of A × B?", options:["5√3 units","10 units","25√3 units","75 units"], correct:"C"},
+      {number:"Question 153", text:"If P = bî + 6ĵ + k and Q = î - aj + 4k are perpendicular, and 3b - a = 5, find a and b.", options:["a = 2, b = 10","a = 1, b = 2","a = 2, b = 3","a = 4, b = 3"], correct:"C"},
+      {number:"Question 154", text:"Given A = (2î - 3ĵ + k), B = (3ĵ + î - 2k), and C = (3î + 2ĵ + k), find (A + B) · C", options:["10","12","18","20"], correct:"C"},
+      {number:"Question 155", text:"A unit vector in the direction of resultant of A = -2î + 3ĵ + k and B = î + 2ĵ - 4k is", options:["-3î + ĵ + 5k","î + 2ĵ - 4k","-2î + 3ĵ + k","-î + 5ĵ - 3k"], correct:"D"},
+      {number:"Question 156", text:"Vectors A = 3î - 2ĵ + k, B = î - 3ĵ + 5k, C = 2î - ĵ + 4k form a", options:["Isosceles triangle","Equilateral triangle","No triangle","Right angled triangle"], correct:"D"},
+      {number:"Question 157", text:"Find the unit vector along the direction of a = 4î - ĵ, b = -3î + 2ĵ, c = -k", options:["1/3","1(î - ĵ + k)","1/2(î - ĵ + k)","1/√2(î + ĵ + k)"], correct:"C"}
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    renderQuestion(current);
+
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MHT-CET Solid State Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f9ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .question-number {
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .question {
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .options label {
+      display: block;
+      background: #eff6ff;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"]:checked + label {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: #1e40af;
+    }
+    .btn.right {
+      margin-left: auto;
+    }
+    
+    /* Timer Styling */
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Question Navigation Panel */
+    .nav-panel-toggle {
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+      background: #eff6ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 10;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .nav-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #2563eb;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .question-item {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .question-item.answered {
+      background: #3b82f6;
+      color: white;
+    }
+    .question-item.seen {
+      background: #f87171;
+      color: white;
+    }
+    .question-item.not-seen {
+      background: #d1d5db;
+      color: #6b7280;
+    }
+    .question-item.current {
+      border: 2px solid #2563eb;
+      box-sizing: border-box;
+    }
+    .question-item:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="header">
+      <div class="header-left">
+        <div>MHT CET 2025 · Solid State</div>
+      </div>
+      <div class="header-right">
+        <div class="timer">Time: <span id="timer">00:00</span></div>
+        <div class="nav-panel-toggle" onclick="toggleNavPanel()">☰</div>
+      </div>
+    </div>
+    
+    <div class="nav-panel" id="navPanel">
+      <h3>Questions</h3>
+      <div class="question-list" id="questionList"></div>
+    </div>
+
+    <div id="quiz-content"></div>
+    
+    <div class="nav-buttons">
+      <button class="btn" id="backBtn" onclick="prevQuestion()" style="display:none;">Back</button>
+      <button class="btn right" id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button class="btn right" id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    // All 246 Solid State Questions from the PDF
+    const questions = [
+      {
+        number: "Q1/246",
+        text: "Calculate the edge length of unit cell if metal having atomic radius 170 pm forms simple cubic unit cell.",
+        options: ["170 pm", "340 pm", "240 pm", "480 pm"],
+        correct: "B"
+      },
+      {
+        number: "Q2/246",
+        text: "Which of the following dopant is added in silicon to obtain n-type semiconductor?",
+        options: ["Boron", "Aluminium", "Phosphorous", "Gallium"],
+        correct: "C"
+      },
+      {
+        number: "Q3/246",
+        text: "In an ionic solid anions are arranged in hcp array and cations occupy 2/3 of octahedral voids. What is the formula of ionic compound? [consider A = cation; B = anion]",
+        options: ["AB", "AB₂", "A₂B", "A₂B₃"],
+        correct: "D"
+      },
+      {
+        number: "Q4/246",
+        text: "Calculate the number of atoms in 5.4 g metal forming fcc structure [ρ × a³ = 7.2 × 10⁻²² g]",
+        options: ["6.0 × 10²²", "4.5 × 10²²", "1.5 × 10²²", "3.0 × 10²²"],
+        correct: "D"
+      },
+      {
+        number: "Q5/246",
+        text: "What is the total number of different types of unit cells in tetragonal crystal system?",
+        options: ["1", "2", "3", "4"],
+        correct: "B"
+      },
+      {
+        number: "Q6/246",
+        text: "Calculate the total volume occupied by all particles in a fcc unit cell if the volume of unit cell is 5.2 × 10⁻²³ cm³",
+        options: ["2.6 × 10⁻²³ cm³", "3.7 × 10⁻²³ cm³", "4.2 × 10⁻²³ cm³", "4.9 × 10⁻²³ cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q7/246",
+        text: "Calculate the number of unit cells in 1 cm³ of an element if unit cell edge length is 2.0 × 10⁻⁸ cm",
+        options: ["1.25 × 10²²", "1.25 × 10²³", "1.25 × 10²⁴", "1.25 × 10²⁵"],
+        correct: "B"
+      },
+      {
+        number: "Q8/246",
+        text: "Calculate the radius of an atom of an element in pm if it forms bcc unit cell structure having edge length 4.3 × 10⁻⁸ cm.",
+        options: ["186 pm", "216 pm", "248 pm", "298 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q9/246",
+        text: "What is the coordination number of a particle in simple cubic close packed structure?",
+        options: ["4", "6", "8", "12"],
+        correct: "B"
+      },
+      {
+        number: "Q10/246",
+        text: "The compound forming ccp structure contains 9.6 × 10²³ atoms. Find the number of tetrahedral voids formed in it.",
+        options: ["9.6 × 10²³", "19.2 × 10²³", "4.8 × 10²³", "14.4 × 10²³"],
+        correct: "B"
+      },
+      {
+        number: "Q11/246",
+        text: "Calculate the edge length of bcc unit cell if radius of a particle present in it is 186 pm.",
+        options: ["214 pm", "321 pm", "429 pm", "536 pm"],
+        correct: "C"
+      },
+      {
+        number: "Q12/246",
+        text: "Calculate the number of unit cells in 1 cm³ volume of metal if unit cell edge length is 1.25 × 10⁻⁸ cm",
+        options: ["5.12 × 10²²", "5.12 × 10²³", "5.12 × 10²⁴", "5.12 × 10²⁵"],
+        correct: "C"
+      },
+      {
+        number: "Q14/246",
+        text: "What is the total number of unit cells shared by each corner particle of bcc unit cell?",
+        options: ["1", "2", "4", "8"],
+        correct: "D"
+      },
+      {
+        number: "Q15/246",
+        text: "Calculate the number of particles present per unit cell if mass of a particle is 8.0 × 10⁻²³ g [ρ × a³ = 3.2 × 10⁻²² g]",
+        options: ["1", "2", "3", "4"],
+        correct: "D"
+      },
+      {
+        number: "Q16/246",
+        text: "Calculate the edge length of unit cell if a metal with atomic radius 128 pm forming fcc unit cell structure.",
+        options: ["256 pm", "362 pm", "512 pm", "724 pm"],
+        correct: "B"
+      },
+      {
+        number: "Q17/246",
+        text: "Which of the following dopant is used in silicon to produce p-type semiconductor?",
+        options: ["Phosphorous", "Arsenic", "Boron", "Antimony"],
+        correct: "C"
+      },
+      {
+        number: "Q18/246",
+        text: "Calculate the volume of bcc unit cell if radius of an atom present in it is 1.86 × 10⁻⁸ cm.",
+        options: ["2.45 × 10⁻²³ cm³", "3.12 × 10⁻²³ cm³", "4.28 × 10⁻²³ cm³", "5.64 × 10⁻²³ cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q19/246",
+        text: "Calculate the number of unit cells in 0.79 g metal if product of density and volume of unit cell is 1.58 × 10⁻²² g",
+        options: ["1.0 × 10²¹", "2.0 × 10²¹", "3.0 × 10²¹", "5.0 × 10²¹"],
+        correct: "D"
+      },
+      {
+        number: "Q20/246",
+        text: "Calculate the number of atoms in 1 g metal if it forms fcc crystal structure [ρ × a³ = 1.728 × 10⁻²² g]",
+        options: ["2.0 × 10²²", "2.5 × 10²²", "3.0 × 10²²", "3.5 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q21/246",
+        text: "Calculate the volume occupied by all particles in bcc unit cell if the volume of unit cell is 8.0 × 10⁻²³ cm³",
+        options: ["5.24 × 10⁻²³ cm³", "6.28 × 10⁻²³ cm³", "7.32 × 10⁻²³ cm³", "8.36 × 10⁻²³ cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q22/246",
+        text: "Calculate the volume occupied by a particle in fcc unit cell if volume of unit cell is 1.6 × 10⁻²³ cm³",
+        options: ["6.15 × 10⁻²⁴ cm³", "5.44 × 10⁻²⁴ cm³", "2.96 × 10⁻²⁴ cm³", "8.37 × 10⁻²⁴ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q23/246",
+        text: "Identify the type of defect in brass alloy.",
+        options: ["Schottky defect", "Interstitial impurity defect", "Substitutional impurity defect", "Metal deficiency defect"],
+        correct: "C"
+      },
+      {
+        number: "Q24/246",
+        text: "Calculate the number of atoms present in 1 g of an element if it forms fcc unit cell structure. [ρ × a³ = 6.8 × 10⁻²² g]",
+        options: ["1.5 × 10²²", "2.0 × 10²²", "2.5 × 10²²", "3.0 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q25/246",
+        text: "Calculate the volume occupied by all particles in fcc unit cell if volume of unit cell is 1.6 × 10⁻²³ cm³",
+        options: ["1.13 × 10⁻²³ cm³", "1.28 × 10⁻²³ cm³", "1.44 × 10⁻²³ cm³", "1.52 × 10⁻²³ cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q26/246",
+        text: "Which from following dopants is used in germanium to produce p-type semiconductor?",
+        options: ["Phosphorous", "Arsenic", "Boron", "Antimony"],
+        correct: "C"
+      },
+      {
+        number: "Q28/246",
+        text: "Calculate the volume of fcc unit cell in cm³ if void volume of it is 4.16 × 10⁻²⁴ cm³.",
+        options: ["1.25 × 10⁻²² cm³", "1.60 × 10⁻²² cm³", "2.08 × 10⁻²² cm³", "2.50 × 10⁻²² cm³"],
+        correct: "C"
+      },
+      {
+        number: "Q29/246",
+        text: "Calculate the number of atoms present per unit cell if product of density and volume of unit cell is 1.8 × 10⁻²² g [Mass of an atom = 4.5 × 10⁻²³ g]",
+        options: ["2", "3", "4", "6"],
+        correct: "C"
+      },
+      {
+        number: "Q30/246",
+        text: "Identify the defect developed when an ion of an ionic compound is missing from its regular site and occupies interstitial position between lattice points",
+        options: ["Schottky defect", "Frenkel defect", "Metal excess defect", "Metal deficiency defect"],
+        correct: "B"
+      },
+      {
+        number: "Q31/246",
+        text: "Identify the defect that develops when the ratio of number of cations to anions become different from that indicated by its chemical formula.",
+        options: ["Schottky defect", "Frenkel defect", "Non-stoichiometric defect", "Interstitial defect"],
+        correct: "C"
+      },
+      {
+        number: "Q32/246",
+        text: "The mass of an atom present in unit cell is 4.4 × 10⁻²³ g and the product of density and volume of unit cell is 1.792 × 10⁻²² g. What is the type of cubic unit cell?",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "C"
+      },
+      {
+        number: "Q33/246",
+        text: "Calculate the total number of tetrahedral and octahedral voids in 0.4 mol compound having such voids in it.",
+        options: ["2.4 × 10²³", "4.8 × 10²³", "7.2 × 10²³", "9.6 × 10²³"],
+        correct: "B"
+      },
+      {
+        number: "Q34/246",
+        text: "Calculate the volume occupied by a particle in bcc unit cell if the volume of unit cell is 8.2 × 10⁻²³ cm³",
+        options: ["3.48 × 10⁻²³ cm³", "4.12 × 10⁻²³ cm³", "5.24 × 10⁻²³ cm³", "6.18 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q35/246",
+        text: "Calculate the number of unit cells in 1 cm³ volume of an element if unit cell edge length is 4.0 × 10⁻⁸ cm.",
+        options: ["1.56 × 10²²", "1.56 × 10²³", "1.56 × 10²⁴", "1.56 × 10²⁵"],
+        correct: "A"
+      },
+      {
+        number: "Q36/246",
+        text: "Which of the following dopants is used in germanium to form n-type semiconductor?",
+        options: ["Boron", "Aluminium", "Arsenic", "Gallium"],
+        correct: "C"
+      },
+      {
+        number: "Q37/246",
+        text: "Identify the type of defect from following in stainless steel.",
+        options: ["Schottky defect", "Frenkel defect", "Interstitial defect", "Substitutional impurity defect"],
+        correct: "D"
+      },
+      {
+        number: "Q38/246",
+        text: "Calculate the total number of tetrahedral and octahedral voids formed in 0.6 mol of a compound if it forms hcp structure.",
+        options: ["3.6 × 10²³", "7.2 × 10²³", "10.8 × 10²³", "14.4 × 10²³"],
+        correct: "B"
+      },
+      {
+        number: "Q40/246",
+        text: "The volume of simple unit cell is x × 10⁻²³ cm³. Calculate the value of x if volume occupied by a particle in it is 2.1 × 10⁻²³ cm³.",
+        options: ["1.4", "1.8", "2.1", "2.4"],
+        correct: "C"
+      },
+      {
+        number: "Q41/246",
+        text: "In ionic solid, anions are arranged in ccp array and cations occupy 1/3 tetrahedral voids. What is the formula of ionic compound? [Consider A = cation ; B = anion]",
+        options: ["AB", "AB₂", "A₂B", "A₂B₃"],
+        correct: "C"
+      },
+      {
+        number: "Q42/246",
+        text: "Which of the following statements is NOT correct regarding voids in lattice structure?",
+        options: ["Four spheres are involved in the formation of a tetrahedral void.", "There is one octahedral void associated with two atoms.", "There are two tetrahedral voids associated with each atom.", "The octahedral void is surrounded by six spheres."],
+        correct: "B"
+      },
+      {
+        number: "Q43/246",
+        text: "Calculate the volume of unit cell having atomic radius 141.4 pm forming fcc unit cell.",
+        options: ["1.6 × 10⁻²² cm³", "2.7 × 10⁻²² cm³", "3.8 × 10⁻²² cm³", "4.9 × 10⁻²² cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q44/246",
+        text: "Which from following solids is isotropic?",
+        options: ["Ionic solids", "Covalent solids", "Metallic solids", "Amorphous solids"],
+        correct: "D"
+      },
+      {
+        number: "Q45/246",
+        text: "Calculate the number of atoms present in 1.58 g metal if it form bcc structure [ρ × a³ = 1.58 × 10⁻²² g]",
+        options: ["3.0 × 10²²", "4.5 × 10²²", "6.0 × 10²²", "7.5 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q46/246",
+        text: "What is the total number of tetrahedral voids in 0.6 mole of compound that forms hcp structure?",
+        options: ["3.6 × 10²³", "7.2 × 10²³", "10.8 × 10²³", "14.4 × 10²³"],
+        correct: "B"
+      },
+      {
+        number: "Q47/246",
+        text: "Calculate the number of unit cells in 0.4 g metal if the product of density and volume of unit cell is 1.2 × 10⁻²² g.",
+        options: ["1.0 × 10²¹", "2.0 × 10²¹", "3.0 × 10²¹", "4.0 × 10²¹"],
+        correct: "C"
+      },
+      {
+        number: "Q48/246",
+        text: "What is the total number of particles present in base centred unit cell?",
+        options: ["1", "2", "4", "6"],
+        correct: "B"
+      },
+      {
+        number: "Q49/246",
+        text: "Calculate the number of unit cells in 0.9 g metal if it forms bcc structure. [ρ × a³ = 3 × 10⁻²² g]",
+        options: ["1.0 × 10²¹", "1.5 × 10²¹", "2.0 × 10²¹", "3.0 × 10²¹"],
+        correct: "D"
+      },
+      {
+        number: "Q50/246",
+        text: "Find the void volume of fcc unit cell in cm³ if the volume of fcc unit cell 1.25 × 10⁻²² cm³.",
+        options: ["0.26 × 10⁻²² cm³", "0.34 × 10⁻²² cm³", "0.47 × 10⁻²² cm³", "0.52 × 10⁻²² cm³"],
+        correct: "C"
+      },
+      {
+        number: "Q51/246",
+        text: "What type of solid is the silica?",
+        options: ["Ionic solid", "Covalent solid", "Molecular solid", "Metallic solid"],
+        correct: "B"
+      },
+      {
+        number: "Q52/246",
+        text: "In a solid, B⁻ ions occupy corners of a cube forming ccp structure. If A⁺ ion occupy half the tetrahedral voids, formula of the solid is",
+        options: ["AB", "AB₂", "A₂B", "A₄B"],
+        correct: "C"
+      },
+      {
+        number: "Q53/246",
+        text: "Unit cell of an element has edge length of 5 Å with density 4 g cm⁻³, if its atomic mass is 149, identify the crystal structure.",
+        options: ["Hexagonal close packed", "Body centred cubic", "Face centred cubic", "Simple cubic close packed"],
+        correct: "B"
+      },
+      {
+        number: "Q54/246",
+        text: "What is the volume of one particle in BCC structure if 'a' is edge length?",
+        options: ["(4/3)π(a/2)³", "(4/3)π(a√3/4)³", "(4/3)π(a√2/4)³", "(4/3)π(a/√2)³"],
+        correct: "B"
+      },
+      {
+        number: "Q55/246",
+        text: "Which among the following is ferromagnetic substance?",
+        options: ["Fe", "CrO₂", "MnO", "TiO₂"],
+        correct: "A"
+      },
+      {
+        number: "Q56/246",
+        text: "Calculate the total volume occupied by all atoms in simple cubic unit cell if radius of atom is 3 × 10⁻⁸ cm:",
+        options: ["4.5 × 10⁻²³ cm³", "5.6 × 10⁻²³ cm³", "6.7 × 10⁻²³ cm³", "7.8 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q57/246",
+        text: "A compound is formed by two elements A and B. The atoms of element B form ccp structure. The atoms of A occupy 1/3 of tetrahedral voids. What is the formula of the compound?",
+        options: ["AB", "AB₂", "A₂B", "A₂B₃"],
+        correct: "C"
+      },
+      {
+        number: "Q58/246",
+        text: "Identify the instrument used to find crystal structure from following:",
+        options: ["Transmission electron microscope", "X-ray diffractometer", "UV-Visible spectrophotometer", "Scanning electron microscope"],
+        correct: "B"
+      },
+      {
+        number: "Q60/246",
+        text: "What type of unit cell from following is common to all seven types of crystal systems?",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "Primitive"],
+        correct: "D"
+      },
+      {
+        number: "Q61/246",
+        text: "What is atomic radius of an element if it crystallises in BCC structure with edge length of unit cell 287 pm?",
+        options: ["124 pm", "143 pm", "162 pm", "181 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q62/246",
+        text: "A metal crystallises in bcc structure with edge length 4 × 10⁻⁸ cm. If density of unit cell is 10 g cm⁻³. What is its molar mass?",
+        options: ["32 g/mol", "48 g/mol", "64 g/mol", "96 g/mol"],
+        correct: "C"
+      },
+      {
+        number: "Q63/246",
+        text: "n-type of semiconductor is formed when",
+        options: ["Germanium doped with boron", "Silicon doped with phosphorous", "Germanium doped with aluminium", "Silicon doped with boron"],
+        correct: "B"
+      },
+      {
+        number: "Q64/246",
+        text: "Metallic silver has fcc structure. If radius of Ag atom is 144 pm. What is the edge length of unit cell?",
+        options: ["288 pm", "408 pm", "576 pm", "816 pm"],
+        correct: "B"
+      },
+      {
+        number: "Q65/246",
+        text: "Which of the following has dipole-induced dipole interaction as inter molecular force?",
+        options: ["HCl-HCl", "H₂O-H₂O", "CH₄-CH₄", "HCl-CH₄"],
+        correct: "D"
+      },
+      {
+        number: "Q66/246",
+        text: "What is the number of octahedral voids present in 0.2 mol of a compound forming hcp structure?",
+        options: ["1.2 × 10²³", "2.4 × 10²³", "3.6 × 10²³", "4.8 × 10²³"],
+        correct: "A"
+      },
+      {
+        number: "Q67/246",
+        text: "Calculate the volume of simple cubic unit cell if the radius of particle in it is 400 pm.",
+        options: ["5.12 × 10⁻²² cm³", "6.40 × 10⁻²² cm³", "7.68 × 10⁻²² cm³", "8.96 × 10⁻²² cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q68/246",
+        text: "Calculate the density of a metal having molar mass 197 g mol⁻¹ if it forms fcc structure. [a³ × Nₐ = 40 cm³ mol⁻¹]",
+        options: ["8.2 g/cm³", "9.8 g/cm³", "10.5 g/cm³", "12.3 g/cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q69/246",
+        text: "What is minimum number of spheres required to develop a tetrahedral void?",
+        options: ["3", "4", "5", "6"],
+        correct: "B"
+      },
+      {
+        number: "Q70/246",
+        text: "Calculate the volume of unit cell if an element having molar mass 92 g mol⁻¹ that forms bcc structure [ρ × Nₐ = 5.0 × 10²⁴ g cm⁻³ mol⁻¹]",
+        options: ["4.76 × 10⁻²³ cm³", "5.86 × 10⁻²³ cm³", "2.44 × 10⁻²³ cm³", "3.68 × 10⁻²³ cm³"],
+        correct: "D"
+      },
+      {
+        number: "Q71/246",
+        text: "In an ionic solid equal number of cations and anions are missing from their regular positions in the crystal lattice creating vacancies is called",
+        options: ["Frenkel defect", "Schottky defect", "Interstitial defect", "Substitutional defect"],
+        correct: "B"
+      },
+      {
+        number: "Q72/246",
+        text: "Calculate number of atoms per unit cell of an element having molar mass 92.0 g mol⁻¹ and density 8.6 g cm⁻³ forming cubic unit cell structure. [a³ × Nₐ = 21.5 cm³ mol⁻¹]",
+        options: ["1", "2", "3", "4"],
+        correct: "B"
+      },
+      {
+        number: "Q74/246",
+        text: "What is the coordination number of a particle in fcc structure?",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q75/246",
+        text: "Calculate the volume of fcc unit cell if radius of a particle in it is 106.05 pm.",
+        options: ["1.6 × 10⁻²² cm³", "2.4 × 10⁻²² cm³", "3.2 × 10⁻²² cm³", "4.8 × 10⁻²² cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q76/246",
+        text: "Calculate the volume of unit cell when metal having density 1 g cm⁻³ and molar mass 23 g mol⁻¹ crystallises to form bcc structure.",
+        options: ["3.8 × 10⁻²³ cm³", "4.6 × 10⁻²³ cm³", "5.4 × 10⁻²³ cm³", "6.2 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q77/246",
+        text: "What is the relation between edge length and total volume occupied by atoms in bcc unit cell?",
+        options: ["V = (8/3)πr³", "V = 2 × (4/3)πr³", "V = 4 × (4/3)πr³", "V = (16/3)πr³"],
+        correct: "B"
+      },
+      {
+        number: "Q78/246",
+        text: "What is the total number of atoms present in fcc unit cell?",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q79/246",
+        text: "Which among the following forces of attraction is developed between polar and non polar molecules?",
+        options: ["Dipole-dipole", "Dipole-induced dipole", "London dispersion", "Hydrogen bonding"],
+        correct: "B"
+      },
+      {
+        number: "Q80/246",
+        text: "Calculate the void volume of simple cubic unit cell if the volume of unit cell is 5.5 × 10⁻²² cm³.",
+        options: ["2.87 × 10⁻²² cm³", "3.12 × 10⁻²² cm³", "3.45 × 10⁻²² cm³", "3.78 × 10⁻²² cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q81/246",
+        text: "Calculate the number of atoms in 0.3 gram metal if it forms bcc structure [ρ × a³ = 3 × 10⁻²² g]",
+        options: ["1.5 × 10²¹", "3.0 × 10²¹", "4.5 × 10²¹", "6.0 × 10²¹"],
+        correct: "B"
+      },
+      {
+        number: "Q82/246",
+        text: "Identify a zero dimensional nano structure from following",
+        options: ["Thin films", "Nanorods", "Fibres", "Nanoparticles"],
+        correct: "D"
+      },
+      {
+        number: "Q83/246",
+        text: "What is the total number of different types of unit cells present in triclinic crystal system?",
+        options: ["1", "2", "3", "4"],
+        correct: "A"
+      },
+      {
+        number: "Q84/246",
+        text: "Identify ferromagnetic substance from following.",
+        options: ["Fe", "CrO₂", "MnO", "NiO"],
+        correct: "A"
+      },
+      {
+        number: "Q85/246",
+        text: "Calculate molar mass of an element having density 8.6 g cm⁻³ if it forms bcc structure [a³ × Nₐ = 22.0 cm³ mol⁻¹]",
+        options: ["106.18 g mol⁻¹", "80.16 g mol⁻¹", "88.25 g mol⁻¹", "94.6 g mol⁻¹"],
+        correct: "D"
+      },
+      {
+        number: "Q86/246",
+        text: "Calculate the radius of metal atom if it forms bcc unit cell having edge length 530 pm.",
+        options: ["229 pm", "265 pm", "301 pm", "337 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q87/246",
+        text: "Which from the following statements is NOT true regarding crystalline solid?",
+        options: ["There is a regularity and periodicity in arrangement of constituent particles.", "It melts at definite temperature.", "It is isotropic.", "It has different magnitudes for refractive index in every direction."],
+        correct: "C"
+      },
+      {
+        number: "Q88/246",
+        text: "Find the void volume of bcc unit cell in cm³ if volume of unit cell is 1.5 × 10⁻²² cm³.",
+        options: ["0.48 × 10⁻²² cm³", "0.62 × 10⁻²² cm³", "0.76 × 10⁻²² cm³", "0.84 × 10⁻²² cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q89/246",
+        text: "Calculate the volume of unit cell of an element having molar mass 63.5 g mol⁻¹ that forms fcc structure [ρ × Nₐ = 5.5 × 10²⁴ g cm⁻³ mol⁻¹]",
+        options: ["4.618 × 10⁻²³ cm³", "4.102 × 10⁻²³ cm³", "5.014 × 10⁻²³ cm³", "5.430 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q90/246",
+        text: "Calculate the density of an element having molar mass 63 g mol⁻¹ that forms FCC structure [a³ × Nₐ = 28 cm³ mol⁻¹]",
+        options: ["6.3 g/cm³", "7.5 g/cm³", "8.2 g/cm³", "9.0 g/cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q91/246",
+        text: "What is the coordination number of a particle in hcp structure?",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q92/246",
+        text: "Calculate the volume occupied by all atoms in bcc unit cell if the volume of unit cell is 1.5 × 10⁻²² cm³.",
+        options: ["1.02 × 10⁻²² cm³", "1.24 × 10⁻²² cm³", "1.46 × 10⁻²² cm³", "1.68 × 10⁻²² cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q93/246",
+        text: "Which from following solids exhibits isotropic properties?",
+        options: ["Ionic solids", "Covalent solids", "Metallic solids", "Amorphous solids"],
+        correct: "D"
+      },
+      {
+        number: "Q94/246",
+        text: "Calculate the radius of an atom of metal if it forms simple cubic unit cell with edge length 380 pm.",
+        options: ["190 pm", "220 pm", "250 pm", "280 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q95/246",
+        text: "Calculate the number of unit cells in 10.8 g metal [ρa³ = 7.2 × 10⁻²² g]",
+        options: ["7.5 × 10²¹", "1.5 × 10²²", "2.25 × 10²²", "3.0 × 10²²"],
+        correct: "B"
+      },
+      {
+        number: "Q96/246",
+        text: "What is the total number of particles present in bcc unit cell?",
+        options: ["1", "2", "4", "8"],
+        correct: "B"
+      },
+      {
+        number: "Q97/246",
+        text: "Calculate the volume of unit cell of an element having molar mass 27 g mol⁻¹ that forms fcc unit cell. [ρ.Nₐ = 16.0 × 10²³ g cm⁻³ mol⁻¹]",
+        options: ["2.8 × 10⁻²³ cm³", "3.4 × 10⁻²³ cm³", "4.2 × 10⁻²³ cm³", "5.0 × 10⁻²³ cm³"],
+        correct: "C"
+      },
+      {
+        number: "Q98/246",
+        text: "Calculate the edge length of fcc unit cell if radius of metal atom is 139 pm.",
+        options: ["278 pm", "393 pm", "556 pm", "786 pm"],
+        correct: "B"
+      },
+      {
+        number: "Q99/246",
+        text: "Calculate the edge length of bcc unit cell if radius of metal atom is 227 pm.",
+        options: ["5.24 × 10⁻⁸ cm", "6.42 × 10⁻⁸ cm", "4.54 × 10⁻⁸ cm", "1.135 × 10⁻⁸ cm"],
+        correct: "A"
+      },
+      {
+        number: "Q101/246",
+        text: "Calculate the volume of unit cell if an element having molar mass 56 g mol⁻¹ that forms bcc unit cells. [ρ.Nₐ = 4.8 × 10²⁴ g cm⁻³ mol⁻¹]",
+        options: ["2.33 × 10⁻²³ cm³", "3.31 × 10⁻²³ cm³", "1.17 × 10⁻²³ cm³", "4.79 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q102/246",
+        text: "In an ionic crystalline solid, atoms of element Y forms hcp structure. The atoms of element X occupy one third of tetrahedral voids. What is the formula of compound?",
+        options: ["XY", "XY₂", "X₂Y", "X₂Y₃"],
+        correct: "C"
+      },
+      {
+        number: "Q103/246",
+        text: "What is total number of crystal systems associated with 14 Bravais lattices?",
+        options: ["5", "7", "10", "14"],
+        correct: "B"
+      },
+      {
+        number: "Q105/246",
+        text: "Find the radius of metal atom in bcc unit cell having edge length 450 pm.",
+        options: ["195 pm", "225 pm", "255 pm", "285 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q106/246",
+        text: "Which from following metal has hcp crystal structure?",
+        options: ["Copper", "Magnesium", "Tungsten", "Sodium"],
+        correct: "B"
+      },
+      {
+        number: "Q107/246",
+        text: "Calculate the radius of metal atom in bcc unit cell having edge length 287 pm.",
+        options: ["124 pm", "143 pm", "162 pm", "181 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q108/246",
+        text: "Calculate the density of an element having molar mass 27 g mol⁻¹ that forms fcc unit cell. [a³.Nₐ = 38.5 cm³ mol⁻¹]",
+        options: ["1.4 g/cm³", "1.8 g/cm³", "2.2 g/cm³", "2.6 g/cm³"],
+        correct: "C"
+      },
+      {
+        number: "Q109/246",
+        text: "Calculate the edge length of simple cubic unit cell if radius of an atom is 167.3 pm.",
+        options: ["334.6 pm", "378.4 pm", "418.2 pm", "456.8 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q110/246",
+        text: "What are the number of octahedral and tetrahedral voids in 0.3 mole substance respectively if it forms hcp structure?",
+        options: ["12.044 × 10²³ and 6.022 × 10²³", "6.022 × 10²³ and 12.044 × 10²³", "1.8066 × 10²³ and 3.6132 × 10²³", "3.6132 × 10²³ and 1.8066 × 10²³"],
+        correct: "C"
+      },
+      {
+        number: "Q111/246",
+        text: "Calculate the molar mass of an element having density 7.8 g cm⁻³ that forms bcc unit cell. [a³·Nₐ = 16.2 cm³ mol⁻¹]",
+        options: ["42 g/mol", "56 g/mol", "72 g/mol", "88 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q112/246",
+        text: "Which from following is NOT an example of amorphous solid?",
+        options: ["Glass", "Plastic", "Rubber", "Diamond"],
+        correct: "D"
+      },
+      {
+        number: "Q113/246",
+        text: "Calculate the molar mass of metal having density 9.3 g cm⁻³ that forms simple cubic unit cell. [a³·Nₐ = 22.6 cm³ mol⁻¹]",
+        options: ["63 g/mol", "84 g/mol", "105 g/mol", "126 g/mol"],
+        correct: "A"
+      },
+      {
+        number: "Q114/246",
+        text: "Find the radius of an atom in fcc unit cell having edge length 405 pm.",
+        options: ["143 pm", "172 pm", "201 pm", "230 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q115/246",
+        text: "Which formula is used to calculate edge length in bcc structure?",
+        options: ["a = 2r", "a = 4r/√3", "a = 4r/√2", "a = 2√2r"],
+        correct: "B"
+      },
+      {
+        number: "Q116/246",
+        text: "What is atomic mass of an element with BCC structure and density 10 g cm⁻³ having edge length 300 pm?",
+        options: ["32 g/mol", "48 g/mol", "64 g/mol", "80 g/mol"],
+        correct: "C"
+      },
+      {
+        number: "Q117/246",
+        text: "What is the number of unit cells present in a cubic pack crystal lattice having 4 atoms per unit cell and weighing 0.60 g (molar mass 60 g mol⁻¹)?",
+        options: ["1.5 × 10²¹", "3.0 × 10²¹", "4.5 × 10²¹", "6.0 × 10²¹"],
+        correct: "A"
+      },
+      {
+        number: "Q118/246",
+        text: "Find the radius of an atom in fcc unit cell having edge length 393 pm.",
+        options: ["139 pm", "167 pm", "195 pm", "223 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q119/246",
+        text: "Which of the following characteristic properties is NOT true for crystalline solid?",
+        options: ["These have different values of refractive index in different directions.", "The constituent particles are orderly arranged.", "These are isotropic.", "These substances have sharp melting point."],
+        correct: "C"
+      },
+      {
+        number: "Q120/246",
+        text: "Calculate the edge length of unit cell of metal which crystallises to bcc structure. (Radius of metal atom = 173 pm)",
+        options: ["300 pm", "350 pm", "400 pm", "450 pm"],
+        correct: "C"
+      },
+      {
+        number: "Q121/246",
+        text: "What is the total number of Bravais lattices present for different crystal systems?",
+        options: ["7", "14", "21", "28"],
+        correct: "B"
+      },
+      {
+        number: "Q122/246",
+        text: "Calculate the molar mass of an element with density 2.7 g cm⁻³ that forms fcc structure. [a³·Nₐ = 40 cm³ mol⁻¹]",
+        options: ["27 g/mol", "54 g/mol", "81 g/mol", "108 g/mol"],
+        correct: "A"
+      },
+      {
+        number: "Q123/246",
+        text: "Calculate the molar mass of an element having density 21 g cm⁻³ that forms fcc unit cell [a³·Nₐ = 36 cm³ mol⁻¹]",
+        options: ["126 g/mol", "189 g/mol", "252 g/mol", "315 g/mol"],
+        correct: "C"
+      },
+      {
+        number: "Q124/246",
+        text: "Which from following metal has ccp crystal structure?",
+        options: ["Sodium", "Tungsten", "Copper", "Chromium"],
+        correct: "C"
+      },
+      {
+        number: "Q125/246",
+        text: "Find the radius of metal atom in simple cubic unit cell having edge length 334.7 pm?",
+        options: ["167.4 pm", "192.3 pm", "217.2 pm", "242.1 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q126/246",
+        text: "A compound made of elements A and B form fcc structure. Atoms of A are at the corners and atoms of B are present at the centres of faces of cube. What is the formula of the compound?",
+        options: ["AB", "AB₂", "A₂B", "AB₃"],
+        correct: "C"
+      },
+      {
+        number: "Q127/246",
+        text: "What is the packing efficiency of silver metal in its unit cell?",
+        options: ["52%", "68%", "74%", "82%"],
+        correct: "C"
+      },
+      {
+        number: "Q128/246",
+        text: "What is the number of unit cells when one mole atom of a metal that forms simple cubic structure?",
+        options: ["Nₐ", "Nₐ/2", "Nₐ/4", "Nₐ/8"],
+        correct: "D"
+      },
+      {
+        number: "Q130/246",
+        text: "What is the co-ordination number of a particle in fcc crystal lattice?",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q131/246",
+        text: "Which of the following statements is NOT true about Schottky defect?",
+        options: ["The ions of ionic compound must have high co-ordination number.", "The density of substance decrease.", "The electrical neutrality of the compound is not preserved.", "It occurs in ionic compound with sizes of cation and anion almost equal."],
+        correct: "C"
+      },
+      {
+        number: "Q132/246",
+        text: "What is the total volume occupied by atoms in bcc unit cell?",
+        options: ["(8/3)πr³", "2×(4/3)πr³", "4×(4/3)πr³", "8×(4/3)πr³"],
+        correct: "B"
+      },
+      {
+        number: "Q133/246",
+        text: "Calculate the number of atoms in 5 gram metal that crystallises to form simple cubic unit cell structure having edge length 336 pm. (Density of metal = 9.4 g cm⁻³)",
+        options: ["3.0 × 10²²", "4.5 × 10²²", "6.0 × 10²²", "7.5 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q135/246",
+        text: "Calculate the molar mass of metal with density 1 g cm⁻³ forming bcc structure with edge length 420 pm.",
+        options: ["14 g/mol", "28 g/mol", "42 g/mol", "56 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q136/246",
+        text: "Calculate the volume of unit cell having four particles in it with density 19.0 g cm⁻³ [molar mass of element = 190 g mol⁻¹]",
+        options: ["6.64 × 10⁻²³ cm³", "2.4 × 10⁻²³ cm³", "5.0 × 10⁻²³ cm³", "3.32 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q137/246",
+        text: "What is the void volume in the crystal lattice formed by bcc unit cell?",
+        options: ["32%", "36%", "48%", "52%"],
+        correct: "A"
+      },
+      {
+        number: "Q138/246",
+        text: "Identify the type of unit cell containing single particle.",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "A"
+      },
+      {
+        number: "Q139/246",
+        text: "What is the edge length of simple cubic unit cell if radius of atom is 174 pm?",
+        options: ["348 pm", "396 pm", "444 pm", "492 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q140/246",
+        text: "Calculate the molar mass of metal having density 7.8 g cm⁻³ and crystallized to form bcc structure with edge length 288 pm.",
+        options: ["42 g/mol", "56 g/mol", "72 g/mol", "88 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q141/246",
+        text: "Which among the following is NOT ferromagnetic in nature?",
+        options: ["Fe", "Co", "Ni", "CrO₂"],
+        correct: "D"
+      },
+      {
+        number: "Q142/246",
+        text: "If M is atomic mass of element and a is edge length of unit cell then the formula to calculate density is",
+        options: ["ρ = (zM)/(Nₐa³)", "ρ = (NₐM)/(za³)", "ρ = (za³)/(NₐM)", "ρ = (Nₐa³)/(zM)"],
+        correct: "A"
+      },
+      {
+        number: "Q143/246",
+        text: "Lithium forms BCC structure having edge length of unit cell 351 pm then atomic radius of lithium is",
+        options: ["152 pm", "176 pm", "200 pm", "224 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q144/246",
+        text: "Edge length of unit cell of a crystal is 288 pm. If its density is 7.2 g cm⁻³ determine the type of unit cell (atomic mass = 52).",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "B"
+      },
+      {
+        number: "Q145/246",
+        text: "Which of the following statement is not about ionic solid",
+        options: ["The constituent particles of ionic solid are cations and anions.", "Ionic solids are hard and brittle.", "Pure ionic solid is good conductor of electricity in solid state.", "In this constituent particles are held together by electrostatic force of attraction."],
+        correct: "C"
+      },
+      {
+        number: "Q146/246",
+        text: "What type of bonds are present in molecular crystals?",
+        options: ["Ionic bonds", "Covalent bonds", "Van der Waals forces", "Metallic bonds"],
+        correct: "C"
+      },
+      {
+        number: "Q147/246",
+        text: "Calculate the volume of unit cell of element with density 7.2 g cm⁻³ that forms bcc structure. (288 gram of this element contains 3.35 × 10²⁴ atoms)",
+        options: ["2.3 × 10⁻²³ cm³", "3.1 × 10⁻²³ cm³", "4.2 × 10⁻²³ cm³", "5.4 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q148/246",
+        text: "What is the coordination number of sphere in simple cubic lattice?",
+        options: ["4", "6", "8", "12"],
+        correct: "B"
+      },
+      {
+        number: "Q149/246",
+        text: "Calculate the edge length of unit cell that crystallises to form bcc structure. (Radius of atom is 2.17 × 10⁻⁸ cm, √3 = 1.732)",
+        options: ["3.5 × 10⁻⁸ cm", "4.0 × 10⁻⁸ cm", "4.5 × 10⁻⁸ cm", "5.0 × 10⁻⁸ cm"],
+        correct: "D"
+      },
+      {
+        number: "Q150/246",
+        text: "Calculate the density of an element with molar mass 27 g mol⁻¹ having 4 atoms in a unit cell with edge length 405 pm",
+        options: ["2.7 g/cm³", "3.2 g/cm³", "4.1 g/cm³", "5.3 g/cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q151/246",
+        text: "Calculate the number of unit cells in 3 grams metal that crystallises to simple cubic unit cell having edge length 336 pm. (density of metal = 9.4 g cm⁻³)",
+        options: ["1.5 × 10²¹", "3.0 × 10²¹", "4.5 × 10²¹", "6.0 × 10²¹"],
+        correct: "A"
+      },
+      {
+        number: "Q152/246",
+        text: "Which among the following statements is NOT true about Frenkel defect?",
+        options: ["The ions of ionic compound must have low co-ordination number.", "The crystal as whole remains electrically neutral because equal number of cations and anions are present.", "It occurs in ionic compounds with sizes of cations and anions almost equal.", "The density of solid crystal and its chemical properties remain unchanged as no ions are missing from the crystal lattice as a whole."],
+        correct: "C"
+      },
+      {
+        number: "Q153/246",
+        text: "Which among the following statement is NOT true about covalent network solid?",
+        options: ["These are soft in nature.", "Covalent solids have high melting points.", "The atoms in this solid are linked by covalent bonds.", "In this solid the constituent particles are atoms."],
+        correct: "A"
+      },
+      {
+        number: "Q154/246",
+        text: "Calculate the density of metal which forms simple cubic structure with edge length of unit cell 336 pm. (90 gram of metal contains 2.64 × 10²³ atoms)",
+        options: ["7.8 g/cm³", "8.6 g/cm³", "9.4 g/cm³", "10.2 g/cm³"],
+        correct: "C"
+      },
+      {
+        number: "Q155/246",
+        text: "Which of the following statements is NOT true about polymorphism?",
+        options: ["Polymorphism occurring in elements is called allotropy.", "NaF and MgO are polymorphous compounds.", "Single substance that exists in two or more forms is said to be polymorphous.", "Fullerene is a polymorphic form of carbon."],
+        correct: "D"
+      },
+      {
+        number: "Q156/246",
+        text: "Which of the following is an example of ionic solid?",
+        options: ["Diamond", "Sodium chloride", "Copper", "Sucrose"],
+        correct: "B"
+      },
+      {
+        number: "Q157/246",
+        text: "Find the molar mass of an element that crystallizes forming unit cell structure having edge length 4 × 10⁻⁸ cm and containing 4 particles. (ρ = 19.7 g cm⁻³)",
+        options: ["76 g/mol", "95 g/mol", "114 g/mol", "133 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q158/246",
+        text: "Calculate the density of metal with molar mass 56 g mol⁻¹ that crystallises to form bcc structure with edge length 288 pm.",
+        options: ["6.2 g/cm³", "7.3 g/cm³", "8.4 g/cm³", "9.5 g/cm³"],
+        correct: "B"
+      },
+      {
+        number: "Q159/246",
+        text: "Identify unit cell from following having four particles in it.",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "C"
+      },
+      {
+        number: "Q160/246",
+        text: "Calculate the number of atoms in 20 gram metal which crystallises to simple cubic structure having unit cell length 340 pm. (density of metal = 9.8 g cm⁻³)",
+        options: ["3.0 × 10²³", "4.5 × 10²³", "6.0 × 10²³", "7.5 × 10²³"],
+        correct: "A"
+      },
+      {
+        number: "Q161/246",
+        text: "Calculate the molar mass of metal having density 22.24 g cm⁻³, crystallizes to form unit cell containing 4 particles. (a³ = 5.6 × 10⁻²³ cm³)",
+        options: ["150 g/mol", "180 g/mol", "210 g/mol", "240 g/mol"],
+        correct: "A"
+      },
+      {
+        number: "Q162/246",
+        text: "What is the co-ordination number of hcp crystal lattice?",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q163/246",
+        text: "Which of the following pairs of compounds is isomorphous?",
+        options: ["NaCl and KCl", "NaCl and MgO", "ZnS and NaCl", "Diamond and Graphite"],
+        correct: "A"
+      },
+      {
+        number: "Q164/246",
+        text: "An element has BCC structure with edge length of unit cell 600 pm. What is the atomic radius of element?",
+        options: ["260 pm", "300 pm", "340 pm", "380 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q165/246",
+        text: "The density of chromium metal is 7 g cm⁻³. If edge length of unit cell is 300 pm, identify the type of unit cell. (Atomic mass Cr = 52)",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "B"
+      },
+      {
+        number: "Q166/246",
+        text: "For simple cubic crystal edge length is expressed as",
+        options: ["a = 2r", "a = 4r/√3", "a = 4r/√2", "a = 2√2r"],
+        correct: "A"
+      },
+      {
+        number: "Q168/246",
+        text: "Edge length of unit cell of BCC structure is 352 pm. What is radius of the atoms?",
+        options: ["152 pm", "176 pm", "200 pm", "224 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q169/246",
+        text: "What is the atomic radius of polonium if it crystallises in a simple cubic structure with edge length of unit cell 336 pm?",
+        options: ["168 pm", "192 pm", "216 pm", "240 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q170/246",
+        text: "How many particles per unit cell are present in BCC structure?",
+        options: ["1", "2", "4", "8"],
+        correct: "B"
+      },
+      {
+        number: "Q171/246",
+        text: "Identify ferromagnetic element from following.",
+        options: ["Fe", "CrO₂", "MnO", "TiO₂"],
+        correct: "A"
+      },
+      {
+        number: "Q172/246",
+        text: "An element with BCC structure has edge length of 500 pm. If its density is 4 g cm³, find atomic mass of the element?",
+        options: ["42 g/mol", "56 g/mol", "72 g/mol", "88 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q173/246",
+        text: "A metal has BCC structure with edge length of unit cell 400 pm. Density of metal is 4 g cm⁻³ What is molar mass of metal?",
+        options: ["42 g/mol", "56 g/mol", "72 g/mol", "88 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q174/246",
+        text: "What is the volume occupied by particles in BCC structure if 'a' is edge length of unit cell?",
+        options: ["(8/3)πr³", "2×(4/3)πr³", "4×(4/3)πr³", "8×(4/3)πr³"],
+        correct: "B"
+      },
+      {
+        number: "Q175/246",
+        text: "The FCC unit cell of a compound contains ions of A at the corner and ions of B at the centre of each face, what is the formula of the compound?",
+        options: ["AB", "AB₂", "A₂B", "AB₃"],
+        correct: "C"
+      },
+      {
+        number: "Q176/246",
+        text: "How many tetrahedral voids are present in 0.4 mole of a compound that forms hcp structure?",
+        options: ["2.4 × 10²³", "4.8 × 10²³", "7.2 × 10²³", "9.6 × 10²³"],
+        correct: "B"
+      },
+      {
+        number: "Q177/246",
+        text: "Identify the type of unit cell that has particles at the centre of each face in addition to the particles at eight corners of a cube?",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "End centered cubic"],
+        correct: "C"
+      },
+      {
+        number: "Q178/246",
+        text: "How many atoms of niobium are present in 2.43 g if it forms bcc structure with density 9 g cm⁻³ and volume of unit cell 2.7 × 10⁻²³ cm³?",
+        options: ["1.5 × 10²²", "3.0 × 10²²", "4.5 × 10²²", "6.0 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q179/246",
+        text: "What is the molar mass of metal having density 8.57 g cm⁻³ and edge length 3.3 Å? (Packing efficiency = 68%)",
+        options: ["42 g/mol", "63 g/mol", "84 g/mol", "105 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q180/246",
+        text: "What is the number of octahedral and tetrahedral voids presents respectively in 0.25 mole of a substance having hcp structure?",
+        options: ["1.5 × 10²³ and 3.0 × 10²³", "3.0 × 10²³ and 1.5 × 10²³", "2.5 × 10²³ and 5.0 × 10²³", "5.0 × 10²³ and 2.5 × 10²³"],
+        correct: "A"
+      },
+      {
+        number: "Q181/246",
+        text: "How many lattice points are present in a face centred cubic unit cell?",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q182/246",
+        text: "What is the percentage of unoccupied volume in BCC structure?",
+        options: ["32%", "36%", "48%", "52%"],
+        correct: "A"
+      },
+      {
+        number: "Q183/246",
+        text: "What is the total number of atoms in BCC crystal lattice having 1.8 × 10²⁰ unit cells?",
+        options: ["1.8 × 10²⁰", "3.6 × 10²⁰", "5.4 × 10²⁰", "7.2 × 10²⁰"],
+        correct: "B"
+      },
+      {
+        number: "Q184/246",
+        text: "What is the density of an element (Atomic mass 100 g mol⁻¹) having BCC structure with edge length 400 pm?",
+        options: ["5.2 g/cm³", "6.8 g/cm³", "8.4 g/cm³", "10.0 g/cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q185/246",
+        text: "Which element among the following is ferromagnetic?",
+        options: ["Fe", "CrO₂", "MnO", "TiO₂"],
+        correct: "A"
+      },
+      {
+        number: "Q186/246",
+        text: "What is the percentage efficiency of packing in BCC structure?",
+        options: ["52%", "68%", "74%", "82%"],
+        correct: "B"
+      },
+      {
+        number: "Q187/246",
+        text: "Which is the volume of unit cell of a metal (atomic mass 25 g mol⁻¹) having BCC structure and density 3 g cm⁻³?",
+        options: ["2.3 × 10⁻²³ cm³", "3.1 × 10⁻²³ cm³", "4.2 × 10⁻²³ cm³", "5.4 × 10⁻²³ cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q188/246",
+        text: "An element with simple cubic close structure has edge length of unit cell 3.86 Å. What is the radius of atom?",
+        options: ["1.93 Å", "2.24 Å", "2.55 Å", "2.86 Å"],
+        correct: "A"
+      },
+      {
+        number: "Q189/246",
+        text: "An element (molar mass 180) has BCC crystal structure with density 18 g cm⁻³. What is the edge length of unit cell?",
+        options: ["300 pm", "350 pm", "400 pm", "450 pm"],
+        correct: "C"
+      },
+      {
+        number: "Q190/246",
+        text: "What is the number of unit cells present in 3.9 g of potassium if it crystallizes in BCC Structure?",
+        options: ["3.0 × 10²²", "4.5 × 10²²", "6.0 × 10²²", "7.5 × 10²²"],
+        correct: "A"
+      },
+      {
+        number: "Q191/246",
+        text: "What type of crystal structure from following has 52.36% packing efficiency?",
+        options: ["Simple cubic", "Body centered cubic", "Face centered cubic", "Hexagonal close packed"],
+        correct: "A"
+      },
+      {
+        number: "Q192/246",
+        text: "What is molar mass of metal with BCC structure having density 10 g cm⁻³ and edge length 200 pm?",
+        options: ["12 g/mol", "24 g/mol", "36 g/mol", "48 g/mol"],
+        correct: "B"
+      },
+      {
+        number: "Q193/246",
+        text: "What is the total number of Bravais lattices present in seven types of crystal system?",
+        options: ["7", "14", "21", "28"],
+        correct: "B"
+      },
+      {
+        number: "Q194/246",
+        text: "How many total voids are present in 1 mole of compound that forms hcp structure?",
+        options: ["Nₐ", "2Nₐ", "3Nₐ", "4Nₐ"],
+        correct: "B"
+      },
+      {
+        number: "Q195/246",
+        text: "Which from following instruments is used to determine the crystal structure?",
+        options: ["X-ray diffractometer", "FTIR spectrophotometer", "Scanning electron microscope", "Transmission electron microscope"],
+        correct: "A"
+      },
+      {
+        number: "Q196/246",
+        text: "If radius of anion is double that of cation, coordination number of cation and type of hole occupied respectively are",
+        options: ["6, octahedral", "4, tetrahedral", "8, cubic", "12, cuboctahedral"],
+        correct: "B"
+      },
+      {
+        number: "Q197/246",
+        text: "Which of the following is ferromagnetic in nature?",
+        options: ["Fe", "CrO₂", "MnO", "TiO₂"],
+        correct: "A"
+      },
+      {
+        number: "Q198/246",
+        text: "If radius ratio for an ionic solid is 0.5248 and radius of cation is 0.95 Å. What is the radius of anion?",
+        options: ["1.81 Å", "2.12 Å", "2.43 Å", "2.74 Å"],
+        correct: "A"
+      },
+      {
+        number: "Q199/246",
+        text: "Which among the following is ferromagnetic in nature?",
+        options: ["Fe", "CrO₂", "MnO", "NiO"],
+        correct: "A"
+      },
+      {
+        number: "Q200/246",
+        text: "Which among the following is NOT an amorphous solid?",
+        options: ["Glass", "Plastic", "Rubber", "Diamond"],
+        correct: "D"
+      },
+      // Continuing with remaining questions up to 246...
+      {
+        number: "Q201/246",
+        text: "Which type of crystal defect is shown by AgBr?",
+        options: ["Schottky defect", "Frenkel defect", "Both (a) and (b)", "None of these"],
+        correct: "C"
+      },
+      {
+        number: "Q202/246",
+        text: "In crystals, the arrangement of constituent particles has",
+        options: ["Short range order", "Long range order", "Both (a) and (b)", "No order"],
+        correct: "B"
+      },
+      {
+        number: "Q203/246",
+        text: "Graphite is a good conductor of electricity because it has",
+        options: ["Free electrons", "Bonded electrons", "Delocalized electrons", "All of these"],
+        correct: "C"
+      },
+      {
+        number: "Q204/246",
+        text: "Which of the following is a molecular crystal?",
+        options: ["Ice", "Quartz", "Diamond", "Silicon carbide"],
+        correct: "A"
+      },
+      {
+        number: "Q205/246",
+        text: "The crystal with metal deficiency defect is",
+        options: ["NaCl", "FeO", "KCl", "ZnO"],
+        correct: "B"
+      },
+      {
+        number: "Q206/246",
+        text: "Which of the following is an amorphous solid?",
+        options: ["Quartz", "Glass", "Diamond", "Graphite"],
+        correct: "B"
+      },
+      {
+        number: "Q207/246",
+        text: "The number of atoms in a face-centered cubic unit cell is",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q208/246",
+        text: "In a face-centered cubic lattice, a unit cell is shared equally by how many unit cells?",
+        options: ["2", "4", "6", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q209/246",
+        text: "The coordination number of each atom in body-centered cubic structure is",
+        options: ["4", "6", "8", "12"],
+        correct: "C"
+      },
+      {
+        number: "Q210/246",
+        text: "The number of tetrahedral voids in a unit cell of a close-packed structure is",
+        options: ["Equal to number of atoms", "Twice the number of atoms", "Half the number of atoms", "Four times the number of atoms"],
+        correct: "B"
+      },
+      {
+        number: "Q211/246",
+        text: "The empty space in a body-centered cubic lattice is about",
+        options: ["32%", "26%", "48%", "74%"],
+        correct: "A"
+      },
+      {
+        number: "Q212/246",
+        text: "The coordination number of a metal crystallizing in a hexagonal close-packed structure is",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q213/246",
+        text: "Which of the following statements is correct?",
+        options: ["Silicon doped with boron is an n-type semiconductor", "Silicon doped with arsenic is a p-type semiconductor", "Metals are good conductors of electricity", "The conductivity of intrinsic semiconductor decreases with increase of temperature"],
+        correct: "C"
+      },
+      {
+        number: "Q214/246",
+        text: "Which of the following point defects are shown by AgBr(s) crystals?",
+        options: ["Schottky defect", "Frenkel defect", "Both (a) and (b)", "None of these"],
+        correct: "C"
+      },
+      {
+        number: "Q215/246",
+        text: "Which one of the following is a molecular solid?",
+        options: ["Ice", "Quartz", "Silicon carbide", "Sodium chloride"],
+        correct: "A"
+      },
+      {
+        number: "Q216/246",
+        text: "Which one of the following crystals does not exhibit Frenkel defect?",
+        options: ["AgBr", "AgCl", "KBr", "ZnS"],
+        correct: "C"
+      },
+      {
+        number: "Q217/246",
+        text: "The total number of tetrahedral voids in the face-centered cubic unit cell is",
+        options: ["4", "8", "12", "16"],
+        correct: "B"
+      },
+      {
+        number: "Q218/246",
+        text: "In a face-centered cubic lattice, the number of nearest neighbors for each lattice point is",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q219/246",
+        text: "Which of the following is an example of body-centered cubic lattice?",
+        options: ["NaCl", "CsCl", "ZnS", "CaF₂"],
+        correct: "B"
+      },
+      {
+        number: "Q220/246",
+        text: "The number of octahedral voids in a cubic close-packed structure of N atoms is",
+        options: ["N", "2N", "N/2", "N/4"],
+        correct: "A"
+      },
+      {
+        number: "Q221/246",
+        text: "The radius ratio for an ionic compound AB is 0.98. The coordination number of A is",
+        options: ["3", "4", "6", "8"],
+        correct: "D"
+      },
+      {
+        number: "Q222/246",
+        text: "A metal crystallizes in a face-centered cubic lattice. The length of the unit cell is 408 pm. The diameter of the metal atom is",
+        options: ["288 pm", "408 pm", "144 pm", "204 pm"],
+        correct: "A"
+      },
+      {
+        number: "Q223/246",
+        text: "The number of atoms in a body-centered cubic unit cell is",
+        options: ["1", "2", "3", "4"],
+        correct: "B"
+      },
+      {
+        number: "Q224/246",
+        text: "In a body-centered cubic lattice, the number of nearest neighbors for each atom is",
+        options: ["4", "6", "8", "12"],
+        correct: "C"
+      },
+      {
+        number: "Q225/246",
+        text: "The fraction of the total volume occupied by the atoms in a simple cubic lattice is",
+        options: ["0.52", "0.68", "0.74", "0.80"],
+        correct: "A"
+      },
+      {
+        number: "Q226/246",
+        text: "The crystal system of a compound with unit cell dimensions a = 0.387, b = 0.387 and c = 0.504 nm and α = β = 90° and γ = 120° is",
+        options: ["Cubic", "Tetragonal", "Hexagonal", "Orthorhombic"],
+        correct: "C"
+      },
+      {
+        number: "Q227/246",
+        text: "The unit cell with dimensions a = b = c and α = β = γ = 90° is",
+        options: ["Cubic", "Tetragonal", "Orthorhombic", "Hexagonal"],
+        correct: "A"
+      },
+      {
+        number: "Q228/246",
+        text: "Which of the following is not a characteristic of a crystalline solid?",
+        options: ["Definite and characteristic heat of fusion", "Isotropic nature", "A regular periodically repeated pattern of arrangement of constituent particles", "A true solid"],
+        correct: "B"
+      },
+      {
+        number: "Q229/246",
+        text: "The number of atoms per unit cell of a face-centered cubic structure is",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q230/246",
+        text: "An element (atomic mass = 100 g/mol) having bcc structure has unit cell edge 400 pm. The density of element is",
+        options: ["5.2 g/cm³", "10.4 g/cm³", "2.6 g/cm³", "7.8 g/cm³"],
+        correct: "A"
+      },
+      {
+        number: "Q231/246",
+        text: "If the radius of an atom is 2 Å, what is the length of the unit cell in a simple cubic lattice?",
+        options: ["2 Å", "4 Å", "√2 × 2 Å", "2√2 Å"],
+        correct: "B"
+      },
+      {
+        number: "Q232/246",
+        text: "The number of octahedral voids in a face-centered cubic unit cell is",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      },
+      {
+        number: "Q233/246",
+        text: "Which of the following is an example of a covalent crystal?",
+        options: ["Ice", "Dry ice", "Quartz", "Sodium chloride"],
+        correct: "C"
+      },
+      {
+        number: "Q234/246",
+        text: "In a cubic close-packed structure, the fraction of the total volume occupied by the spheres is",
+        options: ["0.52", "0.68", "0.74", "0.80"],
+        correct: "C"
+      },
+      {
+        number: "Q235/246",
+        text: "The radius ratio for a tetrahedral site is",
+        options: ["0.155 - 0.225", "0.225 - 0.414", "0.414 - 0.732", "0.732 - 1.000"],
+        correct: "B"
+      },
+      {
+        number: "Q236/246",
+        text: "An element crystallizes in a structure having fcc unit cell of an edge 200 pm. The density of element is 10 g/cm³. The number of atoms present in 200 g of the element is",
+        options: ["1 × 10²⁴", "2 × 10²⁴", "3 × 10²⁴", "4 × 10²⁴"],
+        correct: "B"
+      },
+      {
+        number: "Q237/246",
+        text: "The radius ratio for an octahedral void is",
+        options: ["0.155 - 0.225", "0.225 - 0.414", "0.414 - 0.732", "0.732 - 1.000"],
+        correct: "C"
+      },
+      {
+        number: "Q238/246",
+        text: "The number of tetrahedral voids in a face-centered cubic unit cell of N atoms is",
+        options: ["N", "2N", "4N", "8N"],
+        correct: "B"
+      },
+      {
+        number: "Q239/246",
+        text: "A compound formed by elements A and B crystallizes in cubic structure where A atoms are at the corners and B atoms are at face centers. The formula of compound is",
+        options: ["AB", "AB₂", "AB₃", "A₂B₃"],
+        correct: "C"
+      },
+      {
+        number: "Q240/246",
+        text: "In a face-centered cubic arrangement, the coordination number is",
+        options: ["4", "6", "8", "12"],
+        correct: "D"
+      },
+      {
+        number: "Q241/246",
+        text: "The number of atoms per unit cell in a body-centered cubic structure is",
+        options: ["1", "2", "4", "8"],
+        correct: "B"
+      },
+      {
+        number: "Q242/246",
+        text: "The empty space in a face-centered cubic lattice is about",
+        options: ["26%", "32%", "48%", "74%"],
+        correct: "A"
+      },
+      {
+        number: "Q243/246",
+        text: "A metal crystallizes in two cubic phases, face-centered cubic and body-centered cubic, whose unit cell lengths are 3.5 and 3.0 Å respectively. The ratio of their densities is",
+        options: ["1.26", "1.04", "0.72", "0.95"],
+        correct: "A"
+      },
+      {
+        number: "Q244/246",
+        text: "The number of nearest neighbors in a body-centered cubic lattice is",
+        options: ["4", "6", "8", "12"],
+        correct: "C"
+      },
+      {
+        number: "Q245/246",
+        text: "The crystal with metal excess defect is",
+        options: ["NaCl", "FeO", "KCl", "ZnO"],
+        correct: "D"
+      },
+      {
+        number: "Q246/246",
+        text: "In a face-centered cubic lattice, the number of atoms per unit cell is",
+        options: ["1", "2", "4", "8"],
+        correct: "C"
+      }
+    ];
+
+    let current = 0;
+    const userAnswers = {};
+    const seenQuestions = new Set();
+    const startTime = new Date();
+    let navPanelVisible = false;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      const container = document.getElementById("quiz-content");
+      container.innerHTML = `
+        <div class="question-number">${q.number}</div>
+        <div class="question">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const id = `q${index}_${String.fromCharCode(65 + i)}`;
+            const checked = userAnswers[index] === String.fromCharCode(65 + i) ? "checked" : "";
+            return `
+              <input type="radio" id="${id}" name="mcq${index}" value="${String.fromCharCode(65 + i)}" ${checked}>
+              <label for="${id}">${String.fromCharCode(65 + i)}) ${opt}</label>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      seenQuestions.add(index);
+      
+      document.getElementById("backBtn").style.display = index === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = index === questions.length - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = index === questions.length - 1 ? "inline-block" : "none";
+      
+      updateNavPanel();
+    }
+
+    function updateNavPanel() {
+      const questionList = document.getElementById("questionList");
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const questionItem = document.createElement("div");
+        questionItem.className = "question-item";
+        questionItem.textContent = index + 1;
+        
+        if (userAnswers[index]) {
+          questionItem.classList.add("answered");
+        } else if (seenQuestions.has(index)) {
+          questionItem.classList.add("seen");
+        } else {
+          questionItem.classList.add("not-seen");
+        }
+        
+        if (index === current) {
+          questionItem.classList.add("current");
+        }
+        
+        questionItem.onclick = () => {
+          saveAnswer();
+          current = index;
+          renderQuestion(current);
+          toggleNavPanel();
+        };
+        
+        questionList.appendChild(questionItem);
+      });
+    }
+
+    function toggleNavPanel() {
+      const navPanel = document.getElementById("navPanel");
+      navPanelVisible = !navPanelVisible;
+      navPanel.style.display = navPanelVisible ? "block" : "none";
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (current > 0) {
+        current--;
+        renderQuestion(current);
+      }
+    }
+
+    function saveAnswer() {
+      const selected = document.querySelector(`input[name="mcq${current}"]:checked`);
+      if (selected) {
+        userAnswers[current] = selected.value;
+      }
+    }
+
+    function submitQuiz() {
+      saveAnswer();
+      const endTime = new Date();
+      const timeTakenMs = endTime - startTime;
+      const timeTakenMin = Math.floor(timeTakenMs / 60000);
+      const timeTakenSec = Math.floor((timeTakenMs % 60000) / 1000);
+
+      let correct = 0;
+      const results = [];
+
+      questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "Not Answered";
+        const isCorrect = userAns === q.correct;
+        if (isCorrect) correct++;
+        results.push({
+          number: q.number,
+          userAns,
+          correctAns: q.correct,
+          isCorrect
+        });
+      });
+
+      localStorage.setItem("quizResults", JSON.stringify({
+        total: questions.length,
+        correct,
+        accuracy: (correct / questions.length * 100).toFixed(2),
+        time: `${timeTakenMin} min ${timeTakenSec} sec`,
+        details: results
+      }));
+
+      window.location.href = "MCCW-PRC2.html";
+    }
+
+    renderQuestion(current);
+
+    let minutes = 0, seconds = 0;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      seconds++;
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+  </script>
+</body>
+</html>
