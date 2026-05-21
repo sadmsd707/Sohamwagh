@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharada Academy Baramati - JEE | NEET | MHT-CET Prep</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        .bg-sharada-light {
+            background-color: #f8fafc; 
+        }
+        #equations-canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #db2777, #e11d48, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-sharada-light text-slate-900 overflow-hidden font-sans">
+
+    <!-- STEM Canvas containing Equations, Chemistry Structures, and Physics Symbols -->
+    <canvas id="equations-canvas"></canvas>
+
+    <!-- Main Intro Wrapper -->
+    <main class="content-layer min-h-screen flex flex-col justify-between p-6 md:p-12 max-w-7xl mx-auto">
+        
+        <!-- Header Area -->
+        <header class="flex justify-between items-center opacity-0" id="header">
+            <div class="text-2xl font-black tracking-wider text-pink-600">SHARADA <span class="text-slate-800 font-light">ACADEMY</span></div>
+            <div class="text-xs md:text-sm tracking-widest text-slate-500 uppercase font-semibold">Baramati's Premier Institute</div>
+        </header>
+
+        <!-- Central Content Area -->
+        <div class="flex flex-col items-center text-center my-auto space-y-8">
+            
+            <!-- Exam Badges -->
+            <div class="flex flex-wrap justify-center gap-4 opacity-0" id="badges">
+                <span class="px-5 py-2 rounded-full border border-pink-200 bg-pink-50 text-pink-600 font-bold tracking-wide text-sm shadow-[0_4px_12px_rgba(219,39,119,0.08)]">IIT-JEE (Main & Adv)</span>
+                <span class="px-5 py-2 rounded-full border border-rose-200 bg-rose-50 text-rose-600 font-bold tracking-wide text-sm shadow-[0_4px_12px_rgba(225,29,72,0.08)]">NEET (Medical)</span>
+                <span class="px-5 py-2 rounded-full border border-purple-200 bg-purple-50 text-purple-600 font-bold tracking-wide text-sm shadow-[0_4px_12px_rgba(147,51,234,0.08)]">MHT-CET</span>
+            </div>
+
+            <!-- Main Catchy Headline -->
+            <h1 class="text-4xl md:text-7xl font-extrabold tracking-tight max-w-4xl text-slate-900 opacity-0" id="headline">
+                Honest Efforts. <br class="hidden md:inline">
+                Proven <span class="gradient-text">Success.</span>
+            </h1>
+
+            <!-- Short Pitch -->
+            <p class="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto font-medium opacity-0" id="subtext">
+                Shaping fundamentals and building concept clarity for India's toughest competitive engineering and medical entrance exams since 2016.
+            </p>
+
+            <!-- Call To Action -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full opacity-0" id="ctas">
+                <button class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-500 text-white font-bold rounded-xl shadow-lg shadow-pink-600/20 hover:scale-105 transition-transform duration-300 cursor-pointer">
+                    Start Preparation With Us
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Area -->
+        <footer class="grid grid-cols-3 gap-4 border-t border-slate-200 pt-6 text-center opacity-0" id="footer">
+            <div>
+                <div class="text-xl md:text-3xl font-extrabold text-pink-600">2016</div>
+                <div class="text-[10px] md:text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Established</div>
+            </div>
+            <div>
+                <div class="text-xl md:text-3xl font-extrabold text-slate-800">Expert</div>
+                <div class="text-[10px] md:text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">HOD Led Faculty</div>
+            </div>
+            <div>
+                <div class="text-xl md:text-3xl font-extrabold text-slate-800">Smart</div>
+                <div class="text-[10px] md:text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Class Classrooms</div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Animation & Canvas Script -->
+    <script>
+        const canvas = document.getElementById('equations-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const expressions = [
+            "E = mc²", "∫ x² dx", "∇ × B = μ₀J", "PV = nRT", "sin²θ + cos²θ = 1", 
+            "H₂O + CO₂ → C₆H₁₂O₆", "ΔG = ΔH - TΔS", "F = G(m₁m₂)/r²", "pH = -log[H⁺]",
+            "DNA ⇌ RNA", "Fe²⁺ + e⁻ → Fe", "λ = h/p", "v = u + at", "C₆H₁₂O₆", 
+            "∑ F = ma", "lim (x→0) sin(x)/x = 1", "ATP → ADP + Pi", "Krebs Cycle",
+            "dψ/dt", "K_a = [H⁺][A⁻]/[HA]", "y = mx + c"
+        ];
+
+        // --- Chemistry Drawing Routines ---
+        function drawBenzene(ctx, x, y, size) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const nextX = x + size * Math.cos(angle);
+                const nextY = y + size * Math.sin(angle);
+                if (i === 0) ctx.moveTo(nextX, nextY);
+                else ctx.lineTo(nextX, nextY);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.font = "bold 11px monospace";
+            ctx.fillText("CH₃", x + size, y - size*0.5);
+        }
+
+        function drawSkeletalChain(ctx, x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + size * 0.5, y - size * 0.3);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x + size * 1.5, y - size * 0.3);
+            ctx.stroke();
+
+            ctx.font = "bold 11px monospace";
+            ctx.fillText("OH", x + size * 1.5 + 4, y - size * 0.3 + 4);
+            ctx.fillText("O", x + size * 0.5 - 4, y - size * 0.3 - 6);
+        }
+
+        // --- Physics Drawing Routines ---
+        function drawResistor(ctx, x, y, size) {
+            const w = size * 1.8;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + w * 0.2, y); // Lead-in line
+            
+            // Zigzag points
+            ctx.lineTo(x + w * 0.3, y - 10);
+            ctx.lineTo(x + w * 0.4, y + 10);
+            ctx.lineTo(x + w * 0.5, y - 10);
+            ctx.lineTo(x + w * 0.6, y + 10);
+            ctx.lineTo(x + w * 0.7, y - 10);
+            ctx.lineTo(x + w * 0.8, y);
+            
+            ctx.lineTo(x + w, y); // Lead-out line
+            ctx.stroke();
+            ctx.font = "bold 10px monospace";
+            ctx.fillText("R", x + w*0.45, y - 14);
+        }
+
+        function drawCapacitor(ctx, x, y, size) {
+            const w = size * 1.2;
+            const h = 16;
+            ctx.beginPath();
+            // Left lead and plate
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + w * 0.4, y);
+            ctx.moveTo(x + w * 0.4, y - h);
+            ctx.lineTo(x + w * 0.4, y + h);
+            
+            // Right plate and lead
+            ctx.moveTo(x + w * 0.6, y - h);
+            ctx.lineTo(x + w * 0.6, y + h);
+            ctx.moveTo(x + w * 0.6, y);
+            ctx.lineTo(x + w, y);
+            ctx.stroke();
+            ctx.font = "bold 10px monospace";
+            ctx.fillText("C", x + w*0.42, y - h - 4);
+        }
+
+        function drawDiode(ctx, x, y, size) {
+            const w = size * 1.4;
+            const h = 12;
+            ctx.beginPath();
+            // Entrance Line
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + w * 0.3, y);
+            
+            // Triangle arrowhead pointer
+            ctx.moveTo(x + w * 0.3, y - h);
+            ctx.lineTo(x + w * 0.7, y);
+            ctx.lineTo(x + w * 0.3, y + h);
+            ctx.closePath();
+            
+            // Vertical Block line
+            ctx.moveTo(x + w * 0.7, y - h);
+            ctx.lineTo(x + w * 0.7, y + h);
+            
+            // Exit Line
+            ctx.moveTo(x + w * 0.7, y);
+            ctx.lineTo(x + w, y);
+            ctx.stroke();
+            ctx.font = "bold 9px monospace";
+            ctx.fillText("D", x + w*0.45, y - h - 4);
+        }
+
+
+        class ScienceParticle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height; 
+            }
+
+            reset() {
+                // Fair split logic across all branches:
+                // 50% Text Expressions, 25% Chemistry Structures, 25% Physics Circuit Elements
+                const rand = Math.random();
+                if (rand < 0.5) {
+                    this.type = 'text';
+                } else if (rand < 0.75) {
+                    this.type = 'chemistry';
+                    this.subType = Math.random() > 0.5 ? 'benzene' : 'chain';
+                } else {
+                    this.type = 'physics';
+                    const roll = Math.random();
+                    this.subType = roll < 0.33 ? 'resistor' : (roll < 0.66 ? 'capacitor' : 'diode');
+                }
+                
+                this.text = expressions[Math.floor(Math.random() * expressions.length)];
+                this.x = Math.random() * width;
+                this.y = -50; 
+                this.speed = 0.2 + Math.random() * 0.4; 
+                this.size = 13 + Math.floor(Math.random() * 15); 
+                this.opacity = 0.18 + Math.random() * 0.14; 
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.y > height + 50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.strokeStyle = `rgba(157, 23, 77, ${this.opacity})`;
+                ctx.fillStyle = `rgba(157, 23, 77, ${this.opacity})`;
+                ctx.lineWidth = 1.8;
+
+                if (this.type === 'text') {
+                    ctx.font = `bold ${this.size}px 'Courier New', monospace`;
+                    ctx.fillText(this.text, this.x, this.y);
+                } else if (this.type === 'chemistry') {
+                    if (this.subType === 'benzene') {
+                        drawBenzene(ctx, this.x, this.y, this.size * 1.2);
+                    } else {
+                        drawSkeletalChain(ctx, this.x, this.y, this.size * 1.5);
+                    }
+                } else if (this.type === 'physics') {
+                    if (this.subType === 'resistor') {
+                        drawResistor(ctx, this.x, this.y, this.size);
+                    } else if (this.subType === 'capacitor') {
+                        drawCapacitor(ctx, this.x, this.y, this.size);
+                    } else if (this.subType === 'diode') {
+                        drawDiode(ctx, this.x, this.y, this.size);
+                    }
+                }
+                ctx.restore();
+            }
+        }
+
+        const particleCount = 45; 
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new ScienceParticle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // GSAP Cinematic Entrance Sequence
+        window.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+            tl.to("#header", { opacity: 1, y: 0, duration: 1, startAt: { y: -50 } })
+              .to("#badges", { opacity: 1, y: 0, duration: 0.8, startAt: { y: 30 } }, "-=0.6")
+              .to("#headline", { opacity: 1, y: 0, duration: 1, startAt: { y: 40 } }, "-=0.6")
+              .to("#subtext", { opacity: 1, y: 0, duration: 0.8, startAt: { y: 20 } }, "-=0.6")
+              .to("#ctas", { opacity: 1, y: 0, duration: 0.8, startAt: { y: 20 } }, "-=0.6")
+              .to("#footer", { opacity: 1, duration: 1 }, "-=0.4");
+        });
+    </script>
+</body>
+</html>
