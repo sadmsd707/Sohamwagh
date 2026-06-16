@@ -1,15 +1,4 @@
 
-
-        // --- Chemistry Drawing Routines ---
-        function drawBenzene(ctx, x, y, size) {
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI / 3) * i;
-                const nextX = x + size * Math.cos(angle);
-                const nextY = y + size * Math.sin(angle);
-                if (i === 0) ctx.moveTo(nextX, nextY);
-                else ctx.lineTo(nextX, nextY);
-            }
             ctx.closePath();
             ctx.stroke();
 
