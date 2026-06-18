@@ -1,18 +1,5 @@
 
 
-        function drawSkeletalChain(ctx, x, y, size) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + size * 0.5, y - size * 0.3);
-            ctx.lineTo(x + size, y);
-            ctx.lineTo(x + size * 1.5, y - size * 0.3);
-            ctx.stroke();
-
-            ctx.font = "bold 11px monospace";
-            ctx.fillText("OH", x + size * 1.5 + 4, y - size * 0.3 + 4);
-            ctx.fillText("O", x + size * 0.5 - 4, y - size * 0.3 - 6);
-        }
-
         // --- Physics Drawing Routines ---
         function drawResistor(ctx, x, y, size) {
             const w = size * 1.8;
