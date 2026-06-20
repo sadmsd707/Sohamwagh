@@ -1,12 +1,4 @@
 
-
-        // --- Physics Drawing Routines ---
-        function drawResistor(ctx, x, y, size) {
-            const w = size * 1.8;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + w * 0.2, y); // Lead-in line
-            
             // Zigzag points
             ctx.lineTo(x + w * 0.3, y - 10);
             ctx.lineTo(x + w * 0.4, y + 10);
