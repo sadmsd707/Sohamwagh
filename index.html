@@ -1,15 +1,4 @@
 
-
-        function drawCapacitor(ctx, x, y, size) {
-            const w = size * 1.2;
-            const h = 16;
-            ctx.beginPath();
-            // Left lead and plate
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + w * 0.4, y);
-            ctx.moveTo(x + w * 0.4, y - h);
-            ctx.lineTo(x + w * 0.4, y + h);
-            
             // Right plate and lead
             ctx.moveTo(x + w * 0.6, y - h);
             ctx.lineTo(x + w * 0.6, y + h);
