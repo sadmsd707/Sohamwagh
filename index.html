@@ -1,15 +1,4 @@
-
-            // Right plate and lead
-            ctx.moveTo(x + w * 0.6, y - h);
-            ctx.lineTo(x + w * 0.6, y + h);
-            ctx.moveTo(x + w * 0.6, y);
-            ctx.lineTo(x + w, y);
-            ctx.stroke();
-            ctx.font = "bold 10px monospace";
-            ctx.fillText("C", x + w*0.42, y - h - 4);
-        }
-
-        function drawDiode(ctx, x, y, size) {
+function drawDiode(ctx, x, y, size) {
             const w = size * 1.4;
             const h = 12;
             ctx.beginPath();
