@@ -1,11 +1,4 @@
-function drawDiode(ctx, x, y, size) {
-            const w = size * 1.4;
-            const h = 12;
-            ctx.beginPath();
-            // Entrance Line
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + w * 0.3, y);
-            
+
             // Triangle arrowhead pointer
             ctx.moveTo(x + w * 0.3, y - h);
             ctx.lineTo(x + w * 0.7, y);
