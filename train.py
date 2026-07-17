@@ -1,16 +1,4 @@
-# train.py — CPU‑optimised for Snapdragon X Plus (ARM64, Windows)
-import os
-os.environ["OMP_NUM_THREADS"] = "10"
-os.environ["MKL_NUM_THREADS"] = "10"
-os.environ["NUMEXPR_NUM_THREADS"] = "10"
-os.environ["OMP_DYNAMIC"] = "FALSE"
 
-import torch
-torch.set_num_threads(10)
-
-import torch.nn.functional as F
-import numpy as np
-from model import GPT
 from tokenizers import Tokenizer
 import time
 
