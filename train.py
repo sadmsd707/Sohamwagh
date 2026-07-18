@@ -1,25 +1,4 @@
 
-from tokenizers import Tokenizer
-import time
-
-# ----------------------------
-# Config
-# ----------------------------
-vocab_size          = 8192
-block_size          = 1024
-n_embd              = 512
-n_head              = 8
-n_layer             = 8
-batch_size          = 2              # saturates 10 cores, fits in 16 GB RAM
-learning_rate       = 3e-4
-epochs              = 10
-checkpoint_path     = "checkpoint.pt"
-train_bin           = "train.bin"
-val_bin             = "val.bin"
-tokenizer_path      = "tokenizer.json"
-print_interval      = 10              # print loss every 10 steps
-checkpoint_interval = 500             # less disk I/O (was 10)
-
 device = torch.device('cpu')
 print(f"Using CPU, Threads: {torch.get_num_threads()}", flush=True)
 
