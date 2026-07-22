@@ -1,14 +1,4 @@
 
-device = torch.device('cpu')
-print(f"Using CPU, Threads: {torch.get_num_threads()}", flush=True)
-
-# ----------------------------
-# Tokenizer & data (RAM loaded)
-# ----------------------------
-tokenizer = Tokenizer.from_file(tokenizer_path)
-pad_id    = tokenizer.token_to_id("<|pad|>")
-
-print("Loading data into RAM...", flush=True)
 train_data = np.array(np.memmap(train_bin, dtype=np.uint16, mode='r').reshape(-1, block_size))
 val_data   = np.array(np.memmap(val_bin,   dtype=np.uint16, mode='r').reshape(-1, block_size))
 print(f"Train blocks: {len(train_data)}, Val blocks: {len(val_data)}", flush=True)
