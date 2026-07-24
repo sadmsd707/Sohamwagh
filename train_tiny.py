@@ -1,18 +1,4 @@
-# train_tiny.py – training with validation, checkpointing, resume
-import os, json, math, time
-import numpy as np
-from tinygrad import Tensor, nn, TinyJit
-from tinygrad.nn.optim import Adam      # correct import for Adam
-import safetensors.numpy
-from tiny_model import GPT, GPTConfig
 
-# ---------- hyperparameters ----------
-block_size = 256
-n_embd     = 384
-n_head     = 6
-n_layer    = 6
-batch_size = 1
-learning_rate = 3e-4
 max_steps     = 20000
 eval_interval = 100
 val_iters     = 10
