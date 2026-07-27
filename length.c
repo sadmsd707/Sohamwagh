@@ -9,3 +9,8 @@ int main() {
 }
 int length(char a[]) {
     int len = 0;
+    while (a[len] != '\0') {
+        len++;
+    }
+    return len;
+}
